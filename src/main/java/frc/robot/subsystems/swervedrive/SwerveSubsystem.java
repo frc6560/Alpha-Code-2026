@@ -50,6 +50,7 @@ import frc.robot.utility.LimelightHelpers.PoseEstimate;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -205,22 +206,25 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     // mod 180 because two values.
-    public void alignToTrenchCommand(){
+    public Command alignToTrenchCommand(){
       m_pidControllerTheta.enableContinuousInput(-Math.PI, Math.PI);
-
-      SmartDashboard.getEntry("Yaw error").setDouble(m_pidControllerTheta.getError());
-      SmartDashboard.getEntry("Pose in radians").setDouble(getPose().getRotation().getRadians());
-
+      double ROT_TOLERANCE = Units.degreesToRadians(2.0);
       double target = MathUtil.angleModulus(getPose().getRotation().getRadians() - (MathUtil.inputModulus(getPose().getRotation().getRadians(), - Math.PI/2 , Math.PI/2)));
       SmartDashboard.getEntry("Target pose").setDouble(target);
+      Command alignToTrenchCommand = run(
+          () -> {
+            SmartDashboard.getEntry("Yaw error").setDouble(m_pidControllerTheta.getError());
+            SmartDashboard.getEntry("Pose in radians").setDouble(getPose().getRotation().getRadians());
 
-      ChassisSpeeds targetSpeeds = new ChassisSpeeds(
-        0,
-        0,
-        (-1) * (m_pidControllerTheta.calculate(getPose().getRotation().getRadians(), target))
-      );
+            ChassisSpeeds targetSpeeds = new ChassisSpeeds(
+              0,
+              0,
+                                m_pidControllerTheta.calculate(getPose().getRotation().getRadians(), target)
+            );
   
-      swerveDrive.driveFieldOriented(targetSpeeds);
+            swerveDrive.driveFieldOriented(targetSpeeds);
+          }).until(() -> getPose().getRotation().getRadians() - target < ROT_TOLERANCE);
+      return alignToTrenchCommand;
     }
 
   @Override
