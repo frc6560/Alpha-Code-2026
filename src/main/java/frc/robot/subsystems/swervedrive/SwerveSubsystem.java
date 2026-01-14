@@ -174,8 +174,8 @@ public class SwerveSubsystem extends SubsystemBase {
     SmartDashboard.getEntry("Pose in radians").setDouble(getPose().getRotation().getRadians());
 
     ChassisSpeeds targetSpeeds = new ChassisSpeeds(
-      0,
-      0,
+      getFieldVelocity().vxMetersPerSecond,
+      getFieldVelocity().vyMetersPerSecond,
       m_pidControllerTheta.calculate(getPose().getRotation().getRadians(), targetInRadians)
     );
 
@@ -230,7 +230,6 @@ public class SwerveSubsystem extends SubsystemBase {
           rotateToAngle(target);
         }, 
         (interrupted) -> {
-          swerveDrive.drive(new ChassisSpeeds());
         },
         () -> Math.abs(MathUtil.angleModulus(getPose().getRotation().getRadians() - target)) < ROT_TOLERANCE
       );
