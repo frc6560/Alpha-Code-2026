@@ -23,6 +23,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+
+import choreo.*;
+import choreo.auto.AutoFactory;
+
 import swervelib.SwerveInputStream;
 import frc.robot.commands.SubsystemManagerCommand;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -30,7 +34,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.Constants.LimelightConstants;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.autonomous.Auto;
-import frc.robot.autonomous.AutoFactory;
 import frc.robot.autonomous.AutoRoutines;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import frc.robot.subsystems.vision.LimelightVision;
@@ -56,8 +59,8 @@ public class RobotContainer {
     private final BallGrabber ballGrabber = new BallGrabber();
     private final SubsystemManager subsystemManager = new SubsystemManager(drivebase, elevator, arm, ballGrabber, controls);
 
-    private final AutoFactory factory;
-    private final SendableChooser<Auto> autoChooser;
+    private final AutoFactory autofactory;
+
 
     SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
       () -> driverXbox.getLeftY() * -1,
@@ -75,22 +78,24 @@ public class RobotContainer {
       ballGrabber.setDefaultCommand(new BallGrabberCommand(ballGrabber, controls));
       subsystemManager.setDefaultCommand(new SubsystemManagerCommand(drivebase, elevator, arm, ballGrabber, controls, subsystemManager));
       
-      factory = new AutoFactory(
-      null,
-      drivebase
-      );
+      autofactory = new AutoFactory(
+        drivebase::getPose,
+        drivebase::resetOdometry,
+        drivebase::followSegment,
+        false,
+        drivebase);
 
-      autoChooser = new SendableChooser<Auto>();
+      // autoChooser = new SendableChooser<Auto>();
 
-      for(AutoRoutines auto : AutoRoutines.values()) {
-        Auto autonomousRoutine = new Auto(auto, factory);
-        if(auto == AutoRoutines.TEST){
-          autoChooser.setDefaultOption(autonomousRoutine.getName(), autonomousRoutine);
-        }
-        else {
-          autoChooser.addOption(autonomousRoutine.getName(), autonomousRoutine);
-        }
-      }
+      // for(AutoRoutines auto : AutoRoutines.values()) {
+      //   Auto autonomousRoutine = new Auto(auto, factory);
+      //   if(auto == AutoRoutines.TEST){
+      //     autoChooser.setDefaultOption(autonomousRoutine.getName(), autonomousRoutine);
+      //   }
+      //   else {
+      //     autoChooser.addOption(autonomousRoutine.getName(), autonomousRoutine);
+      //   }
+      // }
 
       List<LimelightVision> limelights = new ArrayList<LimelightVision>();
       for(String name : LimelightConstants.LIMELIGHT_NAMES) {
@@ -101,7 +106,7 @@ public class RobotContainer {
       vision = new VisionSubsystem(limelights);
       configureBindings();
 
-    SmartDashboard.putData("Auto Chooser", autoChooser);
+    // SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
     private void configureBindings() {
@@ -120,7 +125,20 @@ public class RobotContainer {
         driverXbox.rightBumper().onTrue(Commands.none());
     }
 
+    public Command rebuiltauto(){
+      return Commands.sequence(
+          autofactory.resetOdometry("kianpth1dot1"),
+          autofactory.trajectoryCmd("kianpth1dot1"),
+          autofactory.trajectoryCmd("kianpath1dot2"),
+          autofactory.trajectoryCmd("kianpath1dot3"),
+          autofactory.trajectoryCmd("kianpath1dot4"),
+          autofactory.trajectoryCmd("kianpath1dot5")
+
+          
+      );
+    }
+
     public Command getAutonomousCommand() {
-      return autoChooser.getSelected().getCommand();
+      return rebuiltauto();
     }
 }
