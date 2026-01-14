@@ -169,6 +169,19 @@ public class SwerveSubsystem extends SubsystemBase {
     swerveDrive.driveFieldOriented(targetSpeeds);
   }
 
+  public void rotateToAngle(double targetInRadians){
+    SmartDashboard.getEntry("Yaw error").setDouble(m_pidControllerTheta.getError());
+    SmartDashboard.getEntry("Pose in radians").setDouble(getPose().getRotation().getRadians());
+
+    ChassisSpeeds targetSpeeds = new ChassisSpeeds(
+      0,
+      0,
+      m_pidControllerTheta.calculate(getPose().getRotation().getRadians(), targetInRadians)
+    );
+
+    swerveDrive.driveFieldOriented(targetSpeeds);
+  }
+
   double tx;
 
   public Command trackAprilTag(){
@@ -211,21 +224,20 @@ public class SwerveSubsystem extends SubsystemBase {
       double ROT_TOLERANCE = Units.degreesToRadians(2.0);
       double target = MathUtil.angleModulus(getPose().getRotation().getRadians() - (MathUtil.inputModulus(getPose().getRotation().getRadians(), - Math.PI/2 , Math.PI/2)));
       SmartDashboard.getEntry("Target pose").setDouble(target);
-      Command alignToTrenchCommand = run(
-          () -> {
-            SmartDashboard.getEntry("Yaw error").setDouble(m_pidControllerTheta.getError());
-            SmartDashboard.getEntry("Pose in radians").setDouble(getPose().getRotation().getRadians());
-
-            ChassisSpeeds targetSpeeds = new ChassisSpeeds(
-              0,
-              0,
-                                m_pidControllerTheta.calculate(getPose().getRotation().getRadians(), target)
-            );
-  
-            swerveDrive.driveFieldOriented(targetSpeeds);
-          }).until(() -> getPose().getRotation().getRadians() - target < ROT_TOLERANCE);
+      Command alignToTrenchCommand = new FunctionalCommand(
+        () -> {},
+        () -> {
+          rotateToAngle(target);
+        }, 
+        (interrupted) -> {
+          swerveDrive.drive(new ChassisSpeeds());
+        },
+        () -> Math.abs(getPose().getRotation().getRadians() - target) < ROT_TOLERANCE
+      );
       return alignToTrenchCommand;
     }
+
+    
 
   @Override
   public void simulationPeriodic(){

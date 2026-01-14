@@ -104,7 +104,7 @@ public class LimelightVision{
         PoseEstimate poseEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue(this.name);
         if(poseEstimate != null){
             robotPose2d = poseEstimate.pose;
-            if(robotPose2d!= null) drivebase.resetOdometry(robotPose2d);
+            if(robotPose2d!= null && robotPose2d != new Pose2d()) drivebase.resetOdometry(robotPose2d);
         }
     }
 
