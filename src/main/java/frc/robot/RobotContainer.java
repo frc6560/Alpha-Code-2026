@@ -112,12 +112,10 @@ public class RobotContainer {
             return Commands.runOnce(() -> vision.hardReset("limelight"), vision);
           }, Set.of(vision))
         );
-        driverXbox.b().onTrue((Commands.runOnce(() -> drivebase.trackAprilTag().schedule(), drivebase)));
         driverXbox.y().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().cancelAll()));
-        driverXbox.x().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().schedule(drivebase.alignToTrenchCommand()), drivebase));
+        driverXbox.x().onTrue(drivebase.alignToTrenchCommand());
         driverXbox.start().onTrue((Commands.runOnce(drivebase::zeroNoAprilTagsGyro)));
         driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
-        driverXbox.rightBumper().onTrue(Commands.none());
     }
 
     public Command getAutonomousCommand() {
