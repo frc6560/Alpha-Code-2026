@@ -223,6 +223,7 @@ public class SwerveSubsystem extends SubsystemBase {
       m_pidControllerTheta.enableContinuousInput(-Math.PI, Math.PI);
       double ROT_TOLERANCE = Units.degreesToRadians(2.0);
       double target = MathUtil.angleModulus(getPose().getRotation().getRadians() - (MathUtil.inputModulus(getPose().getRotation().getRadians(), - Math.PI/2 , Math.PI/2)));
+      System.out.println(target);
       SmartDashboard.getEntry("Target pose").setDouble(target);
       Command alignToTrenchCommand = new FunctionalCommand(
         () -> {},
