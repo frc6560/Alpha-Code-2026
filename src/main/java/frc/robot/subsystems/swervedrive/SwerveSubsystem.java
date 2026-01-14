@@ -232,7 +232,7 @@ public class SwerveSubsystem extends SubsystemBase {
         (interrupted) -> {
           swerveDrive.drive(new ChassisSpeeds());
         },
-        () -> Math.abs(getPose().getRotation().getRadians() - target) < ROT_TOLERANCE
+        () -> Math.abs(MathUtil.angleModulus(getPose().getRotation().getRadians() - target)) < ROT_TOLERANCE
       );
       return alignToTrenchCommand;
     }
