@@ -29,7 +29,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import frc.robot.Constants.LimelightConstants;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.autonomous.Auto;
-import frc.robot.autonomous.AutoFactory;
+import frc.robot.autonomous.AutoCommands;
 import frc.robot.autonomous.AutoRoutines;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 
@@ -54,7 +54,7 @@ public class RobotContainer {
     private final BallGrabber ballGrabber = new BallGrabber();
     private final SubsystemManager subsystemManager = new SubsystemManager(drivebase, elevator, arm, ballGrabber, controls);
 
-    private final AutoFactory factory;
+    private final AutoCommands factory;
     private final SendableChooser<Auto> autoChooser;
 
     SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
@@ -73,7 +73,7 @@ public class RobotContainer {
       ballGrabber.setDefaultCommand(new BallGrabberCommand(ballGrabber, controls));
       subsystemManager.setDefaultCommand(new SubsystemManagerCommand(drivebase, elevator, arm, ballGrabber, controls, subsystemManager));
       
-      factory = new AutoFactory(
+      factory = new AutoCommands(
       null,
       drivebase
       );
