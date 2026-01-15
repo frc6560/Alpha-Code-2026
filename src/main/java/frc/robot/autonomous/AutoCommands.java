@@ -34,10 +34,9 @@ public class AutoCommands {
 
     /** These are functions for returning different autonomous routines. See AutoNames.java for more information. */
 
-    private final AutoRoutine IDLE = autoFactory.newRoutine("idle");
-
     /** These literally do nothing. As in, nothing. */
     public AutoRoutine getNoAuto(){
+        final AutoRoutine IDLE = autoFactory.newRoutine("idle");
         return IDLE;
     }
 
@@ -52,7 +51,7 @@ public class AutoCommands {
 
         trenchToCenter.atTime("intake")
             .onTrue(
-                null
+                Commands.idle()
             );
 
         testRoutine
