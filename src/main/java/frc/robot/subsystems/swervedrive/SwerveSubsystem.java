@@ -150,7 +150,7 @@ public class SwerveSubsystem extends SubsystemBase {
     Pose2d pose = getPose();
     m_pidControllerX.setIZone(0.5);
     m_pidControllerY.setIZone(0.5);
-    m_pidControllerTheta.setIZone(Units.degreesToRadians(1.0));
+    m_pidControllerTheta.setIZone(0.08);
 
     ChassisSpeeds targetSpeeds = new ChassisSpeeds( 
       setpoint.vx + m_pidControllerX.calculate(pose.getX(), setpoint.x), 
