@@ -143,20 +143,12 @@ public class SwerveSubsystem extends SubsystemBase {
   public void periodic() {
   }
 
-  /** Full PID commands with all three parameters
+  /** 
+   * Path following command using SwerveSample from Choreo
+   * @param setpoint SwerveSample setpoint to follow, representing the robot state.
    */
   public void followSegment(SwerveSample setpoint) {
     m_pidControllerTheta.enableContinuousInput(-Math.PI, Math.PI);
-    Pose2d pose = getPose();
-    m_pidControllerX.setIZone(0.5);
-    m_pidControllerY.setIZone(0.5);
-    m_pidControllerTheta.setIZone(Units.degreesToRadians(1.0));
-
-    ChassisSpeeds targetSpeeds = new ChassisSpeeds( 
-      setpoint.vx + m_pidControllerX.calculate(pose.getX(), setpoint.x), 
-      setpoint.vy + m_pidControllerY.calculate(pose.getY(), setpoint.y),
-      setpoint.omega + m_pidControllerTheta.calculate(pose.getRotation().getRadians(), setpoint.heading)
-    );
 
     // Log some basic data to see if path following is accurate.
     swerveDrive.field.getObject("TargetPose").setPose(setpoint.getPose());
@@ -166,9 +158,19 @@ public class SwerveSubsystem extends SubsystemBase {
     SmartDashboard.getEntry("VX Error").setDouble(Math.abs(setpoint.vx - swerveDrive.getRobotVelocity().vxMetersPerSecond));
     SmartDashboard.getEntry("VY Error").setDouble(Math.abs(setpoint.vy - swerveDrive.getRobotVelocity().vyMetersPerSecond));
 
+    Pose2d pose = getPose();
+
+    ChassisSpeeds targetSpeeds = new ChassisSpeeds( 
+      setpoint.vx + m_pidControllerX.calculate(pose.getX(), setpoint.x), 
+      setpoint.vy + m_pidControllerY.calculate(pose.getY(), setpoint.y),
+      setpoint.omega + m_pidControllerTheta.calculate(pose.getRotation().getRadians(), setpoint.heading)
+    );
+
     swerveDrive.driveFieldOriented(targetSpeeds);
   }
 
+
+  /** Rotates to a specified angle while inheriting the chassis's original translational velocity */
   public void rotateToAngle(double targetInRadians){
     SmartDashboard.getEntry("Yaw error").setDouble(m_pidControllerTheta.getError());
     SmartDashboard.getEntry("Pose in radians").setDouble(getPose().getRotation().getRadians());
@@ -184,6 +186,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
   double tx;
 
+
+  /** Tracks an april tag using the drivetrain! */
   public Command trackAprilTag(){
     LinearFilter filter = LinearFilter.movingAverage(5);
     Command trackAprilTagCommand = new FunctionalCommand(
@@ -218,12 +222,15 @@ public class SwerveSubsystem extends SubsystemBase {
       return trackAprilTagCommand;
     }
 
-    // mod 180 because two values.
+
+    /** Aligns the robot to face the trench while driving*/
     public Command alignToTrenchCommand(){
       m_pidControllerTheta.enableContinuousInput(-Math.PI, Math.PI);
-      double ROT_TOLERANCE = Units.degreesToRadians(2.0);
+
+      final double ROT_TOLERANCE = Units.degreesToRadians(2.0);
       double target = MathUtil.angleModulus(getPose().getRotation().getRadians() - (MathUtil.inputModulus(getPose().getRotation().getRadians(), - Math.PI/2 , Math.PI/2)));
       SmartDashboard.getEntry("Target pose").setDouble(target);
+
       Command alignToTrenchCommand = new FunctionalCommand(
         () -> {},
         () -> {
