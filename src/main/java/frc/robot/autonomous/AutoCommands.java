@@ -16,36 +16,29 @@ import edu.wpi.first.wpilibj2.command.Commands;
 
 // TODOs: delete all commented out files in robot.java, and this file
 public class AutoCommands {
-    private DriverStation.Alliance alliance;
     private SwerveSubsystem drivetrain;
 
-    private final AutoFactory autoFactory = new AutoFactory(
+    private AutoFactory autoFactory;
+
+    public AutoCommands(SwerveSubsystem drivetrain) {
+        this.drivetrain = drivetrain;
+
+        autoFactory = new AutoFactory(
             drivetrain::getPose,
             drivetrain::resetOdometry,
             drivetrain::followSegment,
             true,
             drivetrain
         );
-
-    public AutoCommands(DriverStation.Alliance alliance, SwerveSubsystem drivetrain) {
-        this.drivetrain = drivetrain;
-        if(alliance == null) {
-            this.alliance = DriverStation.Alliance.Red;
-        }
-        else{
-            this.alliance = alliance;
-        }
-
-        // put AutoFactory bindings in here to intake, shoot, and so forwards
     }
 
-    /** These are functions for returning different autonomous routines. See AutoRoutines.java for more information. */
+    /** These are functions for returning different autonomous routines. See AutoNames.java for more information. */
 
     private final AutoRoutine IDLE = autoFactory.newRoutine("idle");
 
     /** These literally do nothing. As in, nothing. */
-    Pair<Pose2d, AutoRoutine> getNoAuto(){
-        return Pair.of(null, IDLE);
+    public AutoRoutine getNoAuto(){
+        return IDLE;
     }
 
     /** Test auto on HP side. Should be comp level accuracy. */
@@ -82,9 +75,5 @@ public class AutoCommands {
         );
 
         return testRoutine;
-    }
-
-    public void updateAlliance(DriverStation.Alliance alliance) {
-        this.alliance = alliance;
     }
 }

@@ -28,7 +28,7 @@ import frc.robot.commands.SubsystemManagerCommand;
 import edu.wpi.first.math.geometry.Pose3d;
 import frc.robot.Constants.LimelightConstants;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.autonomous.Auto;
+import frc.robot.autonomous.AutoModeChooser;
 import frc.robot.autonomous.AutoCommands;
 import frc.robot.autonomous.AutoNames;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
@@ -55,7 +55,7 @@ public class RobotContainer {
     private final SubsystemManager subsystemManager = new SubsystemManager(drivebase, elevator, arm, ballGrabber, controls);
 
     private final AutoCommands factory;
-    private final SendableChooser<Auto> autoChooser;
+    private final AutoModeChooser autoChooser;
 
     SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
       () -> driverXbox.getLeftY() * -1,
@@ -73,22 +73,10 @@ public class RobotContainer {
       ballGrabber.setDefaultCommand(new BallGrabberCommand(ballGrabber, controls));
       subsystemManager.setDefaultCommand(new SubsystemManagerCommand(drivebase, elevator, arm, ballGrabber, controls, subsystemManager));
       
-      factory = new AutoCommands(
-      null,
-      drivebase
-      );
+      factory = new AutoCommands(drivebase);
 
-      autoChooser = new SendableChooser<Auto>();
-
-      for(AutoNames auto : AutoNames.values()) {
-        Auto autonomousRoutine = new Auto(auto, factory);
-        if(auto == AutoNames.TEST){
-          autoChooser.setDefaultOption(autonomousRoutine.getName(), autonomousRoutine);
-        }
-        else {
-          autoChooser.addOption(autonomousRoutine.getName(), autonomousRoutine);
-        }
-      }
+      autoChooser = new AutoModeChooser(factory);
+      SmartDashboard.putData("Auto Chooser", autoChooser.getAutoChooser());
 
       List<LimelightVision> limelights = new ArrayList<LimelightVision>();
       for(String name : LimelightConstants.LIMELIGHT_NAMES) {
@@ -98,8 +86,6 @@ public class RobotContainer {
 
       vision = new VisionSubsystem(limelights);
       configureBindings();
-
-    SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
     private void configureBindings() {
@@ -117,6 +103,6 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-      return autoChooser.getSelected().getCommand();
+      return autoChooser.getAutoChooser().selectedCommand();
     }
 }
