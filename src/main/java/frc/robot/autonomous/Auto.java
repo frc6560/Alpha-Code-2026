@@ -8,12 +8,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 /** Defines an Auto class, which is a name, an enum ID, and a command. */
 public class Auto {
-    private final AutoRoutines autoRoutine;
+    private final AutoNames autoRoutine;
     private final String name;
     private Pair<Pose2d, Command> autoCommand;
-    private final AutoFactory factory;
+    private final AutoCommands factory;
 
-    public Auto(AutoRoutines auto, AutoFactory factory){
+    public Auto(AutoNames auto, AutoCommands factory){
         this.autoRoutine = auto;
         this.factory = factory;
         this.autoCommand = null;
@@ -40,44 +40,12 @@ public class Auto {
         Pair<Pose2d, Command> command;
         String name;
         switch(autoRoutine){
-            case IDLE_LEFT:
-                command = factory.getNoAutoLeft();
+            case IDLE:
+                command = null;
                 name = "Idle Left";
                 break;
-            case IDLE_RIGHT:
-                command = factory.getNoAutoRight();
-                name = "Idle Right";
-                break;
-            case CENTER_3P:
-                command = factory.getThreePieceCenter();
-                name = "Center 3P";
-                break;
-            case LEFT_3P:
-                command = factory.getThreePieceBackLeft();
-                name = "Left 3P";
-                break;
-            case RIGHT_3P:
-                command = factory.getThreePieceBackRight();
-                name = "Right 3P";
-                break;
-            case LEFT_4P_BACK:
-                command = factory.getFourPieceBackLeft();
-                name = "Left 4P Back";
-                break;
-            case RIGHT_4P_BACK:
-                command = factory.getFourPieceBackRight();
-                name = "Right 4P Back";
-                break;
-            case RIGHT_4P:
-                command = factory.getFourPieceRight();
-                name = "Right 4P";
-                break;
-            case LEFT_4P:
-                command = factory.getFourPieceLeft();
-                name = "Left 4P";
-                break;
             case TEST:
-                command = factory.getTest();
+                command = null;
                 name = "Test Auto";
                 break;
             default:

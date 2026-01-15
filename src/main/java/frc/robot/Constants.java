@@ -89,7 +89,7 @@ public final class Constants {
     }
     public static final double kStdvXYBase = 0.3; // No idea how to tune these base values.
     public static final double kStdvThetaBase = 1.0; // See above
-    public static final double JUMP_TOLERANCE = 0.5; // meters. again, needs tuning.
+    public static final double JUMP_TOLERANCE = 0.3; // meters. again, needs tuning.
   }
 
   public static final class ElevatorConstants {

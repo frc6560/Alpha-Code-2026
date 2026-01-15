@@ -30,7 +30,7 @@ import frc.robot.Constants.LimelightConstants;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.autonomous.Auto;
 import frc.robot.autonomous.AutoCommands;
-import frc.robot.autonomous.AutoRoutines;
+import frc.robot.autonomous.AutoNames;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 
 
@@ -80,9 +80,9 @@ public class RobotContainer {
 
       autoChooser = new SendableChooser<Auto>();
 
-      for(AutoRoutines auto : AutoRoutines.values()) {
+      for(AutoNames auto : AutoNames.values()) {
         Auto autonomousRoutine = new Auto(auto, factory);
-        if(auto == AutoRoutines.TEST){
+        if(auto == AutoNames.TEST){
           autoChooser.setDefaultOption(autonomousRoutine.getName(), autonomousRoutine);
         }
         else {
