@@ -51,7 +51,7 @@ public class RobotContainer {
     private final SwerveSubsystem drivebase  = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
     "swerve/falcon"));
     
-    private final VisionSubsystem vision;
+    private  VisionSubsystem vision;
 
     // Subsystems
     private final Elevator elevator = new Elevator();
@@ -79,7 +79,7 @@ public class RobotContainer {
       subsystemManager.setDefaultCommand(new SubsystemManagerCommand(drivebase, elevator, arm, ballGrabber, controls, subsystemManager));
       
       autofactory = new AutoFactory(
-        drivebase::getPose,
+        () -> vision.getLimelightPose("limelight"),
         drivebase::resetOdometry,
         drivebase::followSegment,
         false,
@@ -153,6 +153,6 @@ public class RobotContainer {
 }
 
     public Command getAutonomousCommand() {
-      return test();
+      return rebuiltauto();
     }
 }
