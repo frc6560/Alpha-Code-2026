@@ -135,6 +135,12 @@ public class RobotContainer {
           autofactory.trajectoryCmd("kianpath1dot5")
 
           
+      );}
+
+      public Command test(){
+      return Commands.sequence(
+          autofactory.resetOdometry("test"),
+          autofactory.trajectoryCmd("test")
       );
     }
 
