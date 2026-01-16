@@ -138,13 +138,13 @@ public class RobotContainer {
       );}
 
       public Command test(){
-      return Commands.sequence(
+        return Commands.sequence(
           autofactory.resetOdometry("test"),
           autofactory.trajectoryCmd("test")
       );
     }
 
     public Command getAutonomousCommand() {
-      return rebuiltauto();
+      return test();
     }
 }
