@@ -137,12 +137,20 @@ public class RobotContainer {
           
       );}
 
-      public Command test(){
-        return Commands.sequence(
-          autofactory.resetOdometry("test"),
-          autofactory.trajectoryCmd("test")
-      );
-    }
+    //   public Command test(){
+    //     return Commands.sequence(
+    //       autofactory.resetOdometry("test"),
+    //       autofactory.trajectoryCmd("test")
+    //   );
+    // }
+
+    public Command test(){
+    return Commands.run(
+        () -> drivebase.drive(new ChassisSpeeds(1.0, 0, 0)), // 1 m/s forward
+        drivebase
+    ).withTimeout(2.0)
+     .andThen(Commands.runOnce(() -> drivebase.drive(new ChassisSpeeds(0, 0, 0)), drivebase));
+}
 
     public Command getAutonomousCommand() {
       return test();
