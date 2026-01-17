@@ -98,6 +98,11 @@ public class ManualControls {
     }
   
 
+    // flywheel
+    public boolean shootWithLimelight(){
+      return firstXbox.getRightBumperButton();
+    }
+
 
 
     // tests 

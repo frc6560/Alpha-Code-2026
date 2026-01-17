@@ -4,12 +4,15 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.configs.Slot0Configs;
+
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -90,6 +93,46 @@ public final class Constants {
     public static final double kStdvXYBase = 0.3; // No idea how to tune these base values.
     public static final double kStdvThetaBase = 1.0; // See above
     public static final double JUMP_TOLERANCE = 0.5; // meters. again, needs tuning.
+  }
+
+  public static final class FlywheelConstants {
+    public static final int FLYWHEEL_ID = 21; // TODO: set correct ID
+
+    public static final double kS = 0.0; // TODO: tune
+    public static final double kV = 0.0; // TODO: tune
+    public static final double kA = 0.0; // TODO: tune
+
+    public static final double kP = 0.0; // TODO: tune
+    public static final double kI = 0.0; // TODO: tune
+    public static final double kD = 0.0; // TODO: tune
+
+    public static final double MAX_RPM = 5700.0; // Example value for Falcon 500
+    public static final double FLYWHEEL_GEAR_RATIO = 1.0; // TODO: set correct gear ratio
+    public static final double FLYWHEEL_IDLE_RPM = 0.0;
+    public static final double FLYWHEEL_RPM_TOLERANCE = 100.0;
+    public static final double[][] DISTANCE_RPM_TABLE = {
+      {0.0, 5700.0},
+      {1.0, 5700.0},
+      {2.0, 5700.0},
+      {3.0, 5700.0},
+      {4.0, 5700.0},
+      {5.0, 5700.0}
+    };
+
+    public static final double FLYWHEEL_SUPPLY_CURRENT_LIMIT = 0;
+
+    public static final Translation2d HUB_BLUE_POSITION = null;
+
+    public static final Translation2d HUB_RED_POSITION = null;
+
+    public static final Slot0Configs FLYWHEEL_PID_CONFIG = null;
+
+    public static final double LIMELIGHT_HEIGHT = 0;
+
+    public static final double HUB_HEIGHT = 0;
+
+    public static final double LIMELIGHT_MOUNT_ANGLE = 0;
+
   }
 
   public static final class ElevatorConstants {
