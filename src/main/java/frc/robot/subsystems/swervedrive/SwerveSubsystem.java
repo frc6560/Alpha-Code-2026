@@ -73,9 +73,7 @@ public class SwerveSubsystem extends SubsystemBase {
                                                                             DrivebaseConstants.kV, 
                                                                             DrivebaseConstants.kA);
 
-  Matrix<N3, N1> visionStdDevs = VecBuilder.fill(DrivebaseConstants.kStdvX,
-                                                 DrivebaseConstants.kStdvY, 
-                                                 DrivebaseConstants.kStdvTheta);
+
 
   PIDController m_pidControllerX = new PIDController(DrivebaseConstants.kP_translation, 
                                                           DrivebaseConstants.kI_translation, 
@@ -96,10 +94,10 @@ public class SwerveSubsystem extends SubsystemBase {
     boolean blueAlliance = true;
     Pose2d startingPose = blueAlliance ? new Pose2d(new Translation2d(Meter.of(3.65),
                                                                       Meter.of(0.9)),
-                                                    Rotation2d.fromDegrees(0))
+                                                    Rotation2d.fromDegrees(90))
                                        : new Pose2d(new Translation2d(Meter.of(12.9),
                                                                       Meter.of(7.15)),
-                                                    Rotation2d.fromDegrees(180));
+                                                    Rotation2d.fromDegrees(270));
     // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary objects being created.
     SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
     try
@@ -119,7 +117,6 @@ public class SwerveSubsystem extends SubsystemBase {
     swerveDrive.replaceSwerveModuleFeedforward(driveFF);
     setMotorBrake(true);
     setupPathPlanner();
-    swerveDrive.setVisionMeasurementStdDevs(visionStdDevs);
   }
 
   /**
