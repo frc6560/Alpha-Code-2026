@@ -98,16 +98,14 @@ public final class Constants {
   public static final class FlywheelConstants {
     public static final int FLYWHEEL_ID = 21; // TODO: set correct ID
 
-    public static final double kS = 0.0; // TODO: tune
+    
     public static final double kV = 0.0; // TODO: tune
-    public static final double kA = 0.0; // TODO: tune
-
     public static final double kP = 0.0; // TODO: tune
     public static final double kI = 0.0; // TODO: tune
     public static final double kD = 0.0; // TODO: tune
 
     public static final double MAX_RPM = 5700.0; // Example value for Falcon 500
-    public static final double FLYWHEEL_GEAR_RATIO = 1.0; // TODO: set correct gear ratio
+    public static final double FLYWHEEL_GEAR_RATIO = 25.0 / 24.0; // TODO: set correct gear ratio
     public static final double FLYWHEEL_IDLE_RPM = 0.0;
     public static final double FLYWHEEL_RPM_TOLERANCE = 100.0;
     public static final double[][] DISTANCE_RPM_TABLE = {
@@ -121,17 +119,11 @@ public final class Constants {
 
     public static final double FLYWHEEL_SUPPLY_CURRENT_LIMIT = 0;
 
-    public static final Translation2d HUB_BLUE_POSITION = null;
+    public static final Translation2d HUB_BLUE_POSITION = new Translation2d(0.5,5.5);
 
-    public static final Translation2d HUB_RED_POSITION = null;
+    public static final Translation2d HUB_RED_POSITION = new Translation2d(16.0,5.5);
 
     public static final Slot0Configs FLYWHEEL_PID_CONFIG = null;
-
-    public static final double LIMELIGHT_HEIGHT = 0;
-
-    public static final double HUB_HEIGHT = 0;
-
-    public static final double LIMELIGHT_MOUNT_ANGLE = 0;
 
   }
 

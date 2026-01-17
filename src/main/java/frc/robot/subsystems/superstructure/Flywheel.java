@@ -9,14 +9,13 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-// import edu.wpi.first.math.geometry.Pose2d;
-// import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
-// import edu.wpi.first.wpilibj.DriverStation;
-// import edu.wpi.first.wpilibj.DriverStation.Alliance;
-// import edu.wpi.first.wpilibj.motorcontrol.Talon;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.FlywheelConstants;
@@ -35,12 +34,12 @@ public class Flywheel extends SubsystemBase {
   private final InterpolatingDoubleTreeMap distanceToRPM; 
 
   //pose supplier
-  //private final PoseSupplier poseSupplier;
+  private final PoseSupplier poseSupplier;
 
     // get pose from swerve subsystem
-  // public interface PoseSupplier {
-  //   Pose2d getPose();
-  // }
+  public interface PoseSupplier {
+   Pose2d getPose();
+   }
 
   //state
   private double targetRPM = 0.0;
@@ -48,8 +47,11 @@ public class Flywheel extends SubsystemBase {
 
 
   /** Creates a new Flywheel. */
-  public Flywheel() {
-    //this.poseSupplier = poseSupplier;
+  public Flywheel(PoseSupplier poseSupplier) {
+    this.poseSupplier = poseSupplier;
+
+    // initialize limelight network table
+    limelightTable = NetworkTableInstance.getDefault().getTable("limelight");
 
     //initialize motor
     flywheelMotor = new TalonFX(FlywheelConstants.FLYWHEEL_ID, "rio");
@@ -57,9 +59,6 @@ public class Flywheel extends SubsystemBase {
 
     //initialize control
     velocityControl = new VelocityVoltage(0.0).withSlot(0);
-
-    //initialize limelight table
-    limelightTable = NetworkTableInstance.getDefault().getTable("limelight-flywheel");
 
     //build lookuptable from constants
     distanceToRPM = new InterpolatingDoubleTreeMap(); 
@@ -71,6 +70,8 @@ public class Flywheel extends SubsystemBase {
     }
 
   }
+
+ 
 
   private void configureMotor() {
     //motor configuration
@@ -93,30 +94,34 @@ public class Flywheel extends SubsystemBase {
 
     flywheelMotor.getConfigurator().apply(config);
   }
+  
+    private double getDistanceToTarget() {
+    Pose2d robotPose = poseSupplier.getPose();
+    Translation2d hubPose = getHubPose(); 
 
-  private double getDistanceFromLimelight(){
-    double ty = limelightTable.getEntry("ty").getDouble(0.0);
+    return robotPose.getTranslation().getDistance(hubPose);
+  }
 
-    //calculate distance using limelight angle and height
-    double limelightHeight = FlywheelConstants.LIMELIGHT_HEIGHT;
-    double hubHeight = FlywheelConstants.HUB_HEIGHT;
-    double limelightAngle = Math.toRadians(FlywheelConstants.LIMELIGHT_MOUNT_ANGLE + ty);
+    /**
+   * Gets goal position based on alliance 
+   * @return Goal position on field (meters)
+   */
+  private Translation2d getHubPose() {
+    var alliance = DriverStation.getAlliance();
+    
+    if (alliance.isPresent() && alliance.get() == Alliance.Red) {
+      return FlywheelConstants.HUB_RED_POSITION;
+    }
+    return FlywheelConstants.HUB_BLUE_POSITION;
+  }
 
-    double distance = (hubHeight - limelightHeight) / Math.tan(limelightAngle);
-    return distance;
-  } 
-
-  public void runWithLimelight(){
-    double distance = getDistanceFromLimelight();
-
+  public void runWithPose(){
+    double distance = getDistanceToTarget();
+    
     //get RPM from lookup table
-    if (distance > 0.0){
     targetRPM = distanceToRPM.get(distance); 
     setRPM(targetRPM);
-  } else{
-    setIdle(); 
   }
-}
 
   public void setIdle(){
     setRPM(FlywheelConstants.FLYWHEEL_IDLE_RPM);
@@ -155,7 +160,13 @@ public class Flywheel extends SubsystemBase {
   }
 
   public double getDistance(){
-    return getDistanceFromLimelight();
+    return getDistanceToTarget();
+  }
+
+  // * Gets current robot pose (for debugging)
+  //  */
+  public Pose2d getRobotPose() {
+    return poseSupplier.getPose();
   }
 
   public boolean hasTarget(){
@@ -168,35 +179,6 @@ public class Flywheel extends SubsystemBase {
   //   setRPM(targetRPM);
   
   // } 
-
-//   private double getDistanceToTarget() {
-//     Pose2d robotPose = poseSupplier.getPose();
-//     Translation2d hubPose = getHubPose(); 
-
-//     return robotPose.getTranslation().getDistance(hubPose);
-//   }
-
-//   private Translation2d getHubPose() {
-//     var alliance = DriverStation.getAlliance();
-//     if (alliance.isPresent() && alliance.get() == Alliance.Blue){
-//       return FlywheelConstants.HUB_BLUE_POSITION; 
-
-//     }
-//     else {
-//       return FlywheelConstants.HUB_RED_POSITION;
-    
-//   }
-// }
-
-  // public void runWithPose(){
-  //   double distance = getDistanceToTarget();
-    
-  //   //get RPM from lookup table
-  //   targetRPM = distanceToRPM.get(distance); 
-  //   setRPM(targetRPM);
-  // }
-
-  
 
   @Override
   public void periodic() {

@@ -58,8 +58,7 @@ public class RobotContainer {
     private final Arm arm = new Arm();
     private final BallGrabber ballGrabber = new BallGrabber();
     private final SubsystemManager subsystemManager = new SubsystemManager(drivebase, elevator, arm, ballGrabber, controls);
-    private final Flywheel flywheel = new Flywheel(); 
-    
+    private final Flywheel flywheel = new Flywheel(() -> drivebase.getPose()); 
 
     private final AutoFactory factory;
     private final SendableChooser<Auto> autoChooser;
