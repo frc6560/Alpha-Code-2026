@@ -52,21 +52,21 @@
    "val":7.0
   },
   "cof":{
-   "exp":"1.19",
-   "val":1.19
+   "exp":"1.4",
+   "val":1.4
   },
   "bumper":{
    "front":{
-    "exp":"0.406 m",
-    "val":0.406
+    "exp":"16 in",
+    "val":0.4064
    },
    "side":{
-    "exp":"0.406 m",
-    "val":0.406
+    "exp":"16 in",
+    "val":0.4064
    },
    "back":{
-    "exp":"0.406 m",
-    "val":0.406
+    "exp":"16 in",
+    "val":0.4064
    }
   },
   "differentialTrackWidth":{
