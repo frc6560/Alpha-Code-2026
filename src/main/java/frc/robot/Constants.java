@@ -96,7 +96,8 @@ public final class Constants {
   }
 
   public static final class FlywheelConstants {
-    public static final int FLYWHEEL_ID = 21; // TODO: set correct ID
+    public static final int RIGHT_FLYWHEEL_ID = 21; // TODO: set correct ID
+    public static final int LEFT_FLYWHEEL_ID = 20; // TODO: set correct ID
 
     
     public static final double kV = 0.0; // TODO: tune
@@ -104,17 +105,17 @@ public final class Constants {
     public static final double kI = 0.0; // TODO: tune
     public static final double kD = 0.0; // TODO: tune
 
-    public static final double MAX_RPM = 5700.0; // Example value for Falcon 500
-    public static final double FLYWHEEL_GEAR_RATIO = 25.0 / 24.0; // TODO: set correct gear ratio
-    public static final double FLYWHEEL_IDLE_RPM = 0.0;
+    public static final double MAX_RPM = 2000.0; // Example value for Falcon 500
+    public static final double FLYWHEEL_GEAR_RATIO = 2 / 1; // TODO: set correct gear ratio
+    public static final double FLYWHEEL_IDLE_RPM = 600.0; //kraken x60 
     public static final double FLYWHEEL_RPM_TOLERANCE = 100.0;
     public static final double[][] DISTANCE_RPM_TABLE = {
-      {0.0, 5700.0},
-      {1.0, 5700.0},
-      {2.0, 5700.0},
-      {3.0, 5700.0},
-      {4.0, 5700.0},
-      {5.0, 5700.0}
+      {0.0, 1000.0},
+      {1.0, 1000.0},
+      {2.0, 1000.0},
+      {3.0, 1000.0},
+      {4.0, 1000.0},
+      {5.0, 1000.0}
     };
 
     public static final double FLYWHEEL_SUPPLY_CURRENT_LIMIT = 0;

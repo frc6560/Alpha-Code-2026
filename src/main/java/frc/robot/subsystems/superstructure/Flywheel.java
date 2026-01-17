@@ -7,6 +7,7 @@ package frc.robot.subsystems.superstructure;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -23,7 +24,8 @@ import frc.robot.Constants.FlywheelConstants;
 public class Flywheel extends SubsystemBase {
 
   //motor
-  private final TalonFX flywheelMotor;
+  private final TalonFX leftFlywheelMotor;
+  private final TalonFX rightFlywheelMotor;
 
   //control 
   private final VelocityVoltage velocityControl;
@@ -54,8 +56,15 @@ public class Flywheel extends SubsystemBase {
     limelightTable = NetworkTableInstance.getDefault().getTable("limelight");
 
     //initialize motor
-    flywheelMotor = new TalonFX(FlywheelConstants.FLYWHEEL_ID, "rio");
-     configureMotor(); 
+    leftFlywheelMotor = new TalonFX(FlywheelConstants.LEFT_FLYWHEEL_ID, "rio");
+    rightFlywheelMotor = new TalonFX(FlywheelConstants.RIGHT_FLYWHEEL_ID, "rio");
+
+     configureMotor(leftFlywheelMotor, true); 
+     configureMotor (rightFlywheelMotor, false);
+    
+
+
+    
 
     //initialize control
     velocityControl = new VelocityVoltage(0.0).withSlot(0);
@@ -73,12 +82,12 @@ public class Flywheel extends SubsystemBase {
 
  
 
-  private void configureMotor() {
+  private void configureMotor(TalonFX flywheelMotor, boolean inverted){ 
     //motor configuration
     TalonFXConfiguration config = new TalonFXConfiguration();
 
     //pid config
-    config.Slot0 = FlywheelConstants.FLYWHEEL_PID_CONFIG;
+    //config.Slot0 = FlywheelConstants.FLYWHEEL_PID_CONFIG;
     config.Slot0.kP = FlywheelConstants.kP;
     config.Slot0.kI = FlywheelConstants.kI;
     config.Slot0.kD = FlywheelConstants.kD;
@@ -87,6 +96,12 @@ public class Flywheel extends SubsystemBase {
 
     //motor output 
     config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+
+    // Apply inversion
+    if (inverted) {
+      config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    }
+
 
     //current limits
     config.CurrentLimits.SupplyCurrentLimit = FlywheelConstants.FLYWHEEL_SUPPLY_CURRENT_LIMIT;
@@ -135,16 +150,18 @@ public class Flywheel extends SubsystemBase {
     double motorRPS = motorRPM / 60.0;
 
     //send command to motor
-    flywheelMotor.setControl(velocityControl.withVelocity(motorRPS));
+    leftFlywheelMotor.setControl(velocityControl.withVelocity(motorRPS));
+    rightFlywheelMotor.setControl(velocityControl.withVelocity(motorRPS));
   }
   
   public void stop(){
     targetRPM = 0.0;
-    flywheelMotor.stopMotor();
+      leftFlywheelMotor.stopMotor();
+      rightFlywheelMotor.stopMotor();
   }
 
   public double getCurrentRPM(){
-    double motorRPS = flywheelMotor.getVelocity().getValueAsDouble(); 
+    double motorRPS = leftFlywheelMotor.getVelocity().getValueAsDouble(); 
     double motorRPM = motorRPS * 60.0;
     return motorRPM / FlywheelConstants.FLYWHEEL_GEAR_RATIO;
    
@@ -189,7 +206,7 @@ public class Flywheel extends SubsystemBase {
     SmartDashboard.putBoolean("Flywheel/At Target", atTargetRPM());
     SmartDashboard.putBoolean("Flywheel/Has Target", hasTarget());
     SmartDashboard.putNumber("Flywheel/Distance", getDistance());
-    SmartDashboard.putNumber("Flywheel/Voltage", flywheelMotor.getMotorVoltage().getValueAsDouble());
-    SmartDashboard.putNumber("Flywheel/Current Draw", flywheelMotor.getSupplyCurrent().getValueAsDouble());
+    SmartDashboard.putNumber("Flywheel/Voltage", leftFlywheelMotor.getMotorVoltage().getValueAsDouble());
+    SmartDashboard.putNumber("Flywheel/Current Draw", leftFlywheelMotor.getSupplyCurrent().getValueAsDouble());
   }
 }
