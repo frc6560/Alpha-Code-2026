@@ -17,11 +17,27 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj.util.Color8Bit;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.FlywheelConstants;
 
+
+
+
+
+
+
 public class Flywheel extends SubsystemBase {
+
+// mechanism2D visualization components
+private final Mechanism2d mech2d;
+private final MechanismRoot2d flywheelRoot;
+private final MechanismLigament2d leftFlywheelVisual;
+private final MechanismLigament2d rightFlywheelVisual;
 
   //motor
   private final TalonFX leftFlywheelMotor;
@@ -61,7 +77,25 @@ public class Flywheel extends SubsystemBase {
 
      configureMotor(leftFlywheelMotor, true); 
      configureMotor (rightFlywheelMotor, false);
-    
+
+
+
+  // Initialize Mechanism2D (200x200 px, arbitrary size, units don't matter much)
+  mech2d = new Mechanism2d(200, 200);
+
+  // Add a root point for the flywheel at the center
+  flywheelRoot = mech2d.getRoot("Flywheel Root", 100, 100);
+  // Create ligaments representing the flywheels (length = 50, initial angle = 0)
+  leftFlywheelVisual = flywheelRoot.append(
+    new MechanismLigament2d("Left Flywheel", 50, 0));
+    leftFlywheelVisual.setColor(new Color8Bit(0, 0, 255));
+  rightFlywheelVisual = flywheelRoot.append(
+    new MechanismLigament2d("Right Flywheel", 50, 0));
+    rightFlywheelVisual.setColor(new Color8Bit(255, 0, 0));
+
+  // Push the Mechanism2D to SmartDashboard (so AdvantageScope can see it)
+  SmartDashboard.putData("Flywheel Mechanism", mech2d);
+
 
 
     
@@ -196,7 +230,7 @@ public class Flywheel extends SubsystemBase {
   //   setRPM(targetRPM);
   
   // } 
-
+private double visualAngle = 0.0;
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
@@ -208,5 +242,30 @@ public class Flywheel extends SubsystemBase {
     SmartDashboard.putNumber("Flywheel/Distance", getDistance());
     SmartDashboard.putNumber("Flywheel/Voltage", leftFlywheelMotor.getMotorVoltage().getValueAsDouble());
     SmartDashboard.putNumber("Flywheel/Current Draw", leftFlywheelMotor.getSupplyCurrent().getValueAsDouble());
-  }
+
+
+
+
+
+    // --- Automatic demo spin for visualization ---
+    double rpmToUse = targetRPM;
+
+    // If targetRPM is zero, use demo RPM for visualization
+    if (Math.abs(rpmToUse) < 1e-6) {
+        rpmToUse = 1000.0;
+    }
+
+    // Compute incremental rotation (periodic runs ~20ms per tick)
+    double degPerSec = rpmToUse * 360.0 / 60.0; // 360° per revolution
+    double degPerTick = degPerSec * 0.02;       // 20ms tick
+
+    visualAngle += degPerTick;
+    visualAngle %= 360.0;
+
+    leftFlywheelVisual.setAngle(visualAngle);
+    rightFlywheelVisual.setAngle(-visualAngle); // opposite for variety
+
+    // Debug: expose visual angle
+    SmartDashboard.putNumber("Flywheel/Visual Angle", visualAngle);
+}
 }
