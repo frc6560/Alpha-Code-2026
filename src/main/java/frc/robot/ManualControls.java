@@ -93,6 +93,15 @@ public class ManualControls {
       return secondXbox.getRightBumperButton();
     }
 
+    //intake controls
+    public boolean runIntakePrimary() {
+        return firstXbox.getLeftBumperButton();
+    }
+
+    public boolean runOuttakePrimary() {
+        return firstXbox.getRightBumperButton();
+    }
+
     public boolean zeroNoAprilTagsGyro() {
       return secondXbox.getStartButton();
     }

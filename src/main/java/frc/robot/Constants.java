@@ -237,5 +237,20 @@ public final class Constants {
       }
     }
   }
+  public static final class intakeConstants
+  {
+    // change ids
+    public static int IntakeMotorID = 44;
+    // Magnetic limit switch
+    public static int IntakeLimitSwitchID = 5;
 
+    // Intake speeds
+    public static final double INTAKE_SPEED = -0.6;
+    public static final double OUTTAKE_SPEED = 0.6;
+
+    // Current limit
+    // put the motor into coast before trying to go again
+    public static final double MAX_CURRENT_AMPS = 30.0;
+    public static final double COOLDOWN_SECONDS = 3.0;
+  }
 }

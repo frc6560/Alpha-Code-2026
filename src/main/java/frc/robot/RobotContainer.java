@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.superstructure.Arm;
 import frc.robot.subsystems.superstructure.BallGrabber;
 import frc.robot.subsystems.superstructure.Elevator;
+import frc.robot.subsystems.superstructure.intake;
 import frc.robot.subsystems.superstructure.SubsystemManager;
 import frc.robot.commands.ArmCommand;
 import frc.robot.commands.ElevatorCommand;
@@ -54,6 +55,7 @@ public class RobotContainer {
     private final Elevator elevator = new Elevator();
     private final Arm arm = new Arm();
     private final BallGrabber ballGrabber = new BallGrabber();
+    private final intake intake = new intake();
     private final SubsystemManager subsystemManager = new SubsystemManager(drivebase, elevator, arm, ballGrabber, controls);
 
     private final AutoFactory factory;
@@ -117,7 +119,9 @@ public class RobotContainer {
         driverXbox.x().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().schedule(drivebase.alignToTrenchCommand()), drivebase));
         driverXbox.start().onTrue((Commands.runOnce(drivebase::zeroNoAprilTagsGyro)));
         driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
-        driverXbox.rightBumper().onTrue(Commands.none());
+  // Bind driver Xbox bumpers to intake while-held actions
+  driverXbox.leftBumper().whileTrue(Commands.runOnce(() -> intake.runIntakeTwo(), intake).repeatedly());
+  driverXbox.rightBumper().whileTrue(Commands.runOnce(() -> intake.runOuttakeTwo(), intake).repeatedly());
     }
 
     public Command getAutonomousCommand() {
