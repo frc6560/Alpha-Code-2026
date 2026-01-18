@@ -36,8 +36,8 @@ public class AutoModeChooser {
                 name = "Idle";
                 break;
             case TEST:
-                routine = m_CommandFactory.getTest();
-                name = "Test";
+                routine = m_CommandFactory.getrebuilt1();
+                name = "Rebuiltauto1";
                 break;
             default:
                 routine = m_CommandFactory.getNoAuto();

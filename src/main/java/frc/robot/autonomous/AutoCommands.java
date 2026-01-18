@@ -41,38 +41,39 @@ public class AutoCommands {
     }
 
     /** Test auto on HP side. Should be comp level accuracy. */
-    public AutoRoutine getTest(){
-        AutoRoutine testRoutine = autoFactory.newRoutine("test");
+    public AutoRoutine getrebuilt1(){
+        AutoRoutine rebuilt1Routine = autoFactory.newRoutine("rebuilt1");
         
-        AutoTrajectory trenchToCenter = testRoutine.trajectory("hpTrenchToCenter");
-        AutoTrajectory trenchToShoot = testRoutine.trajectory("hpTrenchToShoot");
-        AutoTrajectory bumpToShoot = testRoutine.trajectory("hpBumpToShoot");
-        AutoTrajectory climb = testRoutine.trajectory("hpClimb");
+        AutoTrajectory p1 = rebuilt1Routine.trajectory("kianpth1dot1");
+        AutoTrajectory p2 = rebuilt1Routine.trajectory("kianpath1dot2");
+        AutoTrajectory p3 = rebuilt1Routine.trajectory("kianpath1dot3");
+        AutoTrajectory p4 = rebuilt1Routine.trajectory("kianpath1dot4");
+        AutoTrajectory p5 = rebuilt1Routine.trajectory("kianpath1dot5");
 
-        trenchToCenter.atTime("intake")
+        p1.atTime("intake")
             .onTrue(
                 Commands.idle()
             );
 
-        testRoutine
+        rebuilt1Routine
             .active()
                 .onTrue(
                     Commands.sequence(
-                        trenchToCenter.resetOdometry(),
-                        trenchToCenter.cmd(), // add an intake command after (or during) this.
-                        trenchToShoot.cmd()
-                            .beforeStarting(trenchToShoot.resetOdometry())
+                        p1.resetOdometry(),
+                        p1.cmd(), // add an intake command after (or during) this.
+                        p2.cmd()
+                            .beforeStarting(p2.resetOdometry())
                             .andThen(Commands.waitSeconds(3)), // to simulate shooting
-                        trenchToCenter.cmd()
-                            .beforeStarting(trenchToCenter.resetOdometry()),
-                        bumpToShoot.cmd()
-                            .beforeStarting(bumpToShoot.resetOdometry())
+                        p3.cmd()
+                            .beforeStarting(p3.resetOdometry()),
+                        p4.cmd()
+                            .beforeStarting(p4.resetOdometry())
                             .andThen(Commands.waitSeconds(3)),
-                        climb.cmd()
-                            .beforeStarting(climb.resetOdometry())
+                        p5.cmd()
+                            .beforeStarting(p5.resetOdometry())
                     )
         );
 
-        return testRoutine;
+        return rebuilt1Routine;
     }
 }
