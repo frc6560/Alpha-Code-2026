@@ -35,9 +35,9 @@ public class LimelightVision{
             cameraPose.getTranslation().getX(),
             cameraPose.getTranslation().getY(),
             cameraPose.getTranslation().getZ(),
-            cameraPose.getRotation().getX(),
-            cameraPose.getRotation().getY(),
-            cameraPose.getRotation().getZ()
+            Units.radiansToDegrees(cameraPose.getRotation().getX()),
+            Units.radiansToDegrees(cameraPose.getRotation().getY()),
+            Units.radiansToDegrees(cameraPose.getRotation().getZ())
         );
     }
 
