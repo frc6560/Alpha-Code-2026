@@ -17,6 +17,10 @@ import frc.robot.commands.ElevatorCommand;
 import frc.robot.commands.BallGrabberCommand;
 import frc.robot.subsystems.vision.LimelightVision;
 import frc.robot.subsystems.vision.VisionSubsystem;
+import frc.robot.subsystems.superstructure.flywheel;
+import frc.robot.subsystems.superstructure.feeder;
+
+
 
 import java.io.File;
 import java.util.ArrayList;
@@ -26,6 +30,7 @@ import java.util.Set;
 
 import choreo.*;
 import choreo.auto.AutoFactory;
+import choreo.auto.AutoTrajectory;
 
 import swervelib.SwerveInputStream;
 import frc.robot.commands.SubsystemManagerCommand;
@@ -58,9 +63,11 @@ public class RobotContainer {
     private final Arm arm = new Arm();
     private final BallGrabber ballGrabber = new BallGrabber();
     private final SubsystemManager subsystemManager = new SubsystemManager(drivebase, elevator, arm, ballGrabber, controls);
-
+    private final flywheel flywheel = new flywheel();
+    private final feeder feeder = new feeder();
     private final AutoFactory autofactory;
-
+    private static final double FLYWHEEL_RPM = 3000;
+    private static final double FEEDER_RPM = 2000;
 
     SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
       () -> driverXbox.getLeftY() * -1,
@@ -79,7 +86,7 @@ public class RobotContainer {
       subsystemManager.setDefaultCommand(new SubsystemManagerCommand(drivebase, elevator, arm, ballGrabber, controls, subsystemManager));
       
       autofactory = new AutoFactory(
-        () -> vision.getLimelightPose("limelight"),
+        drivebase::getPose,
         drivebase::resetOdometry,
         drivebase::followSegment,
         false,
@@ -121,9 +128,16 @@ public class RobotContainer {
         driverXbox.y().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().cancelAll()));
         driverXbox.x().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().schedule(drivebase.alignToTrenchCommand()), drivebase));
         driverXbox.start().onTrue((Commands.runOnce(drivebase::zeroNoAprilTagsGyro)));
-        driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
-        driverXbox.rightBumper().onTrue(Commands.none());
+        //driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
+        //driverXbox.rightBumper().onTrue(Commands.none());
+
+        driverXbox.leftBumper().onTrue(Commands.runOnce(() -> flywheel.setRPM(FLYWHEEL_RPM), flywheel));
+        
+        // B button: Start feeder at constant RPM
+        driverXbox.rightBumper().onTrue(Commands.runOnce(() -> feeder.setRPM(FEEDER_RPM), feeder));
     }
+        
+        
 
     public Command rebuiltauto(){
       return Commands.sequence(
@@ -133,6 +147,17 @@ public class RobotContainer {
           autofactory.trajectoryCmd("kianpath1dot3"),
           autofactory.trajectoryCmd("kianpath1dot4"),
           autofactory.trajectoryCmd("kianpath1dot5")
+
+          
+      );}
+
+      public Command rebuiltauto2(){
+      return Commands.sequence(
+          autofactory.resetOdometry("kianpth2dot1"),
+          autofactory.trajectoryCmd("kianpth2dot1"),
+          autofactory.trajectoryCmd("kianpath2dot2"),
+          autofactory.trajectoryCmd("kianpath2dot3"),
+          autofactory.trajectoryCmd("kianpath2dot4")
 
           
       );}
@@ -153,6 +178,6 @@ public class RobotContainer {
 }
 
     public Command getAutonomousCommand() {
-      return rebuiltauto();
+      return rebuiltauto2();
     }
 }
