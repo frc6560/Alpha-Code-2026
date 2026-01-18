@@ -79,7 +79,7 @@ public final class Constants {
             0.394,
             -0.0248,
             0.192,
-            new Rotation3d(0, 10, 0)
+            new Rotation3d(0, Units.radiansToDegrees(10), 0)
           );
           break;
         default:
