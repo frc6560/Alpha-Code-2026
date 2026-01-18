@@ -79,11 +79,11 @@ public final class Constants {
             0.394,
             -0.0248,
             0.192,
-            new Rotation3d(0, Units.radiansToDegrees(10), 0)
+            new Rotation3d(0, Units.degreesToRadians(10), 0)
           );
           break;
         default:
-          limelightPose = new Pose3d();
+          throw new IllegalArgumentException("Invalid limelight name. You might want to double check your configs: " + name);
       }
       return limelightPose;
     }
