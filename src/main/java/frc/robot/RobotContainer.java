@@ -118,10 +118,13 @@ public class RobotContainer {
         driverXbox.y().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().cancelAll()));
         driverXbox.x().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().schedule(drivebase.alignToTrenchCommand()), drivebase));
         driverXbox.start().onTrue((Commands.runOnce(drivebase::zeroNoAprilTagsGyro)));
-        driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
+        //driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
   // Bind driver Xbox bumpers to intake while-held actions
   driverXbox.leftBumper().whileTrue(Commands.runOnce(() -> intake.runIntakeTwo(), intake).repeatedly());
   driverXbox.rightBumper().whileTrue(Commands.runOnce(() -> intake.runOuttakeTwo(), intake).repeatedly());
+  // Ensure the intake motor is stopped when the bumper is released
+  driverXbox.leftBumper().onFalse(Commands.runOnce(() -> intake.stop(), intake));
+  driverXbox.rightBumper().onFalse(Commands.runOnce(() -> intake.stop(), intake));
     }
 
     public Command getAutonomousCommand() {
