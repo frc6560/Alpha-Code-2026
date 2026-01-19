@@ -76,4 +76,38 @@ public class AutoCommands {
 
         return rebuilt1Routine;
     }
+
+    public AutoRoutine getrebuilt2(){
+        AutoRoutine rebuilt2Routine = autoFactory.newRoutine("rebuilt2");
+        
+        AutoTrajectory p1 = rebuilt2Routine.trajectory("kianpth2dot1");
+        AutoTrajectory p2 = rebuilt2Routine.trajectory("kianpath2dot2");
+        AutoTrajectory p3 = rebuilt2Routine.trajectory("kianpath2dot3");
+        AutoTrajectory p4 = rebuilt2Routine.trajectory("kianpath2dot4");
+
+        p1.atTime("intake")
+            .onTrue(
+                Commands.idle()
+            );
+
+        rebuilt2Routine
+            .active()
+                .onTrue(
+                    Commands.sequence(
+                        p1.resetOdometry(),
+                        p1.cmd(), // add an intake command after (or during) this.
+                        p2.cmd()
+                            .beforeStarting(p2.resetOdometry())
+                            .andThen(Commands.waitSeconds(3)), // to simulate shooting
+                        p3.cmd()
+                            .beforeStarting(p3.resetOdometry()),
+                        p4.cmd()
+                            .beforeStarting(p4.resetOdometry())
+                            .andThen(Commands.waitSeconds(3))
+                    
+                    )
+        );
+
+        return rebuilt2Routine;
+    }
 }

@@ -31,9 +31,9 @@ public class AutoModeChooser {
         AutoRoutine routine;
         String name;
         switch(autoName){
-            case IDLE:
-                routine = m_CommandFactory.getNoAuto();
-                name = "Idle";
+            case TEST1:
+                routine = m_CommandFactory.getrebuilt2();
+                name = "Rebuiltauto2";
                 break;
             case TEST:
                 routine = m_CommandFactory.getrebuilt1();
