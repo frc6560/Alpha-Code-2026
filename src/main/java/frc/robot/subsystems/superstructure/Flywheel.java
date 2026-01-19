@@ -11,7 +11,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Shooter extends SubsystemBase {
+public class Flywheel extends SubsystemBase {
 
     private final TalonFX leaderMotor;
     private final TalonFX followerMotor;
@@ -29,7 +29,7 @@ public class Shooter extends SubsystemBase {
 
     private double targetRPM = 0;
 
-    public Shooter() {
+    public Flywheel() {
         leaderMotor = new TalonFX(20, "rio");
         followerMotor = new TalonFX(21, "rio");
         configureMotors();
