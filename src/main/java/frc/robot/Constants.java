@@ -35,10 +35,6 @@ public final class Constants {
     public static final double kV = 2.474;
     public static final double kA = 0.230;
 
-    public static final double kStdvX = 0.08; // TODO: tune once i get my hands on LL
-    public static final double kStdvY = 0.08; 
-    public static final double kStdvTheta = 3;
-
     public static final double kP_translation = 4.0;
     public static final double kP_rotation = 4.0;
 
