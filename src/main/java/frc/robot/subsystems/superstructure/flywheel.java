@@ -63,7 +63,7 @@ public class flywheel extends SubsystemBase {
 
         followerMotor.getConfigurator().apply(followerConfig);
 
-        followerMotor.setControl(new Follower(leaderMotor.getDeviceID(), MotorAlignmentValue.Aligned));
+        followerMotor.setControl(new Follower(leaderMotor.getDeviceID(), MotorAlignmentValue.Opposed));
     }
 
     public void setRPM(double rpm) {
@@ -79,7 +79,7 @@ public class flywheel extends SubsystemBase {
     public void stop() {
         targetRPM = 0;
         leaderMotor.stopMotor();
-        followerMotor.setControl(new Follower(leaderMotor.getDeviceID(), MotorAlignmentValue.Aligned));
+        followerMotor.setControl(new Follower(leaderMotor.getDeviceID(), MotorAlignmentValue.Opposed));
     }
 
     public double getVelocityRPM() {
