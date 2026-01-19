@@ -41,8 +41,8 @@ public class AutoCommands {
     }
 
     /** Test auto on HP side. Should be comp level accuracy. */
-    public AutoRoutine getTest(){
-        AutoRoutine testRoutine = autoFactory.newRoutine("test");
+    public AutoRoutine getTestBump(){
+        AutoRoutine testRoutine = autoFactory.newRoutine("testBump");
         
         AutoTrajectory trenchToCenter = testRoutine.trajectory("hpTrenchToCenter");
         AutoTrajectory trenchToShoot = testRoutine.trajectory("hpTrenchToShoot");
@@ -70,6 +70,38 @@ public class AutoCommands {
                             .andThen(Commands.waitSeconds(3)),
                         climb.cmd()
                             .beforeStarting(climb.resetOdometry())
+                    )
+        );
+
+        return testRoutine;
+    }
+
+    public AutoRoutine getTestTrench(){
+        AutoRoutine testRoutine = autoFactory.newRoutine("testTrench");
+        
+        AutoTrajectory trenchToCenter = testRoutine.trajectory("hpTrenchToCenter");
+        AutoTrajectory trenchToShoot = testRoutine.trajectory("hpTrenchToShoot");
+        AutoTrajectory bumpToShoot = testRoutine.trajectory("hpBumpToShoot");
+        AutoTrajectory trenchToClimb = testRoutine.trajectory("hpTrenchToClimb");
+
+        trenchToCenter.atTime("intake")
+            .onTrue(
+                Commands.idle()
+            );
+
+        testRoutine
+            .active()
+                .onTrue(
+                    Commands.sequence(
+                        trenchToCenter.resetOdometry(),
+                        trenchToCenter.cmd(), // add an intake command after (or during) this.
+                        trenchToShoot.cmd()
+                            .beforeStarting(trenchToShoot.resetOdometry())
+                            .andThen(Commands.waitSeconds(3)), // to simulate shooting
+                        trenchToCenter.cmd()
+                            .beforeStarting(trenchToCenter.resetOdometry()),
+                        trenchToClimb.cmd()
+                            .beforeStarting(trenchToClimb.resetOdometry())
                     )
         );
 
