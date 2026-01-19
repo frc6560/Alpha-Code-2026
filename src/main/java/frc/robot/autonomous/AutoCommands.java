@@ -128,12 +128,12 @@ public class AutoCommands {
                         p1.cmd(), // add an intake command after (or during) this.
                         p2.cmd()
                             .beforeStarting(p2.resetOdometry())
-                            .andThen(Commands.waitSeconds(3)), // to simulate shooting
+                            .andThen(shoot()), // to simulate shooting
                         p3.cmd()
                             .beforeStarting(p3.resetOdometry()),
                         p4.cmd()
                             .beforeStarting(p4.resetOdometry())
-                            .andThen(Commands.waitSeconds(3))
+                            .andThen(shoot())
                     
                     )
         );
@@ -141,8 +141,6 @@ public class AutoCommands {
         return rebuilt2Routine;
     }
 }
-
-
 
 
 
