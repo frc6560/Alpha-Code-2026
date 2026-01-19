@@ -10,6 +10,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.superstructure.BallGrabber;
 import frc.robot.subsystems.superstructure.Elevator;
+import frc.robot.subsystems.superstructure.Feeder;
+import frc.robot.subsystems.superstructure.Flywheel;
 import frc.robot.subsystems.superstructure.SubsystemManager;
 import frc.robot.subsystems.superstructure.Arm;
 import frc.robot.commands.ArmCommand;
@@ -53,7 +55,8 @@ public class RobotContainer {
     private final Arm arm = new Arm();
     private final BallGrabber ballGrabber = new BallGrabber();
     private final SubsystemManager subsystemManager = new SubsystemManager(drivebase, elevator, arm, ballGrabber, controls);
-
+    private final Flywheel flywheel = new Flywheel();
+    private final Feeder feeder = new Feeder();
     private final AutoCommands factory;
     private final AutoModeChooser autoChooser;
 
