@@ -35,10 +35,6 @@ public final class Constants {
     public static final double kV = 2.474;
     public static final double kA = 0.230;
 
-    public static final double kStdvX = 0.08; // TODO: tune once i get my hands on LL
-    public static final double kStdvY = 0.08; 
-    public static final double kStdvTheta = 3;
-
     public static final double kP_translation = 2.5;
     public static final double kP_rotation = 4.0;
 
@@ -79,7 +75,7 @@ public final class Constants {
             0.394,
             -0.0248,
             0.192,
-            new Rotation3d(0, Units.degreesToRadians(10), 0)
+            new Rotation3d(0, Units.degreesToRadians(15), 0)
           );
           break;
         default:
@@ -158,6 +154,14 @@ public final class Constants {
         public static final double STOW = 0.2;//HeightToRotations(18);
         public static final double GROUNDBALL = 0.2;//HeightToRotations(20);
     
+  }
+
+  public static final class ShooterConstants{
+    public static final double FLYWHEEL_RPM = 50;
+  }
+
+  public static final class FeederConstants{
+    public static final double FEEDER_RPM = 50;
   }
 
   public static final class ArmConstants
