@@ -25,7 +25,7 @@ public class Feeder extends SubsystemBase {
     private double targetRPM = 0;
 
     public Feeder() {
-        feederMotor = new TalonFX(22, "Canivore");
+        feederMotor = new TalonFX(22, "rio");
         configureMotor();
     }
 

@@ -30,8 +30,8 @@ public class Shooter extends SubsystemBase {
     private double targetRPM = 0;
 
     public Shooter() {
-        leaderMotor = new TalonFX(20, "Canivore");
-        followerMotor = new TalonFX(21, "Canivore");
+        leaderMotor = new TalonFX(20, "rio");
+        followerMotor = new TalonFX(21, "rio");
         configureMotors();
     }
 
