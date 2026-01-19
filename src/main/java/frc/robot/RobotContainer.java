@@ -8,13 +8,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.subsystems.superstructure.Arm;
-import frc.robot.subsystems.superstructure.BallGrabber;
-import frc.robot.subsystems.superstructure.Elevator;
-import frc.robot.subsystems.superstructure.SubsystemManager;
-import frc.robot.commands.ArmCommand;
-import frc.robot.commands.ElevatorCommand;
-import frc.robot.commands.BallGrabberCommand;
 import frc.robot.subsystems.vision.LimelightVision;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
@@ -24,9 +17,8 @@ import java.util.List;
 import java.util.Set;
 
 import swervelib.SwerveInputStream;
-import frc.robot.commands.SubsystemManagerCommand;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.Constants.LimelightConstants;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.autonomous.Auto;
@@ -50,12 +42,6 @@ public class RobotContainer {
     
     private final VisionSubsystem vision;
 
-    // Subsystems
-    private final Elevator elevator = new Elevator();
-    private final Arm arm = new Arm();
-    private final BallGrabber ballGrabber = new BallGrabber();
-    private final SubsystemManager subsystemManager = new SubsystemManager(drivebase, elevator, arm, ballGrabber, controls);
-
     private final AutoFactory factory;
     private final SendableChooser<Auto> autoChooser;
 
@@ -69,11 +55,6 @@ public class RobotContainer {
 
 
     public RobotContainer() {
-      arm.setDefaultCommand(new ArmCommand(arm, controls));
-
-      elevator.setDefaultCommand(new ElevatorCommand(elevator,controls));
-      ballGrabber.setDefaultCommand(new BallGrabberCommand(ballGrabber, controls));
-      subsystemManager.setDefaultCommand(new SubsystemManagerCommand(drivebase, elevator, arm, ballGrabber, controls, subsystemManager));
       
       factory = new AutoFactory(
       null,
