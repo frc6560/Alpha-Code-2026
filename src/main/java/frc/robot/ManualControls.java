@@ -97,13 +97,9 @@ public class ManualControls {
       return secondXbox.getStartButton();
     }
   
-    // Ground intake controls (firstXbox)
+    // Ground intake controls (firstXbox) - Single button control
     public boolean intakeOut() {
-      return firstXbox.getLeftBumper();
-    }
-
-    public boolean intakeIn() {
-      return firstXbox.getRightBumper();
+      return firstXbox.getRightBumper(); // Right bumper: extend and intake
     }
 
 

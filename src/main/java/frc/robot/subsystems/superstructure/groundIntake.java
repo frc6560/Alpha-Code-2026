@@ -1,3 +1,4 @@
+
 package frc.robot.subsystems.superstructure;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -9,6 +10,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.GroundIntakeConstants;
@@ -17,6 +19,7 @@ public class groundIntake extends SubsystemBase {
     
     private final TalonFX extensionMotor;
     private final TalonFX rollerMotor;
+    private final DigitalInput retractLimitSwitch;
     
     private boolean isExtended = false;
     private boolean springyModeActive = false;
@@ -27,8 +30,12 @@ public class groundIntake extends SubsystemBase {
     private final NetworkTableEntry ntRollerSpeed = ntTable.getEntry("Roller Speed");
     private final NetworkTableEntry ntSpringyMode = ntTable.getEntry("Springy Mode Active");
     private final NetworkTableEntry ntExtensionCurrent = ntTable.getEntry("Extension Current");
+    private final NetworkTableEntry ntLimitSwitch = ntTable.getEntry("Retract Limit");
     
     public groundIntake() {
+        // Initialize limit switch (triggered when fully retracted)
+        retractLimitSwitch = new DigitalInput(GroundIntakeConstants.RETRACT_LIMIT_SWITCH_ID);
+        
         // Initialize extension motor
         extensionMotor = new TalonFX(GroundIntakeConstants.EXTENSION_MOTOR_ID);
         TalonFXConfiguration extensionConfig = new TalonFXConfiguration();
@@ -72,11 +79,20 @@ public class groundIntake extends SubsystemBase {
     
     /**
      * Retract the intake and stop the roller
+     * Respects limit switch to prevent over-retraction
      */
     public void intakeIn() {
         isExtended = false;
         springyModeActive = false;
-        extensionMotor.set(GroundIntakeConstants.EXTENSION_IN_SPEED);
+        
+        // Only retract if limit switch is NOT triggered (when triggered, intake is fully retracted)
+        if (!isRetractLimitTriggered()) {
+            extensionMotor.set(GroundIntakeConstants.EXTENSION_IN_SPEED);
+        } else {
+            // Already fully retracted, stop motor
+            extensionMotor.stopMotor();
+        }
+        
         rollerMotor.stopMotor();
         resetExtensionCurrentLimit();
     }
@@ -140,6 +156,16 @@ public class groundIntake extends SubsystemBase {
         extensionMotor.getConfigurator().apply(config);
     }
     
+    /**
+     * Check if the retract limit switch is triggered
+     * @return true if intake is fully retracted (limit switch triggered)
+     */
+    public boolean isRetractLimitTriggered() {
+        // DigitalInput.get() returns false when triggered (normally closed magnetic switch)
+        // So we invert it: !get() means triggered
+        return !retractLimitSwitch.get();
+    }
+    
     @Override
     public void periodic() {
         // Update springy mode if intake is extended
@@ -147,15 +173,22 @@ public class groundIntake extends SubsystemBase {
             updateSpringyMode();
         }
         
+        // Safety: If retracting and hit limit switch, stop motor
+        if (!isExtended && isRetractLimitTriggered()) {
+            extensionMotor.stopMotor();
+        }
+        
         // Update NetworkTables for debugging
         ntExtensionSpeed.setDouble(extensionMotor.get());
         ntRollerSpeed.setDouble(rollerMotor.get());
         ntSpringyMode.setBoolean(springyModeActive);
         ntExtensionCurrent.setDouble(extensionMotor.getSupplyCurrent().getValueAsDouble());
+        ntLimitSwitch.setBoolean(isRetractLimitTriggered());
         
         // SmartDashboard updates
         SmartDashboard.putBoolean("Intake Extended", isExtended);
         SmartDashboard.putBoolean("Intake Springy Mode", springyModeActive);
+        SmartDashboard.putBoolean("Intake Fully Retracted", isRetractLimitTriggered());
         SmartDashboard.putNumber("Intake Extension Current", extensionMotor.getSupplyCurrent().getValueAsDouble());
     }
     

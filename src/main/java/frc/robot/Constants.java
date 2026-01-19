@@ -97,6 +97,8 @@ public final class Constants {
     public static final int EXTENSION_MOTOR_ID = 20; // TODO: Set correct CAN ID
     public static final int ROLLER_MOTOR_ID = 21;    // TODO: Set correct CAN ID
     
+    public static final int RETRACT_LIMIT_SWITCH_ID = 5; // TODO: Set correct
+    
     // Current Limits (in Amps)
     public static final double EXTENSION_NORMAL_CURRENT_LIMIT = 40.0;
     public static final double EXTENSION_SPRINGY_CURRENT_LIMIT = 10.0; // Reduced for springy mode
@@ -108,7 +110,7 @@ public final class Constants {
     public static final double ROLLER_INTAKE_SPEED = 0.8;
     public static final double ROLLER_OUTTAKE_SPEED = -0.5;
     
-    // Motor Inversions (set these based on your wiring)
+    // Motor Inversions
     public static final boolean EXTENSION_MOTOR_INVERTED = false; // TODO: Test and adjust
     public static final boolean ROLLER_MOTOR_INVERTED = false;    // TODO: Test and adjust
     

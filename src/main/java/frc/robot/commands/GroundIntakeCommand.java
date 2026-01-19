@@ -17,14 +17,11 @@ public class GroundIntakeCommand extends Command {
     @Override
     public void execute() {
         if (controls.intakeOut()) {
-            // Left bumper: extend intake and spin roller
+            // Right bumper pressed: extend intake and spin roller (actively intaking)
             intake.intakeOut();
-        } else if (controls.intakeIn()) {
-            // Right bumper: retract intake and stop roller
-            intake.intakeIn();
         } else {
-            // No input: stop everything
-            intake.stop();
+            // Right bumper released: retract intake and stop roller
+            intake.intakeIn();
         }
     }
     
