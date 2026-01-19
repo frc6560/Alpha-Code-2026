@@ -92,4 +92,28 @@ public final class Constants {
     public static final double JUMP_TOLERANCE = 0.5; // meters. again, needs tuning.
   }
 
+  public static final class GroundIntakeConstants {
+    // CAN IDs
+    public static final int EXTENSION_MOTOR_ID = 20; // TODO: Set correct CAN ID
+    public static final int ROLLER_MOTOR_ID = 21;    // TODO: Set correct CAN ID
+    
+    // Current Limits (in Amps)
+    public static final double EXTENSION_NORMAL_CURRENT_LIMIT = 40.0;
+    public static final double EXTENSION_SPRINGY_CURRENT_LIMIT = 10.0; // Reduced for springy mode
+    public static final double ROLLER_CURRENT_LIMIT = 30.0;
+    
+    // Motor Speeds (as percentage: -1.0 to 1.0)
+    public static final double EXTENSION_OUT_SPEED = 0.6;
+    public static final double EXTENSION_IN_SPEED = -0.6;
+    public static final double ROLLER_INTAKE_SPEED = 0.8;
+    public static final double ROLLER_OUTTAKE_SPEED = -0.5;
+    
+    // Motor Inversions (set these based on your wiring)
+    public static final boolean EXTENSION_MOTOR_INVERTED = false; // TODO: Test and adjust
+    public static final boolean ROLLER_MOTOR_INVERTED = false;    // TODO: Test and adjust
+    
+    // Extension Thresholds
+    public static final double EXTENSION_THRESHOLD = 0.5; // Motor output threshold to consider "fully extended"
+  }
+
 }

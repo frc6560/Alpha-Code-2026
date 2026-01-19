@@ -9,6 +9,8 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.vision.LimelightVision;
+import frc.robot.subsystems.superstructure.groundIntake;
+import frc.robot.commands.GroundIntakeCommand;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
 import java.io.File;
@@ -42,6 +44,9 @@ public class RobotContainer {
     
     private final VisionSubsystem vision;
 
+    // Superstructure subsystems
+    private final groundIntake groundIntake = new groundIntake();
+
     private final AutoFactory factory;
     private final SendableChooser<Auto> autoChooser;
 
@@ -55,6 +60,8 @@ public class RobotContainer {
 
 
     public RobotContainer() {
+      // Set default command for ground intake
+      groundIntake.setDefaultCommand(new GroundIntakeCommand(groundIntake, controls));
       
       factory = new AutoFactory(
       null,
