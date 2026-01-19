@@ -5,6 +5,10 @@ import java.util.Set;
 import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
+import frc.robot.Constants.FeederConstants;
+import frc.robot.Constants.ShooterConstants;
+import frc.robot.subsystems.superstructure.Feeder;
+import frc.robot.subsystems.superstructure.Shooter;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 
 import edu.wpi.first.math.Pair;
@@ -17,11 +21,15 @@ import edu.wpi.first.wpilibj2.command.Commands;
 // TODOs: delete all commented out files in robot.java, and this file
 public class AutoCommands {
     private SwerveSubsystem drivetrain;
+    private Shooter shooter;
+    private Feeder feeder;
 
     private AutoFactory autoFactory;
 
-    public AutoCommands(SwerveSubsystem drivetrain) {
+    public AutoCommands(SwerveSubsystem drivetrain, Shooter shooter, Feeder feeder) {
         this.drivetrain = drivetrain;
+        this.shooter = shooter;
+        this.feeder = feeder;
 
         autoFactory = new AutoFactory(
             drivetrain::getPose,
@@ -40,6 +48,19 @@ public class AutoCommands {
         return IDLE;
     }
 
+    public Command spinUpShooter(){
+        return Commands.runOnce(() -> shooter.setRPM(ShooterConstants.FLYWHEEL_RPM), shooter);
+    }
+
+    public Command shoot(){
+        return Commands.runOnce(() -> feeder.setRPM(FeederConstants.FEEDER_RPM), feeder)
+            .withTimeout(3.0)
+            .finallyDo((interrupted) -> {
+                shooter.setRPM(0);
+                feeder.setRPM(0);
+            });
+    }
+
     /** Test auto on HP side. Should be comp level accuracy. */
     public AutoRoutine getTestBump(){
         AutoRoutine testRoutine = autoFactory.newRoutine("testBump");
@@ -53,6 +74,16 @@ public class AutoCommands {
             .onTrue(
                 Commands.idle()
             );
+        
+        trenchToShoot.atTime("shoot")
+            .onTrue(
+                spinUpShooter()
+            );
+        
+        bumpToShoot.atTime("shoot")
+            .onTrue(
+                spinUpShooter()
+            );
 
         testRoutine
             .active()
@@ -62,12 +93,12 @@ public class AutoCommands {
                         trenchToCenter.cmd(), // add an intake command after (or during) this.
                         trenchToShoot.cmd()
                             .beforeStarting(trenchToShoot.resetOdometry())
-                            .andThen(Commands.waitSeconds(3)), // to simulate shooting
+                            .andThen(shoot()), // to simulate shooting
                         trenchToCenter.cmd()
                             .beforeStarting(trenchToCenter.resetOdometry()),
                         bumpToShoot.cmd()
                             .beforeStarting(bumpToShoot.resetOdometry())
-                            .andThen(Commands.waitSeconds(3)),
+                            .andThen(shoot()),
                         climb.cmd()
                             .beforeStarting(climb.resetOdometry())
                     )

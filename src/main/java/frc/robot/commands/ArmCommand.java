@@ -1,8 +1,8 @@
 package frc.robot.commands;
 
 import frc.robot.Constants.ArmConstants;
-import frc.robot.subsystems.superstructure.Arm;
-import frc.robot.subsystems.superstructure.Arm.State;
+import frc.robot.subsystems.superstructure.deprecated.Arm;
+import frc.robot.subsystems.superstructure.deprecated.Arm.State;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.ManualControls;
 

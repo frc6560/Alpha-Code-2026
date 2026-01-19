@@ -6,7 +6,7 @@
 package frc.robot.commands;
 
 import frc.robot.ManualControls;
-import frc.robot.subsystems.superstructure.BallGrabber;
+import frc.robot.subsystems.superstructure.deprecated.BallGrabber;
 import edu.wpi.first.wpilibj2.command.Command;
 
  public class BallGrabberCommand extends Command {
