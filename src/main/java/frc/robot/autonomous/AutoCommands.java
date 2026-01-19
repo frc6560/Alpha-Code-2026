@@ -53,7 +53,7 @@ public class AutoCommands {
     }
 
     public Command shoot(){
-        return Commands.runOnce(() -> feeder.setRPM(FeederConstants.FEEDER_RPM), feeder)
+        return Commands.run(() -> feeder.setRPM(FeederConstants.FEEDER_RPM), feeder)
             .withTimeout(3.0)
             .finallyDo((interrupted) -> {
                 shooter.setRPM(0);
@@ -112,12 +112,21 @@ public class AutoCommands {
         
         AutoTrajectory trenchToCenter = testRoutine.trajectory("hpTrenchToCenter");
         AutoTrajectory trenchToShoot = testRoutine.trajectory("hpTrenchToShoot");
-        AutoTrajectory bumpToShoot = testRoutine.trajectory("hpBumpToShoot");
         AutoTrajectory trenchToClimb = testRoutine.trajectory("hpTrenchToClimb");
 
         trenchToCenter.atTime("intake")
             .onTrue(
                 Commands.idle()
+            );
+        
+        trenchToShoot.atTime("shoot")
+            .onTrue(
+                spinUpShooter()
+            );
+        
+        trenchToClimb.atTime("shoot")
+            .onTrue(
+                spinUpShooter()
             );
 
         testRoutine
@@ -128,11 +137,12 @@ public class AutoCommands {
                         trenchToCenter.cmd(), // add an intake command after (or during) this.
                         trenchToShoot.cmd()
                             .beforeStarting(trenchToShoot.resetOdometry())
-                            .andThen(Commands.waitSeconds(3)), // to simulate shooting
+                            .andThen(shoot()), // to simulate shooting
                         trenchToCenter.cmd()
                             .beforeStarting(trenchToCenter.resetOdometry()),
                         trenchToClimb.cmd()
                             .beforeStarting(trenchToClimb.resetOdometry())
+                            .andThen(shoot())
                     )
         );
 
