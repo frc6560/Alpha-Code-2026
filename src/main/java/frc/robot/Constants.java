@@ -95,74 +95,6 @@ public final class Constants {
     public static final double JUMP_TOLERANCE = 0.5; // meters. again, needs tuning.
   }
 
-  public static final class ElevatorConstants {
-    
-    //unknown
-    public static int ElevLeftCanID = 15;
-    public static int ElevRightCanID = 16;
-    
-    public static final int TopLimitSwitchID = 3;
-    public static final int BotLimitSwitchID = 4;
-    
-
-    public static final double kS = 0;
-    public static final double kV = 0;
-    public static final double kA = 0;
-
-    public static final double kP = 3.5;
-    public static final double kI = 0.1;
-    public static final double kD = 0.1;
-
-    public static final double kMaxV = 30;
-    public static final double kMaxA = 23;
-
-    public static final double kG = 0.4;
-    
-      
-        
-        public static enum ElevState {
-          L2BALL(HeightToRotations(32 + 8.125)),
-          L3BALL(HeightToRotations(47.625 + 8.125)),
-          SHOOTBALL(HeightToRotations(76 + 8.125)),
-          STOW(HeightToRotations(18)),
-          GROUNDBALL(HeightToRotations(20));
-        
-
-          public final double elevatorSetPoint;
-          
-          private ElevState(double elevatorSetpoint) {
-            this.elevatorSetPoint = elevatorSetpoint;
-          }
-
-          public double getValue() {
-            return elevatorSetPoint;
-          }
-
-        }
-
-        public static double HeightToRotations(double TargetHeight) {
-          return ((TargetHeight-WristHeightOffGround)/NumInPerRot);
-        } 
-
-        //placeholder
-        public static final double NumInPerRot = 13.4962820398;
-        public static final double WristHeightOffGround = 17;
-        //need to be tested
-
-
-        public static final double L2 = 5;///*5*/ HeightToRotations(32);
-        public static final double L3 = 10;///*10*/HeightToRotations(47.625);
-        public static final double L4 = 15;///*15*/ HeightToRotations(72);
-        public static final double REMOVEBALLL2 = 0.2;///*4*/ HeightToRotations(32 + 8.125);
-        public static final double REMOVEBALLL3 = 14;///*8*/ HeightToRotations(47.625 + 8.125);
-        public static final double SHOOTBALL = 20.22;///*18*/ HeightToRotations(76 + 8.125);
-        public static final double L2BALL = 1.8;//HeightToRotations(32 + 8.125);
-        public static final double L3BALL = 6.7;//HeightToRotations(47.625 + 8.125); 677777777777 haahahahahahahahahahhahahahahaha
-        public static final double STOW = 0.2;//HeightToRotations(18);
-        public static final double GROUNDBALL = 0.2;//HeightToRotations(20);
-    
-  }
-
   public static final class SotmConstants {
     //unknown
     public static int FlywheelCanID = 0;
@@ -195,4 +127,66 @@ public final class Constants {
 
   }
 
+  public static final class TurretConstants {
+    /** CAN IDs */
+    public static final int MOTOR_ID = 0;      // TODO: set correct ID
+    public static final int ENCODER_ID = 0;    // TODO: set correct ID
+
+    /** Characterization Gains */
+    public static final double kS = 0.1;
+    public static final double kV = 0.2;
+    public static final double kA = 0.01;
+    public static final double kG = 0.0;
+
+    /** PID Gains */
+    public static final double kP = 4;
+    public static final double kI = 0.0;
+    public static final double kD = 0.1;
+
+    /** Motion Constraints */
+    public static final double kMaxV = 30; // m/s
+    public static final double kMaxA = 40; // m/s^2
+
+    /** Turret Geometry */
+    public static final double MOTOR_GEAR_RATIO = 1; // Motor reduction ratio
+    public static final double ENCODER_GEAR_RATIO = 1; // Encoder reduction ratio
+    
+
+  // Absolute encoder setup
+  public static final int ABS_ENCODER_DIO_PORT = 0;   // change to your wiring
+  public static final double ABS_ENCODER_OFFSET_DEG = 0.0; // tune so stow = 0°
+  public static final boolean ABS_ENCODER_REVERSED = false; 
+  }
+
+  public static final class HoodConstants {
+    /** CAN IDs */
+    public static final int MOTOR_ID = 0;      // TODO: set correct ID
+    public static final int ENCODER_ID = 0;    // TODO: set correct ID
+
+    /** Characterization Gains */
+    public static final double kS = 0.1;
+    public static final double kV = 0.2;
+    public static final double kA = 0.01;
+    public static final double kG = 0.0;
+
+    /** PID Gains */
+    public static final double kP = 4;
+    public static final double kI = 0.0;
+    public static final double kD = 0.1;
+
+    /** Motion Constraints */
+    public static final double kMaxV = 5; // m/s
+    public static final double kMaxA = 3; // m/s^2
+
+    /** Turret Geometry */
+    public static final double MOTOR_GEAR_RATIO = 1; // Motor reduction ratio
+    public static final double ENCODER_GEAR_RATIO = 1; // Encoder reduction ratio
+    
+
+  // Absolute encoder setup
+  public static final int ABS_ENCODER_DIO_PORT = 0;   // change to your wiring
+  public static final double ABS_ENCODER_OFFSET_DEG = 0.0; // tune so stow = 0°
+  public static final boolean ABS_ENCODER_REVERSED = false; 
+  }
+  
 }

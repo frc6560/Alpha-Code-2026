@@ -18,7 +18,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 import frc.robot.Constants;
-import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.DrivebaseConstants;
 import frc.robot.Constants.SotmConstants;
 import frc.robot.Constants.OperatorConstants;
@@ -39,6 +38,7 @@ public class Sotm extends SubsystemBase {
     private final Flywheel flywheel;
     private final Turret turret;
     private final ShooterLUT shooterLUT;
+    private final Hood hood;
 
     private final ManualControls controls;
     private Pose2d fieldTarget;
@@ -48,12 +48,14 @@ public class Sotm extends SubsystemBase {
         Flywheel flywheel,
         Turret turret,
         ManualControls controls,
-        ShooterLUT shooterLUT
+        ShooterLUT shooterLUT,
+        Hood hood
         ) {
         this.swerveSubsystem = swerve;
         this.flywheel = flywheel;
         this.turret = turret;
         this.shooterLUT = shooterLUT;
+        this.hood = hood;
         this.controls = controls;
     }
 
@@ -91,10 +93,12 @@ public class Sotm extends SubsystemBase {
 
         double finalVelocity = Math.sqrt(Math.pow(finalVi,2) + Math.pow(finalVj,2) + Math.pow(finalVk,2));
         double finalRPM = shooterLUT.getRPMForVelocity(finalVelocity);
-        double robotShootAngle = Math.toDegrees(Math.atan2(finalVj, finalVi));
+        double turretShootAngle = Math.toDegrees(Math.atan2(finalVj, finalVi));
 
         //IF YOU OVERSHOOT THEN RECALCULATE THE ANGLE BASED ON THE INVERSE TANGENT OF THE VELOCITY COMPONENTS
-
+        flywheel.setRPM(finalRPM);
+        turret.setGoal(turretShootAngle);
+        hood.setGoal(launchAngle);
     }
 
     public void initialize() {
@@ -112,5 +116,5 @@ public class Sotm extends SubsystemBase {
         return FlywheelConstants.HUB_BLUE_POSITION;
         }
     }
-    
+
 }

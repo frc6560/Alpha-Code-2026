@@ -69,8 +69,6 @@ public class Flywheel extends SubsystemBase {
 
   }
 
- 
-
     private void configureMotor(TalonFX flywheelMotor, boolean inverted){ 
     //motor configuration
     TalonFXConfiguration config = new TalonFXConfiguration();
@@ -98,32 +96,16 @@ public class Flywheel extends SubsystemBase {
 
     flywheelMotor.getConfigurator().apply(config);
     }
-  
-    private double getDistanceToTarget() {
-    Pose2d robotPose = poseSupplier.getPose();
-    Pose2d hubPose = getHubPose(); 
-
-    return robotPose.getTranslation().getDistance(hubPose);
-  }
 
     /**
    * Gets goal position based on alliance 
    * @return Goal position on field (meters)
    */
-    private Pose2d getHubPose() {
-        var alliance = DriverStation.getAlliance();
-        
-        if (alliance.isPresent() && alliance.get() == Alliance.Red) {
-            return FlywheelConstants.HUB_RED_POSITION;
-        }else{
-            return FlywheelConstants.HUB_BLUE_POSITION;
-        }
-    }
 
   public void setIdle(){
     setRPM(FlywheelConstants.FLYWHEEL_IDLE_RPM);
-
   }
+
   public void setRPM(double rpm){
     targetRPM = rpm;
     
@@ -144,7 +126,6 @@ public class Flywheel extends SubsystemBase {
   public double getCurrentRPM(){
     double motorRPM = leftFlywheelMotor.getVelocity().getValueAsDouble(); 
     return motorRPM / FlywheelConstants.FLYWHEEL_GEAR_RATIO;
-   
   }
 
   public double getTargetRPM(){

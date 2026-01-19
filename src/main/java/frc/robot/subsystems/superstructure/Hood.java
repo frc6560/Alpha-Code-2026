@@ -28,34 +28,28 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
+import frc.robot.Constants.HoodConstants;
 
-public class Turret extends SubsystemBase {
-
-/*
-    private final DigitalInput topLimitSwitch = new DigitalInput(ElevatorConstants.TopLimitSwitchID);
-    private final DigitalInput botLimitSwitch = new DigitalInput(ElevatorConstants.BotLimitSwitchID);
-*/  
+public class Hood extends SubsystemBase {
 
     private final SwerveSubsystem drivebase;
 
-    private final TalonFX turretMotor = new TalonFX(TurretConstants.MOTOR_ID, "rio");
+    private final TalonFX hoodMotor = new TalonFX(HoodConstants.MOTOR_ID, "rio");
     
-    private final ArmFeedforward turretFeedForward = new ArmFeedforward(
-        TurretConstants.kS, TurretConstants.kV, TurretConstants.kA);
+    private final ArmFeedforward hoodFeedForward = new ArmFeedforward(
+        HoodConstants.kS, HoodConstants.kV, HoodConstants.kA);
     private double targetPos = 0;
 
-    public final TrapezoidProfile.Constraints turretConstraints =
-    new TrapezoidProfile.Constraints(TurretConstants.kMaxV, TurretConstants.kMaxA);
+    public final TrapezoidProfile.Constraints hoodConstraints =
+    new TrapezoidProfile.Constraints(HoodConstants.kMaxV, HoodConstants.kMaxA);
+    public final TrapezoidProfile hoodTrapezoidProfile = new TrapezoidProfile(hoodConstraints);
 
-    public final TrapezoidProfile turretTrapezoidProfile = new TrapezoidProfile(turretConstraints);
-
-    public TrapezoidProfile.State turGoalState = new TrapezoidProfile.State();
-    public TrapezoidProfile.State turSetpointState = new TrapezoidProfile.State();
-
+    public TrapezoidProfile.State hoodGoalState = new TrapezoidProfile.State();
+    public TrapezoidProfile.State hoodSetpointState = new TrapezoidProfile.State();
     private final PIDController pidController = new PIDController(
-        TurretConstants.kP,
-        TurretConstants.kI,
-        TurretConstants.kD
+        HoodConstants.kP,
+        HoodConstants.kI,
+        HoodConstants.kD
     );
 
     // NetworkTables
@@ -64,24 +58,24 @@ public class Turret extends SubsystemBase {
     private final NetworkTableEntry ntPosition = ntTable.getEntry("Turret position");
     private final NetworkTableEntry ntTargetPos = ntTable.getEntry("Target angle");
 
-    public Turret(SwerveSubsystem drivebase) {
+    public Hood(SwerveSubsystem drivebase) {
         this.drivebase = drivebase;
         // Configure TalonFX
         TalonFXConfiguration talonFXConfigs = new TalonFXConfiguration();
 
         // PID and feedforward configuration
         Slot0Configs slot0 = talonFXConfigs.Slot0;
-        slot0.kS = TurretConstants.kS;
-        slot0.kV = TurretConstants.kV;
-        slot0.kA = TurretConstants.kA;
-        slot0.kP = TurretConstants.kP;
-        slot0.kI = TurretConstants.kI;
-        slot0.kD = TurretConstants.kD;
+        slot0.kS = HoodConstants.kS;
+        slot0.kV = HoodConstants.kV;
+        slot0.kA = HoodConstants.kA;
+        slot0.kP = HoodConstants.kP;
+        slot0.kI = HoodConstants.kI;
+        slot0.kD = HoodConstants.kD;
 
         // Set motor to brake mode
         talonFXConfigs.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
-        turretMotor.getConfigurator().apply(talonFXConfigs.withSlot0(slot0));
+        hoodMotor.getConfigurator().apply(talonFXConfigs.withSlot0(slot0));
     
     }
 
@@ -89,29 +83,28 @@ public class Turret extends SubsystemBase {
         return drivebase;
     }
 
-    public void setSetpoint(TrapezoidProfile.State nextSetpoint) { turSetpointState = nextSetpoint; }
+    public void setSetpoint(TrapezoidProfile.State nextSetpoint) { hoodSetpointState = nextSetpoint; }
     
-    public TrapezoidProfile.State getSetpoint() { return turSetpointState; }
-
+    public TrapezoidProfile.State getSetpoint() { return hoodSetpointState; }
     /**
-     * Set the target angle for the turret using Motion Magic control
+     * Set the target angle for the hood using Motion Magic control
      * @param goalDeg Target angle in degrees
      */
     public void setGoal(double goalDeg) {
         goalDeg = ((goalDeg % 360) + 360) % 360;
-        turGoalState = new TrapezoidProfile.State((goalDeg/360), 0); 
+        hoodGoalState = new TrapezoidProfile.State((goalDeg/360), 0); 
 
         setControl();
         ntTargetPos.setDouble(goalDeg);
     }
 
-    public TrapezoidProfile.State getGoal() { return turGoalState; }
-    public double getGoalValue() { return (turGoalState.position)*360;}
+    public TrapezoidProfile.State getGoal() { return hoodGoalState; }
+    public double getGoalValue() { return (hoodGoalState.position/25)*360;}
 
-    
-    public double getTurretAngleDeg() {
+
+    public double getHoodAngleDeg() {
         // Get position from TalonFX internal encoder (in rotations)
-        double rotations = turretMotor.getPosition().getValueAsDouble();
+        double rotations = hoodMotor.getPosition().getValueAsDouble();
         // Convert rotations back to degrees (reverse the 81:1 gear ratio)
         double angle = (rotations) * 360;
         return angle;
@@ -122,39 +115,39 @@ public class Turret extends SubsystemBase {
      * Call this when the turret is in a known position (e.g., stow position)
      */
     public void resetEncoder() {
-        turretMotor.setPosition(0);
+        hoodMotor.setPosition(0);
     }
 
     /**
      * Reset encoder and set it to a specific angle
-     * @param currentAngleDeg The actual current angle of the turret in degrees
+     * @param currentAngleDeg The actual current angle of the hood in degrees
      */
     public void resetEncoderToAngle(double currentAngleDeg) {
         double rotations = (currentAngleDeg / 360.0) * 25;
-        turretMotor.setPosition(rotations);
+        hoodMotor.setPosition(rotations);
     }
 
     /**
-     * Get the current state of the turret based on its position
-     * @return Current turret state
+     * Get the current state of the hood based on its position
+     * @return Current hood state
      */
     
 
     public void stopMotor() {
-        turretMotor.set(0);
+        hoodMotor.set(0);
     }
 
 
     @Override
     public void periodic() {
-        double angle = getTurretAngleDeg();
+        double angle = getHoodAngleDeg();
         
         // Update NetworkTables
         ntAngle.setDouble(angle);
         ntPosition.setDouble(angle);
 
         // Update SmartDashboard
-        SmartDashboard.putNumber("Current Turret Angle", angle);
+        SmartDashboard.putNumber("Current Hood Angle", angle);
         
         setControl();
         
@@ -162,15 +155,15 @@ public class Turret extends SubsystemBase {
 
     public void setControl() {
         final PositionVoltage m_request = new PositionVoltage(0).withSlot(0);
-        TrapezoidProfile.State targetState = turretTrapezoidProfile.calculate(0.02, turSetpointState, turGoalState);
+        TrapezoidProfile.State targetState = hoodTrapezoidProfile.calculate(0.02, hoodSetpointState, hoodGoalState);
 
         double targetDeg = (targetState.position) * 360.0;
-        double currentDeg = getTurretAngleDeg();
+        double currentDeg = getHoodAngleDeg();
 
         m_request.Position = targetState.position;
         m_request.Velocity = targetState.velocity;
         setSetpoint(targetState);
-        turretMotor.setControl(m_request);
+        hoodMotor.setControl(m_request);
     }
 
 }
