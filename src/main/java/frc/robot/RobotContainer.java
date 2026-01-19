@@ -76,7 +76,7 @@ public class RobotContainer {
       ballGrabber.setDefaultCommand(new BallGrabberCommand(ballGrabber, controls));
       subsystemManager.setDefaultCommand(new SubsystemManagerCommand(drivebase, elevator, arm, ballGrabber, controls, subsystemManager));
       
-      factory = new AutoCommands(drivebase);
+      factory = new AutoCommands(drivebase,flywheel,feeder);
 
       autoChooser = new AutoModeChooser(factory);
       SmartDashboard.putData("Auto Chooser", autoChooser.getAutoChooser());

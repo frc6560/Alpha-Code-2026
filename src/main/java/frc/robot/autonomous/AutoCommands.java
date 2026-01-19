@@ -6,7 +6,10 @@ import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
-
+import frc.robot.subsystems.superstructure.Feeder;
+import frc.robot.subsystems.superstructure.Flywheel;
+import frc.robot.Constants.ShooterConstants;
+import frc.robot.Constants.FeederConstants;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -17,11 +20,15 @@ import edu.wpi.first.wpilibj2.command.Commands;
 // TODOs: delete all commented out files in robot.java, and this file
 public class AutoCommands {
     private SwerveSubsystem drivetrain;
+    private Flywheel flywheel;
+    private Feeder feeder;
 
     private AutoFactory autoFactory;
 
-    public AutoCommands(SwerveSubsystem drivetrain) {
+    public AutoCommands(SwerveSubsystem drivetrain, Flywheel flywheel, Feeder feeder) {
         this.drivetrain = drivetrain;
+        this.flywheel = flywheel;
+        this.feeder = feeder;
 
         autoFactory = new AutoFactory(
             drivetrain::getPose,
@@ -38,6 +45,19 @@ public class AutoCommands {
     public AutoRoutine getNoAuto(){
         final AutoRoutine IDLE = autoFactory.newRoutine("idle");
         return IDLE;
+    }
+
+    public Command spinUpShooter(){
+        return Commands.runOnce(() -> flywheel.setRPM(ShooterConstants.FLYWHEEL_RPM), flywheel);
+    }
+
+    public Command shoot(){
+        return Commands.run(() -> feeder.setRPM(FeederConstants.FEEDER_RPM), feeder)
+            .withTimeout(3.0)
+            .finallyDo((interrupted) -> {
+                flywheel.setRPM(0);
+                feeder.setRPM(0);
+            });
     }
 
     /** Test auto on HP side. Should be comp level accuracy. */
@@ -111,3 +131,8 @@ public class AutoCommands {
         return rebuilt2Routine;
     }
 }
+
+
+
+
+
