@@ -19,6 +19,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 
 
 // TODOs: delete all commented out files in robot.java, and this file
+// refactor code: add follow and shoot helper
+// add a helper method to sequence commands: sequencePaths(Commands... commands)
+// helpers for markers
 public class AutoCommands {
     private SwerveSubsystem drivetrain;
     private Shooter shooter;
