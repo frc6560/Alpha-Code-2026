@@ -38,12 +38,8 @@ public class Flywheel extends SubsystemBase {
   private final NetworkTable limelightTable; 
 
   //pose supplier
-  private final PoseSupplier poseSupplier;
 
     // get pose from swerve subsystem
-  public interface PoseSupplier {
-   Pose2d getPose();
-   }
 
   //state
   private double targetRPM = 0.0;
@@ -51,8 +47,7 @@ public class Flywheel extends SubsystemBase {
 
 
   /** Creates a new Flywheel. */
-  public Flywheel(PoseSupplier poseSupplier) {
-    this.poseSupplier = poseSupplier;
+  public Flywheel() {
 
     // initialize limelight network table
     limelightTable = NetworkTableInstance.getDefault().getTable("limelight");

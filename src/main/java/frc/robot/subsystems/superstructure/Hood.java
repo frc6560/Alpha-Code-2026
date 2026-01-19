@@ -32,8 +32,6 @@ import frc.robot.Constants.HoodConstants;
 
 public class Hood extends SubsystemBase {
 
-    private final SwerveSubsystem drivebase;
-
     private final TalonFX hoodMotor = new TalonFX(HoodConstants.MOTOR_ID, "rio");
     
     private final ArmFeedforward hoodFeedForward = new ArmFeedforward(
@@ -58,8 +56,7 @@ public class Hood extends SubsystemBase {
     private final NetworkTableEntry ntPosition = ntTable.getEntry("Turret position");
     private final NetworkTableEntry ntTargetPos = ntTable.getEntry("Target angle");
 
-    public Hood(SwerveSubsystem drivebase) {
-        this.drivebase = drivebase;
+    public Hood() {
         // Configure TalonFX
         TalonFXConfiguration talonFXConfigs = new TalonFXConfiguration();
 
@@ -77,10 +74,6 @@ public class Hood extends SubsystemBase {
 
         hoodMotor.getConfigurator().apply(talonFXConfigs.withSlot0(slot0));
     
-    }
-
-    public SwerveSubsystem getDrivebase() {
-        return drivebase;
     }
 
     public void setSetpoint(TrapezoidProfile.State nextSetpoint) { hoodSetpointState = nextSetpoint; }

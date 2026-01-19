@@ -36,8 +36,6 @@ public class Turret extends SubsystemBase {
     private final DigitalInput botLimitSwitch = new DigitalInput(ElevatorConstants.BotLimitSwitchID);
 */  
 
-    private final SwerveSubsystem drivebase;
-
     private final TalonFX turretMotor = new TalonFX(TurretConstants.MOTOR_ID, "rio");
     
     private final ArmFeedforward turretFeedForward = new ArmFeedforward(
@@ -64,8 +62,7 @@ public class Turret extends SubsystemBase {
     private final NetworkTableEntry ntPosition = ntTable.getEntry("Turret position");
     private final NetworkTableEntry ntTargetPos = ntTable.getEntry("Target angle");
 
-    public Turret(SwerveSubsystem drivebase) {
-        this.drivebase = drivebase;
+    public Turret() {
         // Configure TalonFX
         TalonFXConfiguration talonFXConfigs = new TalonFXConfiguration();
 
@@ -83,10 +80,6 @@ public class Turret extends SubsystemBase {
 
         turretMotor.getConfigurator().apply(talonFXConfigs.withSlot0(slot0));
     
-    }
-
-    public SwerveSubsystem getDrivebase() {
-        return drivebase;
     }
 
     public void setSetpoint(TrapezoidProfile.State nextSetpoint) { turSetpointState = nextSetpoint; }

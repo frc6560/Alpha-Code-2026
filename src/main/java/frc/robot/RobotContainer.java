@@ -11,6 +11,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.commands.SotmCommands;
 import frc.robot.subsystems.vision.LimelightVision;
 import frc.robot.subsystems.vision.VisionSubsystem;
+import frc.robot.subsystems.superstructure.Flywheel;
+import frc.robot.subsystems.superstructure.Hood;
+import frc.robot.subsystems.superstructure.ShooterLUT;
+import frc.robot.subsystems.superstructure.Turret;
+import frc.robot.subsystems.superstructure.Flywheel;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -41,11 +46,16 @@ public class RobotContainer {
      // The robot's subsystems and commands are defined here...
     private final SwerveSubsystem drivebase  = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
     "swerve/falcon"));
-    
     private final VisionSubsystem vision;
-
+    
     // Subsystems
-    private final Sotm sotm = new Sotm();
+    private final Flywheel flywheel = new Flywheel();
+    private final Turret turret = new Turret();
+    private final ShooterLUT shooterLUT = new ShooterLUT();
+    private final Hood hood = new Hood();
+    private final Sotm sotm = new Sotm(drivebase, flywheel, turret, controls, shooterLUT, hood);
+    
+
 
     private final AutoFactory factory;
     private final SendableChooser<Auto> autoChooser;
@@ -60,7 +70,7 @@ public class RobotContainer {
 
 
     public RobotContainer() {
-      sotm.setDefaultCommand(new SotmCommands(sotm, controls));
+      sotm.setDefaultCommand(new SotmCommands(sotm, drivebase, flywheel, turret, controls, shooterLUT, hood));
 
       factory = new AutoFactory(
       null,

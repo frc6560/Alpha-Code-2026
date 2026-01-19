@@ -60,7 +60,7 @@ public class Sotm extends SubsystemBase {
     }
 
     public void periodic() {
-        Pose2d robotPose = turret.getDrivebase().getPose();
+        Pose2d robotPose = swerveSubsystem.getPose();
         Pose2d fieldTarget = getHubPose();
 
         ChassisSpeeds robotSpeeds = swerveSubsystem.getRobotVelocity();
