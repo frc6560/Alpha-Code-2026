@@ -4,12 +4,15 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.configs.Slot0Configs;
+
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -165,6 +168,31 @@ public final class Constants {
     public static int FlywheelCanID = 0;
     public static int TurretCanID = 0;
     
+  }
+
+  public static final class FlywheelConstants {
+    public static final int RIGHT_FLYWHEEL_ID = 21; // TODO: set correct ID
+    public static final int LEFT_FLYWHEEL_ID = 20; // TODO: set correct ID
+
+    
+    public static final double kV = 0.0; // TODO: tune
+    public static final double kP = 0.0; // TODO: tune
+    public static final double kI = 0.0; // TODO: tune
+    public static final double kD = 0.0; // TODO: tune
+
+    public static final double MAX_RPM = 2000.0; // Example value for Falcon 500
+    public static final double FLYWHEEL_GEAR_RATIO = 2 / 1; // TODO: set correct gear ratio
+    public static final double FLYWHEEL_IDLE_RPM = 600.0; //kraken x60 
+    public static final double FLYWHEEL_RPM_TOLERANCE = 100.0;
+
+    public static final double FLYWHEEL_SUPPLY_CURRENT_LIMIT = 0;
+
+    public static final Pose2d HUB_BLUE_POSITION = new Pose2d(0.5,5.5, new Rotation2d(0));
+
+    public static final Pose2d HUB_RED_POSITION = new Pose2d(16.0,5.5, new Rotation2d(0));
+
+    public static final Slot0Configs FLYWHEEL_PID_CONFIG = null;
+
   }
 
 }
