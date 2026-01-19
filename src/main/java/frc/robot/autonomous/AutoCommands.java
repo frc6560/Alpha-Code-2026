@@ -109,6 +109,16 @@ public class AutoCommands {
             .onTrue(
                 Commands.idle()
             );
+        
+        p2.atTime("shoot")
+            .onTrue(
+                spinUpShooter()
+            );
+        
+        p4.atTime("shoot")
+            .onTrue(
+                spinUpShooter()
+            );
 
         rebuilt2Routine
             .active()
