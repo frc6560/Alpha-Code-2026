@@ -7,9 +7,13 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import frc.robot.Constants.intakeConstants;
 
 public class intake extends SubsystemBase {
@@ -18,6 +22,12 @@ public class intake extends SubsystemBase {
 	private final DigitalInput limitSwitch;
     private final Timer cooldownTimer = new Timer();
     private boolean inCooldown = false;
+	// Mechanism2d visualization for AdvantageScope / Shuffleboard
+	private final Mechanism2d mechanism = new Mechanism2d(2, 2);
+	private final MechanismRoot2d mechRoot = mechanism.getRoot("IntakeBase", 1.0, 1.0);
+	private final MechanismLigament2d intakeWheel = mechRoot.append(new MechanismLigament2d("IntakeWheel", 1.0, 0));
+	// simulated angle used only in Robot simulation because TalonFX position is not simulated
+	private double simAngleDeg = 0.0;
 
 	public intake() {
 		// Create hardware objects using constants
@@ -34,6 +44,8 @@ public class intake extends SubsystemBase {
 
 		ShuffleboardTab tab = Shuffleboard.getTab("Intake");
 		tab.add(this);
+		// Publish the Mechanism2d so AdvantageScope / Shuffleboard can display it
+		SmartDashboard.putData("IntakeMechanism", mechanism);
 	}
 
 	@Override
@@ -57,6 +69,35 @@ public class intake extends SubsystemBase {
 			}
 		}
 
+		// Update visualization: rotate the intake wheel based on motor encoder (real robot)
+		// or motor output in simulation (Phoenix encoders aren't simulated by default)
+		double angleDeg;
+		if (RobotBase.isSimulation()) {
+			// In sim: compute output RPM from percent output and gearbox, then integrate
+			double percent = intakeMotor.get();
+			double motorRpm = percent * intakeConstants.MOTOR_FREE_RPM;
+			// outputRpm = motorRpm * (driving/driven)
+			double outputRpm = motorRpm * ((double) intakeConstants.GEAR_DRIVING / (double) intakeConstants.GEAR_DRIVEN);
+			// degrees to advance this periodic: outputRpm (rev/min) -> rev/sec = outputRpm/60
+			// deg/sec = (outputRpm/60)*360 ; deg per tick = deg/sec * dt
+			double degPerTick = (outputRpm / 60.0) * 360.0 * 0.02; // dt ~= 20ms
+			simAngleDeg += degPerTick;
+			angleDeg = simAngleDeg % 360.0;
+			if (angleDeg < 0) {
+				angleDeg += 360.0;
+			}
+		} else {
+			double rotations = intakeMotor.getPosition().getValueAsDouble();
+			angleDeg = (rotations * 360.0) % 360.0;
+			if (angleDeg < 0) {
+				angleDeg += 360.0;
+			}
+		}
+
+		intakeWheel.setAngle(angleDeg);
+		// shorten the visual when in cooldown
+		intakeWheel.setLength(inCooldown ? 0.6 : 1.0);
+
 	}
 
 	// intake controls (renamed to avoid confusion with BallGrabber that doesent exist)
@@ -65,7 +106,11 @@ public class intake extends SubsystemBase {
 			// Ignore requests while in cooldown
 			return;
 		}
-		intakeMotor.set(intakeConstants.INTAKE_SPEED);
+		// Set to a percent output that corresponds to the requested output RPM
+		double percent = outputRpmToPercent(intakeConstants.TARGET_OUTPUT_RPM);
+		// Preserve intake direction sign from existing INTAKE_SPEED
+		percent = Math.signum(intakeConstants.INTAKE_SPEED) * Math.abs(percent);
+		intakeMotor.set(percent);
 	}
 
 	public void runOuttakeTwo() {
@@ -73,7 +118,9 @@ public class intake extends SubsystemBase {
 			// Block while in cool beans
 			return;
 		}
-		intakeMotor.set(intakeConstants.OUTTAKE_SPEED);
+		double percent = outputRpmToPercent(intakeConstants.TARGET_OUTPUT_RPM);
+		percent = Math.signum(intakeConstants.OUTTAKE_SPEED) * Math.abs(percent);
+		intakeMotor.set(percent);
 	}
 
 	public void stop() {
@@ -81,7 +128,25 @@ public class intake extends SubsystemBase {
 	}
 
 	public double getMotorCurrent() {
+		if (RobotBase.isSimulation()) {
+			// Simulate current in sim so the cooldown can trigger: scale motor output to amps
+			return Math.abs(intakeMotor.get()) * 60.0;
+		}
 		return intakeMotor.getSupplyCurrent().getValueAsDouble();
+	}
+
+	/**
+	 * Convert desired output RPM (after gearbox) to motor percent output for the Falcon.
+	 * Uses constants in Constants.intakeConstants: gear teeth and motor free RPM.
+	 */
+	private double outputRpmToPercent(double outputRpm) {
+		// motor RPM required = outputRpm * (driven / driving)
+		double motorRpm = outputRpm * ((double) intakeConstants.GEAR_DRIVEN / (double) intakeConstants.GEAR_DRIVING);
+		double percent = motorRpm / intakeConstants.MOTOR_FREE_RPM;
+		// Clamp to [-1,1]
+		if (percent > 1.0) percent = 1.0;
+		if (percent < -1.0) percent = -1.0;
+		return percent;
 	}
 
 	private void enterCooldown() {

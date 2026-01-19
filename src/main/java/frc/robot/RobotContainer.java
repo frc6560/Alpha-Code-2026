@@ -122,9 +122,19 @@ public class RobotContainer {
   // Bind driver Xbox bumpers to intake while-held actions
   driverXbox.leftBumper().whileTrue(Commands.runOnce(() -> intake.runIntakeTwo(), intake).repeatedly());
   driverXbox.rightBumper().whileTrue(Commands.runOnce(() -> intake.runOuttakeTwo(), intake).repeatedly());
-  // Ensure the intake motor is stopped when the bumper is released
-  driverXbox.leftBumper().onFalse(Commands.runOnce(() -> intake.stop(), intake));
-  driverXbox.rightBumper().onFalse(Commands.runOnce(() -> intake.stop(), intake));
+  // Ensure the intake motor is stopped when the bumper is released.
+  // If the other bumper is still held, don't stop (prevents interrupt when switching bumpers).
+  driverXbox.leftBumper().onFalse(Commands.runOnce(() -> {
+    if (!driverXbox.getHID().getRightBumperButton()) {
+      intake.stop();
+    }
+  }, intake));
+
+  driverXbox.rightBumper().onFalse(Commands.runOnce(() -> {
+    if (!driverXbox.getHID().getLeftBumperButton()) {
+      intake.stop();
+    }
+  }, intake));
     }
 
     public Command getAutonomousCommand() {

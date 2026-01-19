@@ -252,5 +252,14 @@ public final class Constants {
     // put the motor into coast before trying to go again
     public static final double MAX_CURRENT_AMPS = 30.0;
     public static final double COOLDOWN_SECONDS = 3.0;
+    
+    // Motor / gearbox specifications for RPM control
+    // Falcon 500 free speed (RPM)
+    public static final double MOTOR_FREE_RPM = 6380.0;
+    // Gearbox gear teeth / ratio: driving : driven (motor : output)
+    public static final int GEAR_DRIVING = 18; // motor sprocket / gear
+    public static final int GEAR_DRIVEN = 32; // output sprocket / gear
+    // Desired output RPM at the intake output (after gearbox)
+    public static final double TARGET_OUTPUT_RPM = 300.0;
   }
 }
