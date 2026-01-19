@@ -6,7 +6,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -25,17 +24,10 @@ public class feeder extends SubsystemBase {
 
     private double targetRPM = 0;
 
-    // Auto increment variables
-    private final Timer incrementTimer = new Timer();
-    private boolean autoIncrementEnabled = false;
-
     public feeder() {
-    feederMotor = new TalonFX(21, "Canivore");
-    configureMotor();
-    incrementTimer.start();
-    autoIncrementEnabled = true;  // Start automatically
-    targetRPM = 0;
-}
+        feederMotor = new TalonFX(22, "Canivore");
+        configureMotor();
+    }
 
     private void configureMotor() {
         TalonFXConfiguration config = new TalonFXConfiguration();
@@ -72,17 +64,6 @@ public class feeder extends SubsystemBase {
         feederMotor.stopMotor();
     }
 
-    public void startAutoIncrement() {
-        autoIncrementEnabled = true;
-        targetRPM = 0;
-        incrementTimer.reset();
-    }
-
-    public void stopAutoIncrement() {
-        autoIncrementEnabled = false;
-        stop();
-    }
-
     public double getVelocityRPM() {
         double motorRPS = feederMotor.getVelocity().getValueAsDouble();
         return motorRPS * 60.0 / GEAR_RATIO;
@@ -94,18 +75,9 @@ public class feeder extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // Auto increment RPM every 1 second
-        if (autoIncrementEnabled && incrementTimer.hasElapsed(1.0)) {
-            targetRPM += 50;
-            setRPM(targetRPM);
-            incrementTimer.reset();
-        }
-
         SmartDashboard.putNumber("Feeder/Target RPM", targetRPM);
         SmartDashboard.putNumber("Feeder/Actual RPM", getVelocityRPM());
         SmartDashboard.putNumber("Feeder/Motor Output", feederMotor.get());
         SmartDashboard.putBoolean("Feeder/At Setpoint", atSetpoint());
-        SmartDashboard.putBoolean("Feeder/Auto Increment Enabled", autoIncrementEnabled);
-        SmartDashboard.putNumber("Feeder/Timer", incrementTimer.get());
     }
 }

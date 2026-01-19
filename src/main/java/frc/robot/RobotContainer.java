@@ -66,8 +66,8 @@ public class RobotContainer {
     private final flywheel flywheel = new flywheel();
     private final feeder feeder = new feeder();
     private final AutoFactory autofactory;
-    private static final double FLYWHEEL_RPM = 3000;
-    private static final double FEEDER_RPM = 2000;
+    private static final double FLYWHEEL_RPM = 50;
+    private static final double FEEDER_RPM = 50;
 
     SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
       () -> driverXbox.getLeftY() * -1,
@@ -79,6 +79,7 @@ public class RobotContainer {
 
 
     public RobotContainer() {
+      SmartDashboard.putString("Test", "RobotContainer loaded!");
       arm.setDefaultCommand(new ArmCommand(arm, controls));
 
       elevator.setDefaultCommand(new ElevatorCommand(elevator,controls));
@@ -126,7 +127,7 @@ public class RobotContainer {
         );
         driverXbox.b().onTrue((Commands.runOnce(() -> drivebase.trackAprilTag().schedule(), drivebase)));
         driverXbox.y().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().cancelAll()));
-        driverXbox.x().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().schedule(drivebase.alignToTrenchCommand()), drivebase));
+        // driverXbox.x().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().schedule(drivebase.alignToTrenchCommand()), drivebase));
         driverXbox.start().onTrue((Commands.runOnce(drivebase::zeroNoAprilTagsGyro)));
         //driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
         //driverXbox.rightBumper().onTrue(Commands.none());
@@ -135,6 +136,8 @@ public class RobotContainer {
         
         // B button: Start feeder at constant RPM
         driverXbox.rightBumper().onTrue(Commands.runOnce(() -> feeder.setRPM(FEEDER_RPM), feeder));
+        driverXbox.x().onTrue(Commands.runOnce(() -> feeder.setRPM(0), feeder));
+        
     }
         
         

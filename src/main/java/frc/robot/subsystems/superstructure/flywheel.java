@@ -1,10 +1,11 @@
 package frc.robot.subsystems.superstructure;
 
-import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -12,13 +13,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class flywheel extends SubsystemBase {
 
-    private final TalonFX flywheelMotor;
+    private final TalonFX leaderMotor;
+    private final TalonFX followerMotor;
     private final VelocityVoltage velocityControl = new VelocityVoltage(0).withSlot(0);
 
     // Gear ratio: 24:18 (motor:flywheel)
     private static final double GEAR_RATIO = 24.0 / 18.0;
 
-    // PID constants - tune these
+    // PID constants
     private static final double kP = 0.11;
     private static final double kI = 0.0;
     private static final double kD = 0.0;
@@ -28,11 +30,12 @@ public class flywheel extends SubsystemBase {
     private double targetRPM = 0;
 
     public flywheel() {
-        flywheelMotor = new TalonFX(20, "Canivore"); // Adjust CAN ID
-        configureMotor();
+        leaderMotor = new TalonFX(20, "Canivore");
+        followerMotor = new TalonFX(21, "Canivore");
+        configureMotors();
     }
 
-    private void configureMotor() {
+    private void configureMotors() {
         TalonFXConfiguration config = new TalonFXConfiguration();
 
         config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
@@ -49,26 +52,38 @@ public class flywheel extends SubsystemBase {
         config.Slot0.kV = kV;
         config.Slot0.kS = kS;
 
-        flywheelMotor.getConfigurator().apply(config);
+        leaderMotor.getConfigurator().apply(config);
+
+        TalonFXConfiguration followerConfig = new TalonFXConfiguration();
+        followerConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        followerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        followerConfig.CurrentLimits.StatorCurrentLimit = 80;
+        followerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+        followerConfig.CurrentLimits.SupplyCurrentLimit = 40;
+
+        followerMotor.getConfigurator().apply(followerConfig);
+
+        followerMotor.setControl(new Follower(leaderMotor.getDeviceID(), MotorAlignmentValue.Aligned));
     }
 
     public void setRPM(double rpm) {
         targetRPM = rpm;
         double rps = rpm / 60.0 * GEAR_RATIO;
-        flywheelMotor.setControl(velocityControl.withVelocity(rps));
+        leaderMotor.setControl(velocityControl.withVelocity(rps));
     }
 
     public void setPercent(double percent) {
-        flywheelMotor.set(percent);
+        leaderMotor.set(percent);
     }
 
     public void stop() {
         targetRPM = 0;
-        flywheelMotor.stopMotor();
+        leaderMotor.stopMotor();
+        followerMotor.setControl(new Follower(leaderMotor.getDeviceID(), MotorAlignmentValue.Aligned));
     }
 
     public double getVelocityRPM() {
-        double motorRPS = flywheelMotor.getVelocity().getValueAsDouble();
+        double motorRPS = leaderMotor.getVelocity().getValueAsDouble();
         return motorRPS * 60.0 / GEAR_RATIO;
     }
 
@@ -80,7 +95,8 @@ public class flywheel extends SubsystemBase {
     public void periodic() {
         SmartDashboard.putNumber("Flywheel/Target RPM", targetRPM);
         SmartDashboard.putNumber("Flywheel/Actual RPM", getVelocityRPM());
-        SmartDashboard.putNumber("Flywheel/Motor Output", flywheelMotor.get());
+        SmartDashboard.putNumber("Flywheel/Leader Output", leaderMotor.get());
+        SmartDashboard.putNumber("Flywheel/Follower Output", followerMotor.get());
         SmartDashboard.putBoolean("Flywheel/At Setpoint", atSetpoint());
     }
 }
