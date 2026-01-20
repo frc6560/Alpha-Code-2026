@@ -1,6 +1,5 @@
 package frc.robot.autonomous;
 
-import java.util.Set;
 
 import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
@@ -11,9 +10,6 @@ import frc.robot.subsystems.superstructure.Feeder;
 import frc.robot.subsystems.superstructure.Shooter;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 
-import edu.wpi.first.math.Pair;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
