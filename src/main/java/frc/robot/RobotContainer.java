@@ -14,12 +14,12 @@ import frc.robot.commands.SotmCommands;
 import frc.robot.subsystems.vision.LimelightVision;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.subsystems.superstructure.Flywheel;
-import frc.robot.subsystems.superstructure.Hood;
+// import frc.robot.subsystems.superstructure.Hood;
 import frc.robot.subsystems.superstructure.ShooterLUT;
-import frc.robot.subsystems.superstructure.Turret;
+// import frc.robot.subsystems.superstructure.Turret;
 import frc.robot.subsystems.superstructure.Flywheel;
 import frc.robot.subsystems.superstructure.Feeder;
-import frc.robot.subsystems.superstructure.Intake;
+// import frc.robot.subsystems.superstructure.Intake;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -54,12 +54,12 @@ public class RobotContainer {
     
     // Subsystems
     private final Flywheel flywheel = new Flywheel();
-    private final Turret turret = new Turret();
+    // private final Turret turret = new Turret();
     private final ShooterLUT shooterLUT = new ShooterLUT();
-    private final Hood hood = new Hood();
+    // private final Hood hood = new Hood();
     private final Feeder feeder = new Feeder();
-    private final Intake intake = new Intake();
-    private final Sotm sotm = new Sotm(drivebase, flywheel, turret, controls, shooterLUT, hood, feeder, intake);
+    // private final Intake intake = new Intake();
+    private final Sotm sotm = new Sotm(drivebase, flywheel, controls, shooterLUT, feeder /*hood, turret, intake*/);
     
 
 
@@ -76,7 +76,7 @@ public class RobotContainer {
 
 
     public RobotContainer() {
-      sotm.setDefaultCommand(new SotmCommands(sotm, drivebase, flywheel, turret, controls, shooterLUT, hood));
+      sotm.setDefaultCommand(new SotmCommands(sotm, drivebase, flywheel, controls, shooterLUT/*, hood, turret*/));
 
       factory = new AutoFactory(
       null,
@@ -115,12 +115,8 @@ public class RobotContainer {
             return Commands.runOnce(() -> vision.hardReset("limelight"), vision);
           }, Set.of(vision))
         );
-        driverXbox.b().onTrue((Commands.runOnce(() -> drivebase.trackAprilTag().schedule(), drivebase)));
-        driverXbox.y().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().cancelAll()));
-        driverXbox.x().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().schedule(drivebase.alignToTrenchCommand()), drivebase));
+        
         driverXbox.start().onTrue((Commands.runOnce(drivebase::zeroNoAprilTagsGyro)));
-        driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
-        driverXbox.rightBumper().onTrue(Commands.none());
 
         new Trigger(controls::BallOut).whileTrue(
                 Commands.runEnd(

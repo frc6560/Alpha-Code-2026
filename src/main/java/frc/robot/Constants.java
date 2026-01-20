@@ -109,7 +109,6 @@ public final class Constants {
     public static final double kI = 0.0; // TODO: tune
     public static final double kD = 0.0; // TODO: tune
 
-    public static final double MAX_RPM = 2000.0; // Example value for Falcon 500
     public static final double FLYWHEEL_GEAR_RATIO = 2 / 1; // TODO: set correct gear ratio
     public static final double FLYWHEEL_IDLE_RPM = 600.0; //kraken x60 
     public static final double FLYWHEEL_RPM_TOLERANCE = 100.0;
@@ -183,6 +182,10 @@ public final class Constants {
   }
 
   public static final class FeederConstants {
+    public static final int MOTOR_ID = 22; // TODO: set correct ID
+  }
+
+  public static final class IntakeConstants {
     public static final int MOTOR_ID = 0; // TODO: set correct ID
   }
   

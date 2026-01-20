@@ -29,10 +29,10 @@ import frc.robot.Constants.IntakeConstants;
 import frc.robot.subsystems.swervedrive.*;
 import frc.robot.subsystems.superstructure.ShooterLUT;
 import frc.robot.subsystems.superstructure.Flywheel;
-import frc.robot.subsystems.superstructure.Turret;
-import frc.robot.subsystems.superstructure.Hood;
+// import frc.robot.subsystems.superstructure.Turret;
+// import frc.robot.subsystems.superstructure.Hood;
 import frc.robot.subsystems.superstructure.Feeder;
-import frc.robot.subsystems.superstructure.Intake;
+// import frc.robot.subsystems.superstructure.Intake;
 import frc.robot.ManualControls;
 import java.util.Optional;
 
@@ -42,11 +42,11 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 public class Sotm extends SubsystemBase {
     private final SwerveSubsystem swerveSubsystem;
     private final Flywheel flywheel;
-    private final Turret turret;
+    // private final Turret turret;
     private final ShooterLUT shooterLUT;
-    private final Hood hood;
+    // private final Hood hood;
     private final Feeder feeder;
-    private final Intake intake;
+    // private final Intake intake;
 
     private final ManualControls controls;
     private Pose2d fieldTarget;
@@ -54,21 +54,21 @@ public class Sotm extends SubsystemBase {
     public Sotm(
         SwerveSubsystem swerve,
         Flywheel flywheel,
-        Turret turret,
+        // Turret turret,
         ManualControls controls,
         ShooterLUT shooterLUT,
-        Hood hood,
-        Feeder feeder,
-        Intake intake
+        // Hood hood,
+        Feeder feeder
+        // Intake intake
         ) {
         this.swerveSubsystem = swerve;
         this.flywheel = flywheel;
-        this.turret = turret;
+        // this.turret = turret;
         this.shooterLUT = shooterLUT;
-        this.hood = hood;
+        // this.hood = hood;
         this.controls = controls;
         this.feeder = feeder;
-        this.intake = intake;
+        // this.intake = intake;
     }
 
     public void feed() {
@@ -143,9 +143,9 @@ public class Sotm extends SubsystemBase {
     }
 
     public void idleState() {
-        flywheel.setRPM(2000);
-        turret.setGoal(0);
-        hood.setGoal(0);
+        flywheel.setRPM(Constants.FlywheelConstants.FLYWHEEL_IDLE_RPM);
+        //turret.setGoal(0);
+        //hood.setGoal(0);
     }
 
 
@@ -189,15 +189,18 @@ public class Sotm extends SubsystemBase {
         } else {
             flywheel.setRPM(finalRPM);
         }
-        turret.setGoal(turretShootAngle);
-        hood.setGoal(launchAngle);
+
+        swerveSubsystem.alignRotationCommand(turretShootAngle);
+
+        // turret.setGoal(turretShootAngle);
+        // hood.setGoal(launchAngle);
     }
     public void runIntake(){
-        intake.intake();
+        // intake.intake();
     }
 
     public void stopIntake(){
-        intake.stop();
+        // intake.stop();
     }
 
 }
