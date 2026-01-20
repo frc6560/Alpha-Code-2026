@@ -157,11 +157,11 @@ public final class Constants {
   }
 
   public static final class ShooterConstants{
-    public static final double FLYWHEEL_RPM = 1750;
+    public static final double FLYWHEEL_RPM = -1750;
   }
 
   public static final class FeederConstants{
-    public static final double FEEDER_RPM = 1000;
+    public static final double FEEDER_RPM = -1000;
   }
 
   public static final class ArmConstants
