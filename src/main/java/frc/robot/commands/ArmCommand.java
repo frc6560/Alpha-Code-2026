@@ -22,7 +22,7 @@ public class ArmCommand extends Command {
     }
 
     @Override
-    public void execute(){
+    public void execute(){ 
 
     }
 
