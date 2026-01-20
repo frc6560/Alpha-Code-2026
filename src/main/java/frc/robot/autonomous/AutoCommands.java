@@ -110,12 +110,12 @@ public class AutoCommands {
                 Commands.idle()
             );
         
-        p2.atTime("shoot")
+        p2.atTime("spin")
             .onTrue(
                 spinUpShooter()
             );
         
-        p4.atTime("shoot")
+        p4.atTime("spin")
             .onTrue(
                 spinUpShooter()
             );
