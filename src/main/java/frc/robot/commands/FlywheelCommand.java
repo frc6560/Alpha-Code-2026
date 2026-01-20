@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.ManualControls;
 
 public class FlywheelCommand extends Command {
@@ -24,23 +25,40 @@ public class FlywheelCommand extends Command {
     }
 
     @Override
-    public void initialize() {
-        final double DEACTUATE_TIME = 3.0; // tune later
-        Translation3d acceleration = drivetrain.getSwerveDrive().getAccel().get();
-        double aSquaredMagnitude= Math.sqrt(Math.pow(acceleration.getX(), 2) + Math.pow(acceleration.getY(), 2));
-        Translation2d accelerationParameter = new Translation2d(
-            acceleration.getX(),
-            acceleration.getY()
-        );
-        
-        // get the velocity from the thing
-        Translation2d velocity = new Translation2d(
-            drivetrain.getSwerveDrive().getRobotVelocity().vxMetersPerSecond,
-            drivetrain.getSwerveDrive().getRobotVelocity().vyMetersPerSecond
-        );
-        
+public void initialize() {
+    final double t = 3.0; // time to predict ahead (get from CAD team)
+    
+    // x0 = initial pose
+    Pose2d x0 = drivetrain.getSwerveDrive().getPose();
+    
+    // v = velocity magnitude (pythag of vx and vy)
+    ChassisSpeeds robotVelocity = drivetrain.getSwerveDrive().getRobotVelocity();
+    double vx = robotVelocity.vxMetersPerSecond;
+    double vy = robotVelocity.vyMetersPerSecond;
+    double v = Math.sqrt(Math.pow(vx, 2) + Math.pow(vy, 2));
+    
+    // a = acceleration magnitude (pythag of ax and ay)
+    Translation3d accel = drivetrain.getSwerveDrive().getAccel().get();
+    double ax = accel.getX();
+    double ay = accel.getY();
+    double a = Math.sqrt(Math.pow(ax, 2) + Math.pow(ay, 2));
+    
+    // x_final = x0 + v*t + 0.5*a*t^2
+    double xFinal = x0.getX() + (vx * t) + (0.5 * ax * Math.pow(t, 2));
+    double yFinal = x0.getY() + (vy * t) + (0.5 * ay * Math.pow(t, 2));
+    
+    Translation2d futurePosition = new Translation2d(xFinal, yFinal);
+    // Current pos check: shouldn't be in a circle radius
+    // (you'll define the circle center and radius)
+    Translation2d circleCenter = new Translation2d(2,3); //change later
+    double radius = 0.0; // define this
+    
+    double distanceFromCenter = futurePosition.getDistance(circleCenter);
+    double nowdistanceFromCenter = x0.getTranslation().getDistance(circleCenter);
+    if (distanceFromCenter < radius || nowdistanceFromCenter < radius) {
+        stop();
     }
-
+}
     @Override
     public void execute(){ 
 
@@ -49,6 +67,10 @@ public class FlywheelCommand extends Command {
 
     public void spinUpFlywheel(){
         flywheel.setRPM(-1500);
+    }
+
+    public void stop(){
+        flywheel.stop();
     }
 
     @Override
