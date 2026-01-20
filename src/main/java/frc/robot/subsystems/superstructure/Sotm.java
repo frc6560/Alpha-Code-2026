@@ -24,11 +24,15 @@ import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.FlywheelConstants;
 import frc.robot.Constants.FieldConstants;
+import frc.robot.Constants.IntakeConstants;
 
 import frc.robot.subsystems.swervedrive.*;
 import frc.robot.subsystems.superstructure.ShooterLUT;
 import frc.robot.subsystems.superstructure.Flywheel;
 import frc.robot.subsystems.superstructure.Turret;
+import frc.robot.subsystems.superstructure.Hood;
+import frc.robot.subsystems.superstructure.Feeder;
+import frc.robot.subsystems.superstructure.Intake;
 import frc.robot.ManualControls;
 import java.util.Optional;
 
@@ -42,6 +46,7 @@ public class Sotm extends SubsystemBase {
     private final ShooterLUT shooterLUT;
     private final Hood hood;
     private final Feeder feeder;
+    private final Intake intake;
 
     private final ManualControls controls;
     private Pose2d fieldTarget;
@@ -53,7 +58,8 @@ public class Sotm extends SubsystemBase {
         ManualControls controls,
         ShooterLUT shooterLUT,
         Hood hood,
-        Feeder feeder
+        Feeder feeder,
+        Intake intake
         ) {
         this.swerveSubsystem = swerve;
         this.flywheel = flywheel;
@@ -62,6 +68,7 @@ public class Sotm extends SubsystemBase {
         this.hood = hood;
         this.controls = controls;
         this.feeder = feeder;
+        this.intake = intake;
     }
 
     public void feed() {
@@ -184,6 +191,13 @@ public class Sotm extends SubsystemBase {
         }
         turret.setGoal(turretShootAngle);
         hood.setGoal(launchAngle);
+    }
+    public void runIntake(){
+        intake.intake();
+    }
+
+    public void stopIntake(){
+        intake.stop();
     }
 
 }

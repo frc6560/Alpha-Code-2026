@@ -19,6 +19,7 @@ import frc.robot.subsystems.superstructure.ShooterLUT;
 import frc.robot.subsystems.superstructure.Turret;
 import frc.robot.subsystems.superstructure.Flywheel;
 import frc.robot.subsystems.superstructure.Feeder;
+import frc.robot.subsystems.superstructure.Intake;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -57,7 +58,8 @@ public class RobotContainer {
     private final ShooterLUT shooterLUT = new ShooterLUT();
     private final Hood hood = new Hood();
     private final Feeder feeder = new Feeder();
-    private final Sotm sotm = new Sotm(drivebase, flywheel, turret, controls, shooterLUT, hood, feeder);
+    private final Intake intake = new Intake();
+    private final Sotm sotm = new Sotm(drivebase, flywheel, turret, controls, shooterLUT, hood, feeder, intake);
     
 
 
@@ -124,6 +126,14 @@ public class RobotContainer {
                 Commands.runEnd(
                     sotm::feed,   // Run while held
                     sotm::stop,   // Stop when released
+                    sotm
+                )
+            );
+
+        new Trigger(controls::runIntake).whileTrue(
+                Commands.runEnd(
+                    sotm::runIntake,   // Run while held
+                    sotm::stopIntake,   // Stop when released
                     sotm
                 )
             );
