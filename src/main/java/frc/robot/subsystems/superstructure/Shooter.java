@@ -63,7 +63,7 @@ public class Shooter extends SubsystemBase {
 
         followerMotor.getConfigurator().apply(followerConfig);
 
-        followerMotor.setControl(new Follower(leaderMotor.getDeviceID(), MotorAlignmentValue.Aligned));
+        followerMotor.setControl(new Follower(leaderMotor.getDeviceID(), MotorAlignmentValue.Opposed));
     }
 
     public void setRPM(double rpm) {

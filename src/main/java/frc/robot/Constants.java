@@ -35,7 +35,7 @@ public final class Constants {
     public static final double kV = 2.474;
     public static final double kA = 0.230;
 
-    public static final double kP_translation = 2.5;
+    public static final double kP_translation = 5.0;
     public static final double kP_rotation = 4.0;
 
     public static final double kI_translation = 0.0;
@@ -75,7 +75,7 @@ public final class Constants {
             0.394,
             -0.0248,
             0.192,
-            new Rotation3d(0, Units.degreesToRadians(15), 0)
+            new Rotation3d(0, Units.degreesToRadians(17.12), 0)
           );
           break;
         default:
@@ -157,7 +157,7 @@ public final class Constants {
   }
 
   public static final class ShooterConstants{
-    public static final double FLYWHEEL_RPM = 1000;
+    public static final double FLYWHEEL_RPM = 1750;
   }
 
   public static final class FeederConstants{
