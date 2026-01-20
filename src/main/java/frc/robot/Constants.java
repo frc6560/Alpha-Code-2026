@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -47,7 +48,12 @@ public final class Constants {
 
   public static final class FieldConstants{
     // public static final Pose2d START = new Pose2d(3.152, 4.018, Rotation2d.fromDegrees(-90));
+    // right/left measured from driver station's reference point
     public static final Pose2d TARGET_POSE = new Pose2d(3.650, 4.010, Rotation2d.fromDegrees(0));
+    public static final Translation2d TRENCH_BLUE_RIGHT = new Translation2d(4.68, 0.68);
+    public static final Translation2d TRENCH_BLUE_LEFT = new Translation2d(4.68, 7.32);
+    public static final Translation2d TRENCH_RED_RIGHT = new Translation2d(11.87, 7.32);
+    public static final Translation2d TRENCH_RED_LEFT = new Translation2d(11.87, 0.68);
   }
 
   public static class OperatorConstants
@@ -157,11 +163,11 @@ public final class Constants {
   }
 
   public static final class ShooterConstants{
-    public static final double FLYWHEEL_RPM = 1000;
+    public static final double FLYWHEEL_RPM = -1750;
   }
 
   public static final class FeederConstants{
-    public static final double FEEDER_RPM = 1000;
+    public static final double FEEDER_RPM = -1000;
   }
 
   public static final class ArmConstants

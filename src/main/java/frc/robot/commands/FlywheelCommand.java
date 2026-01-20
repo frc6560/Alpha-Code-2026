@@ -8,6 +8,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.subsystems.superstructure.Flywheel;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Pose3d;
 
 public class FlywheelCommand extends Command{
     private final Flywheel flywheel;
@@ -60,16 +63,21 @@ public class FlywheelCommand extends Command{
         Translation2d projectedPosition = drivetrain.getPose().getTranslation()
                                         .plus(v.times(HOOD_DEACTUATION_TIME))
                                         .plus(a.times(HOOD_DEACTUATION_TIME * HOOD_DEACTUATION_TIME / 2.0));
+        
+        Pose2d x0 = drivetrain.getSwerveDrive().getPose();
 
         if(projectedPosition.getDistance(Constants.FieldConstants.TRENCH_RED_LEFT) < TRENCH_TOLERANCE ||
            projectedPosition.getDistance(Constants.FieldConstants.TRENCH_RED_RIGHT) < TRENCH_TOLERANCE ||
            projectedPosition.getDistance(Constants.FieldConstants.TRENCH_BLUE_LEFT) < TRENCH_TOLERANCE ||
-           projectedPosition.getDistance(Constants.FieldConstants.TRENCH_BLUE_RIGHT) < TRENCH_TOLERANCE) {
-            flywheel.setRPM(1000);
-        } else {
+           projectedPosition.getDistance(Constants.FieldConstants.TRENCH_BLUE_RIGHT) < TRENCH_TOLERANCE||
+           x0.getTranslation().getDistance(Constants.FieldConstants.TRENCH_RED_LEFT) < TRENCH_TOLERANCE ||
+           x0.getTranslation().getDistance(Constants.FieldConstants.TRENCH_RED_RIGHT) < TRENCH_TOLERANCE ||
+           x0.getTranslation().getDistance(Constants.FieldConstants.TRENCH_BLUE_LEFT) < TRENCH_TOLERANCE ||
+           x0.getTranslation().getDistance(Constants.FieldConstants.TRENCH_BLUE_RIGHT) < TRENCH_TOLERANCE) {
             flywheel.stop();
+        } else {
+            flywheel.setRPM(1000);
         }
-
         // logging
         SmartDashboard.putNumber("Shooter/a_x", a.getX());
         SmartDashboard.putNumber("Shooter/a_y", a.getY());
@@ -88,3 +96,6 @@ public class FlywheelCommand extends Command{
         flywheel.stop();
     }
 }
+
+
+
