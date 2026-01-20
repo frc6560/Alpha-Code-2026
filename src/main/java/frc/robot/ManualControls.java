@@ -37,12 +37,6 @@ public class ManualControls {
         
     }
 
-    // slow down
-
-    // public boolean slowDown() {
-    //   return (firstXbox.getLeftTriggerAxis() > 0.25);
-    // }
-
     // climb
 
     public boolean getClimbDown() {
@@ -55,30 +49,8 @@ public class ManualControls {
         // return secondXbox.getRightStickButton(); 
     }
 
-    // elevator
-
-    public boolean goToStow(){
-      return secondXbox.getPOV() == 180;
-    }
-    
-    public boolean goToL2Ball(){
-        return secondXbox.getXButton();
-    }
-
-    public boolean goToL3Ball(){
-        return secondXbox.getBButton();
-    }
-
-    public boolean goToShootBall(){
-        return secondXbox.getYButton();
-    }
-
-    public boolean shiftedControls(){
-      return secondXbox.getRightBumperButton();
-    }
-
-    public boolean goToGroundBall() {
-      return secondXbox.getAButton();
+    public boolean BallOut(){
+      return secondXbox.getRightTriggerAxis() > 0.5;
     }
 
 
@@ -89,26 +61,7 @@ public class ManualControls {
       return secondXbox.getLeftBumperButton();
     }
 
-    public boolean runOuttake() {
-      return secondXbox.getRightBumperButton();
-    }
-
     public boolean zeroNoAprilTagsGyro() {
       return secondXbox.getStartButton();
     }
-  
-
-
-
-    // tests 
-
-    // public double testWrist(){
-    //   return deadband(secondXbox.getRightX(), 0.1);
-    // }
-    // public double testEle(){
-    //   return secondXbox.getLeftX();
-    // }
-    // public boolean resetWrist(){
-    //   return secondXbox.getRightBumperButton();
-    // }
 }

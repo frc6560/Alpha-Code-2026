@@ -19,9 +19,11 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 import frc.robot.Constants;
 import frc.robot.Constants.DrivebaseConstants;
-import frc.robot.Constants.SotmConstants;
+import frc.robot.Constants.FieldConstants;
+
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.FlywheelConstants;
+import frc.robot.Constants.FieldConstants;
 
 import frc.robot.subsystems.swervedrive.*;
 import frc.robot.subsystems.superstructure.ShooterLUT;
@@ -39,6 +41,7 @@ public class Sotm extends SubsystemBase {
     private final Turret turret;
     private final ShooterLUT shooterLUT;
     private final Hood hood;
+    private final Feeder feeder;
 
     private final ManualControls controls;
     private Pose2d fieldTarget;
@@ -49,7 +52,8 @@ public class Sotm extends SubsystemBase {
         Turret turret,
         ManualControls controls,
         ShooterLUT shooterLUT,
-        Hood hood
+        Hood hood,
+        Feeder feeder
         ) {
         this.swerveSubsystem = swerve;
         this.flywheel = flywheel;
@@ -57,12 +61,89 @@ public class Sotm extends SubsystemBase {
         this.shooterLUT = shooterLUT;
         this.hood = hood;
         this.controls = controls;
+        this.feeder = feeder;
     }
 
-    public void periodic() {
-        Pose2d robotPose = swerveSubsystem.getPose();
-        Pose2d fieldTarget = getHubPose();
+    public void feed() {
+        feeder.feed();
+    }
 
+    public void stop() {
+        feeder.stop();
+    }
+
+    public void ShootBall() {
+        Optional<Alliance> alliance = DriverStation.getAlliance();
+        Pose2d robotPose = swerveSubsystem.getPose();
+        if (alliance.isPresent() && alliance.get() == Alliance.Blue) {
+            if (robotPose.getX() < 4.03) {
+                shootState();
+            } else if (robotPose.getX() > 4.03 && robotPose.getX() < 16.45-4.03) {
+                passState();
+            } else {
+                idleState();
+            }
+        } else if (alliance.isPresent() && alliance.get() == Alliance.Red) {
+            if (robotPose.getX() > 16.54-4.03) {
+                shootState();
+            } else if (robotPose.getX() < 16.54-4.03 && robotPose.getX() > 4.03) {
+                passState();
+            } else {
+                idleState();
+            }
+        } else {
+            idleState();
+        }
+    }
+
+    public void initialize() {
+        fieldTarget = getHubPose(DriverStation.getAlliance());
+    }
+
+    Pose2d getHubPose(Optional<Alliance> alliance) {
+        
+        
+        if (alliance.isPresent() && alliance.get() == Alliance.Red) {
+            return FieldConstants.HUB_RED_POSITION;
+        }else if (alliance.isPresent() && alliance.get() == Alliance.Blue) {
+            return FieldConstants.HUB_BLUE_POSITION;
+        } else{
+        return FieldConstants.HUB_BLUE_POSITION;
+        }
+    }
+
+    Pose2d getPassPose(Optional<Alliance> alliance) {
+        
+        if (alliance.isPresent() && alliance.get() == Alliance.Red) {
+            return FieldConstants.PASS_RED_POSITION;
+        }else if (alliance.isPresent() && alliance.get() == Alliance.Blue) {
+            return FieldConstants.PASS_BLUE_POSITION;
+        } else{
+        return FieldConstants.PASS_BLUE_POSITION;
+        }
+    }
+
+    public void shootState() {
+        Pose2d robotPose = swerveSubsystem.getPose();
+        Pose2d fieldTarget = getHubPose(DriverStation.getAlliance());
+        BallOut(robotPose, fieldTarget);
+    }
+
+    public void passState() {
+        Pose2d robotPose = swerveSubsystem.getPose();
+        Pose2d fieldTarget = getPassPose(DriverStation.getAlliance());
+        BallOut(robotPose, fieldTarget);
+    }
+
+    public void idleState() {
+        flywheel.setRPM(2000);
+        turret.setGoal(0);
+        hood.setGoal(0);
+    }
+
+
+
+    public void BallOut(Pose2d robotPose, Pose2d fieldTarget) {
         ChassisSpeeds robotSpeeds = swerveSubsystem.getRobotVelocity();
 
         double rx = robotSpeeds.vxMetersPerSecond; // forward
@@ -96,25 +177,13 @@ public class Sotm extends SubsystemBase {
         double turretShootAngle = Math.toDegrees(Math.atan2(finalVj, finalVi));
 
         //IF YOU OVERSHOOT THEN RECALCULATE THE ANGLE BASED ON THE INVERSE TANGENT OF THE VELOCITY COMPONENTS
-        flywheel.setRPM(finalRPM);
+        if (finalRPM > 5000) {
+            flywheel.setRPM(5000);
+        } else {
+            flywheel.setRPM(finalRPM);
+        }
         turret.setGoal(turretShootAngle);
         hood.setGoal(launchAngle);
-    }
-
-    public void initialize() {
-        fieldTarget = getHubPose();
-    }
-
-    Pose2d getHubPose() {
-        Optional<Alliance> alliance = DriverStation.getAlliance();
-        
-        if (alliance.isPresent() && alliance.get() == Alliance.Red) {
-            return FlywheelConstants.HUB_RED_POSITION;
-        }else if (alliance.isPresent() && alliance.get() == Alliance.Blue) {
-            return FlywheelConstants.HUB_BLUE_POSITION;
-        } else{
-        return FlywheelConstants.HUB_BLUE_POSITION;
-        }
     }
 
 }

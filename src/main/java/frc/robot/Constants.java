@@ -55,6 +55,10 @@ public final class Constants {
   public static final class FieldConstants{
     // public static final Pose2d START = new Pose2d(3.152, 4.018, Rotation2d.fromDegrees(-90));
     public static final Pose2d TARGET_POSE = new Pose2d(3.650, 4.010, Rotation2d.fromDegrees(0));
+    public static final Pose2d HUB_BLUE_POSITION = new Pose2d(4.03,8.07/2, new Rotation2d(0));
+    public static final Pose2d HUB_RED_POSITION = new Pose2d(16.54-4.03,8.07/2, new Rotation2d(0));
+    public static final Pose2d PASS_BLUE_POSITION = new Pose2d(-1.5,8.07/2, new Rotation2d(0));
+    public static final Pose2d PASS_RED_POSITION = new Pose2d(16.54+1.5,8.07/2, new Rotation2d(0));
   }
 
   public static class OperatorConstants
@@ -95,13 +99,6 @@ public final class Constants {
     public static final double JUMP_TOLERANCE = 0.5; // meters. again, needs tuning.
   }
 
-  public static final class SotmConstants {
-    //unknown
-    public static int FlywheelCanID = 0;
-    public static int TurretCanID = 0;
-    
-  }
-
   public static final class FlywheelConstants {
     public static final int RIGHT_FLYWHEEL_ID = 21; // TODO: set correct ID
     public static final int LEFT_FLYWHEEL_ID = 20; // TODO: set correct ID
@@ -118,10 +115,6 @@ public final class Constants {
     public static final double FLYWHEEL_RPM_TOLERANCE = 100.0;
 
     public static final double FLYWHEEL_SUPPLY_CURRENT_LIMIT = 0;
-
-    public static final Pose2d HUB_BLUE_POSITION = new Pose2d(0.5,5.5, new Rotation2d(0));
-
-    public static final Pose2d HUB_RED_POSITION = new Pose2d(16.0,5.5, new Rotation2d(0));
 
     public static final Slot0Configs FLYWHEEL_PID_CONFIG = null;
 
@@ -187,6 +180,10 @@ public final class Constants {
   public static final int ABS_ENCODER_DIO_PORT = 0;   // change to your wiring
   public static final double ABS_ENCODER_OFFSET_DEG = 0.0; // tune so stow = 0°
   public static final boolean ABS_ENCODER_REVERSED = false; 
+  }
+
+  public static final class FeederConstants {
+    public static final int MOTOR_ID = 0; // TODO: set correct ID
   }
   
 }

@@ -8,6 +8,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+
 import frc.robot.commands.SotmCommands;
 import frc.robot.subsystems.vision.LimelightVision;
 import frc.robot.subsystems.vision.VisionSubsystem;
@@ -16,6 +18,7 @@ import frc.robot.subsystems.superstructure.Hood;
 import frc.robot.subsystems.superstructure.ShooterLUT;
 import frc.robot.subsystems.superstructure.Turret;
 import frc.robot.subsystems.superstructure.Flywheel;
+import frc.robot.subsystems.superstructure.Feeder;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -53,7 +56,8 @@ public class RobotContainer {
     private final Turret turret = new Turret();
     private final ShooterLUT shooterLUT = new ShooterLUT();
     private final Hood hood = new Hood();
-    private final Sotm sotm = new Sotm(drivebase, flywheel, turret, controls, shooterLUT, hood);
+    private final Feeder feeder = new Feeder();
+    private final Sotm sotm = new Sotm(drivebase, flywheel, turret, controls, shooterLUT, hood, feeder);
     
 
 
@@ -115,6 +119,15 @@ public class RobotContainer {
         driverXbox.start().onTrue((Commands.runOnce(drivebase::zeroNoAprilTagsGyro)));
         driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
         driverXbox.rightBumper().onTrue(Commands.none());
+
+        new Trigger(controls::BallOut).whileTrue(
+                Commands.runEnd(
+                    sotm::feed,   // Run while held
+                    sotm::stop,   // Stop when released
+                    sotm
+                )
+            );
+
     }
 
     public Command getAutonomousCommand() {
