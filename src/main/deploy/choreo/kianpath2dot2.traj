@@ -120,6 +120,5 @@
   "splits":[0]
  },
  "events":[
-   {"name":"spin", "from":{"target":1, "targetTimestamp":null, "offset":{"exp":"0 s", "val":0.0}}, "event":null},
-   {"name":"shoot", "from":{"target":2, "targetTimestamp":null, "offset":{"exp":"0 s", "val":0.0}}, "event":null}]
+   {"name":"spin", "from":{"target":1, "targetTimestamp":1.22508, "offset":{"exp":"0 s", "val":0.0}}, "event":null}]
 }
