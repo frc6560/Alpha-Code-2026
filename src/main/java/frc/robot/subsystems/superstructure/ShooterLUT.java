@@ -11,16 +11,16 @@ public class ShooterLUT {
     public ShooterLUT() {
 
         //distance (meters) to RPM
-        rpmMap.put(2.0, 3200.0);
-        rpmMap.put(2.5, 3400.0);
-        rpmMap.put(3.0, 3700.0);
-        rpmMap.put(3.5, 4100.0);
+        rpmMap.put(5.715, 3000.0);
+        rpmMap.put(4.953, 2500.0);
+        rpmMap.put(4.572, 2000.0);
+        rpmMap.put(4.191, 1500.0);
+        rpmMap.put(3.048, 1100.0);
 
         // distance (meters) to angle (degrees)
-        angleMap.put(2.0, 38.0);
-        angleMap.put(2.5, 36.0);
-        angleMap.put(3.0, 33.0);
-        angleMap.put(3.5, 30.0);
+        angleMap.put(0.0, 45.0);
+        angleMap.put(50.0, 45.0);
+        
 
         // RPM to velocity (m/s)
         RPMtoVelocityMap.put(3200.0, 15.0);

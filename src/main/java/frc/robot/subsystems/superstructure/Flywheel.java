@@ -108,8 +108,8 @@ public class Flywheel extends SubsystemBase {
     double motorRPM = rpm * FlywheelConstants.FLYWHEEL_GEAR_RATIO; 
 
     //send command to motor
-    leftFlywheelMotor.setControl(velocityControl.withVelocity(motorRPM));
-    rightFlywheelMotor.setControl(velocityControl.withVelocity(motorRPM));
+    leftFlywheelMotor.set(motorRPM/6000);
+    rightFlywheelMotor.set(motorRPM/6000);
   }
   
   public void stop(){

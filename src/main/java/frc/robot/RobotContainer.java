@@ -76,7 +76,7 @@ public class RobotContainer {
 
 
     public RobotContainer() {
-      sotm.setDefaultCommand(new SotmCommands(sotm, drivebase, flywheel, controls, shooterLUT/*, hood, turret*/));
+      sotm.setDefaultCommand(new SotmCommands(sotm, drivebase, flywheel, controls, shooterLUT, feeder/*, hood, turret*/));
 
       factory = new AutoFactory(
       null,

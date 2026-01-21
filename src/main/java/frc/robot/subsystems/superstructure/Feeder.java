@@ -13,7 +13,7 @@ public class Feeder extends SubsystemBase{
         this.feedMotor = new TalonFX(FeederConstants.MOTOR_ID, "rio");
     }
     public void feed() {
-        feedMotor.set(4);
+        feedMotor.set(-0.2);
     }
     public void stop() {
         feedMotor.set(0);

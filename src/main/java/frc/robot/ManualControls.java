@@ -50,7 +50,7 @@ public class ManualControls {
     }
 
     public boolean BallOut(){
-      return secondXbox.getRightTriggerAxis() > 0.5;
+      return firstXbox.getRightTriggerAxis() > 0.5;
     }
 
 
