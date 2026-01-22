@@ -102,6 +102,7 @@ public class RobotContainer {
         );
         driverXbox.y().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().cancelAll()));
         driverXbox.x().onTrue(Commands.defer(() -> drivebase.alignToTrenchCommand(), Set.of(drivebase)));
+        driverXbox.b().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().schedule(drivebase.sysIdDriveMotorCommand()), drivebase));
         driverXbox.start().onTrue((Commands.runOnce(drivebase::zeroNoAprilTagsGyro)));
         driverXbox.leftBumper().onTrue(Commands.runOnce(() -> shooter.setRPM(-1750), shooter));
         

@@ -55,6 +55,10 @@ public class ShooterCommand extends Command{
 
         // filter acceleration
         a = a.times(1 - A_ALPHA).plus(a_raw.times(A_ALPHA));
+        a = new Translation2d(
+            MathUtil.clamp(a.getX(), -6, 6),
+            MathUtil.clamp(a.getY(), -6, 6)
+        );
 
         // kiinematics!!
         Translation2d projectedPosition = drivetrain.getPose().getTranslation()
