@@ -2,6 +2,7 @@ package frc.robot.utility.Shooter;
 
 import java.util.Optional;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -110,9 +111,9 @@ public class ShotCalculator {
         // Calculates hood angle and flywheel RPM from virtual target
         hoodAzimuth = hoodAzimuthMap.get(distanceToTarget);
         flywheelRPM = flywheelRPMMap.get(distanceToTarget);
-        turretAngle = Math.atan2(
+        turretAngle = MathUtil.angleModulus(Math.atan2(
             virtualTargetPose.getY() - turretPose.getY(),
             virtualTargetPose.getX() - turretPose.getX()
-        ) - projectedPosition.getRotation().getRadians();
+        ) - projectedPosition.getRotation().getRadians());
     }
 }
