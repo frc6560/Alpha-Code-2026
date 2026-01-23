@@ -176,6 +176,7 @@ public final class Constants {
 
   public static final class TurretConstants{
     public static final Transform3d ROBOT_RELATIVE_TURRET = new Transform3d(0, 0, 0, new Rotation3d()); // update when turret constants come out
+    // MAKE SURE THIS IS UP LEFT. NOT UP RIGHT.
   }
 
   public static final class ArmConstants
