@@ -19,6 +19,7 @@ import frc.robot.Constants.TurretConstants;
 // consts needed:
 // all LUT values
 // shooter position on robot
+// time parameter
 public class ShotCalculator {
     public double flywheelRPM;
     private double hoodAzimuth; // in radians
