@@ -10,16 +10,21 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
-import frc.robot.commands.SotmCommands;
+import frc.robot.commands.SotmCommand;
+import frc.robot.commands.SnotmCommand;
+import frc.robot.commands.FeederCommand;
+import frc.robot.commands.GroundIntakeCommand;
+
 import frc.robot.subsystems.vision.LimelightVision;
 import frc.robot.subsystems.vision.VisionSubsystem;
-import frc.robot.subsystems.superstructure.Flywheel;
-// import frc.robot.subsystems.superstructure.Hood;
-import frc.robot.subsystems.superstructure.ShooterLUT;
-// import frc.robot.subsystems.superstructure.Turret;
-import frc.robot.subsystems.superstructure.Flywheel;
 import frc.robot.subsystems.superstructure.Feeder;
-// import frc.robot.subsystems.superstructure.Intake;
+import frc.robot.subsystems.superstructure.Flywheel;
+import frc.robot.subsystems.superstructure.GroundIntake;
+import frc.robot.subsystems.superstructure.Hood;
+import frc.robot.subsystems.superstructure.ShooterLUT;
+import frc.robot.subsystems.superstructure.Snotm;
+import frc.robot.subsystems.superstructure.Sotm;
+import frc.robot.subsystems.superstructure.Turret;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -27,7 +32,7 @@ import java.util.List;
 import java.util.Set;
 
 import swervelib.SwerveInputStream;
-import frc.robot.subsystems.superstructure.Sotm;
+import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.Constants.LimelightConstants;
@@ -35,8 +40,6 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.autonomous.Auto;
 import frc.robot.autonomous.AutoFactory;
 import frc.robot.autonomous.AutoRoutines;
-import frc.robot.subsystems.swervedrive.SwerveSubsystem;
-import frc.robot.subsystems.vision.LimelightVision;
 
 
 public class RobotContainer {
@@ -53,14 +56,15 @@ public class RobotContainer {
     private final VisionSubsystem vision;
     
     // Subsystems
-    private final Flywheel flywheel = new Flywheel();
-    // private final Turret turret = new Turret();
-    private final ShooterLUT shooterLUT = new ShooterLUT();
-    // private final Hood hood = new Hood();
     private final Feeder feeder = new Feeder();
-    // private final Intake intake = new Intake();
-    private final Sotm sotm = new Sotm(drivebase, flywheel, controls, shooterLUT, feeder /*hood, turret, intake*/);
+    private final Flywheel flywheel = new Flywheel();
+    private final GroundIntake intake = new GroundIntake();
+    private final Hood hood = new Hood();
+    private final ShooterLUT shooterLUT = new ShooterLUT();
+    private final Turret turret = new Turret();
     
+    private final Sotm sotm = new Sotm(drivebase, flywheel, controls, shooterLUT, feeder /*hood, turret, intake*/);
+    private final Snotm snotm = new Snotm(drivebase, flywheel, turret, controls, shooterLUT, hood, feeder, intake);
 
 
     private final AutoFactory factory;
@@ -76,8 +80,7 @@ public class RobotContainer {
 
 
     public RobotContainer() {
-      sotm.setDefaultCommand(new SotmCommands(sotm, drivebase, flywheel, controls, shooterLUT, feeder/*, hood, turret*/));
-
+      snotm.setDefaultCommand(new SnotmCommand(snotm, controls, feeder));
       factory = new AutoFactory(
       null,
       drivebase
@@ -117,23 +120,6 @@ public class RobotContainer {
         );
         
         driverXbox.start().onTrue((Commands.runOnce(drivebase::zeroNoAprilTagsGyro)));
-
-        new Trigger(controls::BallOut).whileTrue(
-                Commands.runEnd(
-                    sotm::feed,   // Run while held
-                    sotm::stop,   // Stop when released
-                    sotm
-                )
-            );
-
-        new Trigger(controls::runIntake).whileTrue(
-                Commands.runEnd(
-                    sotm::runIntake,   // Run while held
-                    sotm::stopIntake,   // Stop when released
-                    sotm
-                )
-            );
-
     }
 
     public Command getAutonomousCommand() {

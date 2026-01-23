@@ -53,15 +53,9 @@ public class ManualControls {
       return firstXbox.getRightTriggerAxis() > 0.5;
     }
 
-
     // intake controls
     public boolean intakeOut() {
       return firstXbox.getRightBumper(); // Right bumper: extend and intake
-    }
-
-    // shifted for ball
-    public boolean runIntake(){
-      return secondXbox.getLeftBumperButton();
     }
 
     public boolean zeroNoAprilTagsGyro() {

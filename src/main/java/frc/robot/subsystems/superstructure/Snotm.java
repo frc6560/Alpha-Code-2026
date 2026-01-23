@@ -27,12 +27,13 @@ import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.GroundIntakeConstants;
 
 import frc.robot.subsystems.swervedrive.*;
+import swervelib.simulation.ironmaple.simulation.IntakeSimulation.IntakeSide;
 import frc.robot.subsystems.superstructure.ShooterLUT;
 import frc.robot.subsystems.superstructure.Flywheel;
-// import frc.robot.subsystems.superstructure.Turret;
-// import frc.robot.subsystems.superstructure.Hood;
+import frc.robot.subsystems.superstructure.Turret;
+import frc.robot.subsystems.superstructure.Hood;
 import frc.robot.subsystems.superstructure.Feeder;
-// import frc.robot.subsystems.superstructure.Intake;
+import frc.robot.subsystems.superstructure.GroundIntake;
 import frc.robot.ManualControls;
 import java.util.Optional;
 
@@ -42,11 +43,11 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 public class Snotm extends SubsystemBase {
     private final SwerveSubsystem swerveSubsystem;
     private final Flywheel flywheel;
-    // private final Turret turret;
+    private final Turret turret;
     private final ShooterLUT shooterLUT;
-    // private final Hood hood;
+    private final Hood hood;
     private final Feeder feeder;
-    // private final Intake intake;
+    private final GroundIntake intake;
 
     private final ManualControls controls;
     private Pose2d fieldTarget;
@@ -54,29 +55,21 @@ public class Snotm extends SubsystemBase {
     public Snotm(
         SwerveSubsystem swerve,
         Flywheel flywheel,
-        // Turret turret,
+        Turret turret,
         ManualControls controls,
         ShooterLUT shooterLUT,
-        // Hood hood,
-        Feeder feeder
-        // Intake intake
+        Hood hood,
+        Feeder feeder,
+        GroundIntake intake
         ) {
         this.swerveSubsystem = swerve;
         this.flywheel = flywheel;
-        // this.turret = turret;
+        this.turret = turret;
         this.shooterLUT = shooterLUT;
-        // this.hood = hood;
+        this.hood = hood;
         this.controls = controls;
         this.feeder = feeder;
-        // this.intake = intake;
-    }
-
-    public void feed() {
-        feeder.feed();
-    }
-
-    public void stop() {
-        feeder.stop();
+        this.intake = intake;
     }
 
     public void ShootBall() {
@@ -144,8 +137,8 @@ public class Snotm extends SubsystemBase {
 
     public void idleState() {
         flywheel.setRPM(Constants.FlywheelConstants.FLYWHEEL_IDLE_RPM);
-        //turret.setGoal(0);
-        //hood.setGoal(0);
+        turret.setGoal(0);
+        hood.setGoal(0);
     }
 
 
@@ -162,45 +155,18 @@ public class Snotm extends SubsystemBase {
 
         double launchAngle = shooterLUT.getAngle(Math.sqrt(Math.pow(dx,2) + Math.pow(dy,2)));
         double launchRPM = shooterLUT.getRPM(Math.sqrt(Math.pow(dx,2) + Math.pow(dy,2)));
-        double launchVelocity = shooterLUT.getVelocity(launchRPM);
-
-        double vk = launchVelocity * Math.sin(Math.toRadians(launchAngle));
-        double vij = launchVelocity * Math.cos(Math.toRadians(launchAngle));
-        double vi = vij * Math.cos(Math.toRadians(robotHeadingDeg));
-        double vj = vij * Math.sin(Math.toRadians(robotHeadingDeg));
-
-        ChassisSpeeds fieldRelative =
-        ChassisSpeeds.fromRobotRelativeSpeeds(robotSpeeds, robotPose.getRotation());
-
-        double ri = fieldRelative.vxMetersPerSecond;
-        double rj = fieldRelative.vyMetersPerSecond;
-
-        double finalVi = vi-ri;
-        double finalVj = vj-rj;
-        double finalVk = vk;
-
-        double finalVelocity = Math.sqrt(Math.pow(finalVi,2) + Math.pow(finalVj,2) + Math.pow(finalVk,2));
-        double finalRPM = shooterLUT.getRPMForVelocity(finalVelocity);
-        double turretShootAngle = Math.toDegrees(Math.atan2(finalVj, finalVi));
 
         //IF YOU OVERSHOOT THEN RECALCULATE THE ANGLE BASED ON THE INVERSE TANGENT OF THE VELOCITY COMPONENTS
-        if (finalRPM > FlywheelConstants.FLYWHEEL_MAX_RPM) {
+        if (launchRPM > FlywheelConstants.FLYWHEEL_MAX_RPM) {
             flywheel.setRPM(FlywheelConstants.FLYWHEEL_MAX_RPM);
         } else {
-            flywheel.setRPM(finalRPM);
+            flywheel.setRPM(launchRPM);
         }
 
-        swerveSubsystem.alignRotationCommand(turretShootAngle);
+        turret.setGoal(launchAngle);
 
         // turret.setGoal(turretShootAngle);
         // hood.setGoal(launchAngle);
-    }
-    public void runIntake(){
-        // intake.intake();
-    }
-
-    public void stopIntake(){
-        // intake.stop();
     }
 
 }

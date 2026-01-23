@@ -163,13 +163,13 @@ public final class Constants {
     public static final double kG = 0.0;
 
     /** PID Gains */
-    public static final double kP = 4;
+    public static final double kP = 0.7;
     public static final double kI = 0.0;
-    public static final double kD = 0.1;
+    public static final double kD = 0.01;
 
     /** Motion Constraints */
-    public static final double kMaxV = 5; // m/s
-    public static final double kMaxA = 3; // m/s^2
+    public static final double kMaxV = 3; // m/s
+    public static final double kMaxA = 2; // m/s^2
 
     /** Turret Geometry */
     public static final double MOTOR_GEAR_RATIO = 1; // Motor reduction ratio
