@@ -16,6 +16,9 @@ import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.TurretConstants;
 
 
+// consts needed:
+// all LUT values
+// shooter position on robot
 public class ShotCalculator {
     public double flywheelRPM;
     private double hoodAzimuth; // in radians
