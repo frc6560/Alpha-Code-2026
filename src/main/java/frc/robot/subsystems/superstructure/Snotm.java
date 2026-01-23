@@ -39,7 +39,7 @@ import java.util.Optional;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 
-public class Sotm extends SubsystemBase {
+public class Snotm extends SubsystemBase {
     private final SwerveSubsystem swerveSubsystem;
     private final Flywheel flywheel;
     // private final Turret turret;
@@ -51,7 +51,7 @@ public class Sotm extends SubsystemBase {
     private final ManualControls controls;
     private Pose2d fieldTarget;
 
-    public Sotm(
+    public Snotm(
         SwerveSubsystem swerve,
         Flywheel flywheel,
         // Turret turret,

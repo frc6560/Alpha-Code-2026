@@ -105,13 +105,14 @@ public final class Constants {
 
     
     public static final double kV = 0.0; // TODO: tune
-    public static final double kP = 0.0; // TODO: tune
-    public static final double kI = 0.0; // TODO: tune
-    public static final double kD = 0.0; // TODO: tune
+    public static final double kP = 1.3; // TODO: tune
+    public static final double kI = 0.01; // TODO: tune
+    public static final double kD = 0.2; // TODO: tune
 
-    public static final double FLYWHEEL_GEAR_RATIO = 2 / 1; // TODO: set correct gear ratio
+    public static final double FLYWHEEL_GEAR_RATIO = 2 / 1; // TODO: this is a reduction, 2 rotations of motor is 1 rotation flywheel
     public static final double FLYWHEEL_IDLE_RPM = 600.0; //kraken x60 
     public static final double FLYWHEEL_RPM_TOLERANCE = 100.0;
+    public static final double FLYWHEEL_MAX_RPM = 3200.0;
 
     public static final double FLYWHEEL_SUPPLY_CURRENT_LIMIT = 0;
 
@@ -131,13 +132,13 @@ public final class Constants {
     public static final double kG = 0.0;
 
     /** PID Gains */
-    public static final double kP = 4;
-    public static final double kI = 0.0;
-    public static final double kD = 0.1;
+    public static final double kP = 5;
+    public static final double kI = 0.01;
+    public static final double kD = 0.2;
 
     /** Motion Constraints */
-    public static final double kMaxV = 30; // m/s
-    public static final double kMaxA = 40; // m/s^2
+    public static final double kMaxV = 35; // m/s
+    public static final double kMaxA = 45; // m/s^2
 
     /** Turret Geometry */
     public static final double MOTOR_GEAR_RATIO = 1; // Motor reduction ratio
@@ -185,8 +186,30 @@ public final class Constants {
     public static final int MOTOR_ID = 22; // TODO: set correct ID
   }
 
-  public static final class IntakeConstants {
-    public static final int MOTOR_ID = 0; // TODO: set correct ID
+  public static final class GroundIntakeConstants {
+    // CAN IDs
+    public static final int EXTENSION_MOTOR_ID = 20; // TODO: Set correct CAN ID
+    public static final int ROLLER_MOTOR_ID = 21;    // TODO: Set correct CAN ID
+    
+    public static final int RETRACT_LIMIT_SWITCH_ID = 5; // TODO: Set correct
+    
+    // Current Limits (in Amps)
+    public static final double EXTENSION_NORMAL_CURRENT_LIMIT = 40.0;
+    public static final double EXTENSION_SPRINGY_CURRENT_LIMIT = 10.0; // Reduced for springy mode
+    public static final double ROLLER_CURRENT_LIMIT = 30.0;
+    
+    // Motor Speeds (as percentage: -1.0 to 1.0)
+    public static final double EXTENSION_OUT_SPEED = 0.6;
+    public static final double EXTENSION_IN_SPEED = -0.6;
+    public static final double ROLLER_INTAKE_SPEED = 0.8;
+    public static final double ROLLER_OUTTAKE_SPEED = -0.5;
+    
+    // Motor Inversions
+    public static final boolean EXTENSION_MOTOR_INVERTED = false; // TODO: Test and adjust
+    public static final boolean ROLLER_MOTOR_INVERTED = false;    // TODO: Test and adjust
+    
+    // Extension Thresholds
+    public static final double EXTENSION_THRESHOLD = 0.5; // Motor output threshold to consider "fully extended"
   }
   
 }

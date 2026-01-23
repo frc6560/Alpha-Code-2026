@@ -54,7 +54,10 @@ public class ManualControls {
     }
 
 
-    // pipe and ball grabber 
+    // intake controls
+    public boolean intakeOut() {
+      return firstXbox.getRightBumper(); // Right bumper: extend and intake
+    }
 
     // shifted for ball
     public boolean runIntake(){
