@@ -74,7 +74,7 @@ public class ShotCalculator {
             )
         );
 
-        // for now, use the robot pose as the turret pose. change once you get constants.
+        // gets the turret's robot relative transform
         Transform2d turretTransform = new Transform2d(
             TurretConstants.ROBOT_RELATIVE_TURRET.getX(), 
             TurretConstants.ROBOT_RELATIVE_TURRET.getY(),
@@ -92,7 +92,7 @@ public class ShotCalculator {
         double turretVy = fieldVelocity.vyMetersPerSecond
                         + (r * fieldVelocity.omegaRadiansPerSecond * Math.cos(projectedPosition.getRotation().getRadians() + angleOffset));
         
-        // Calculates a virtual target iteratively based upon our parameters.
+        // calculates a virtual target iteratively based upon our parameters.
         virtualTargetPose = targetPose;
         double timeOfFlight = 0;
         double distanceToTarget = turretPose.getTranslation().getDistance(targetPose);
@@ -108,7 +108,7 @@ public class ShotCalculator {
             distanceToTarget = turretPose.getTranslation().getDistance(virtualTargetPose);
         }
 
-        // Calculates hood angle and flywheel RPM from virtual target
+        // calculates hood angle and flywheel RPM from virtual target
         hoodAzimuth = hoodAzimuthMap.get(distanceToTarget);
         flywheelRPM = flywheelRPMMap.get(distanceToTarget);
         turretAngle = MathUtil.angleModulus(Math.atan2(
