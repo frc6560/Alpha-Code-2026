@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
@@ -54,6 +55,9 @@ public final class Constants {
     public static final Translation2d TRENCH_BLUE_LEFT = new Translation2d(4.68, 7.32);
     public static final Translation2d TRENCH_RED_RIGHT = new Translation2d(11.87, 7.32);
     public static final Translation2d TRENCH_RED_LEFT = new Translation2d(11.87, 0.68);
+
+    public static final Translation2d BLUE_HUB_CENTER = new Translation2d(4.68, 4.03);
+    public static final Translation2d RED_HUB_CENTER = new Translation2d(11.85, 4.03);
   }
 
   public static class OperatorConstants
@@ -168,6 +172,10 @@ public final class Constants {
 
   public static final class FeederConstants{
     public static final double FEEDER_RPM = -1000;
+  }
+
+  public static final class TurretConstants{
+    public static final Transform3d ROBOT_RELATIVE_TURRET = new Transform3d(0, 0, 0, new Rotation3d()); // update when turret constants come out
   }
 
   public static final class ArmConstants
