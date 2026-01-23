@@ -63,7 +63,6 @@ public class RobotContainer {
     private final ShooterLUT shooterLUT = new ShooterLUT();
     private final Turret turret = new Turret();
     
-    private final Sotm sotm = new Sotm(drivebase, flywheel, controls, shooterLUT, feeder /*hood, turret, intake*/);
     private final Snotm snotm = new Snotm(drivebase, flywheel, turret, controls, shooterLUT, hood, feeder, intake);
 
 
