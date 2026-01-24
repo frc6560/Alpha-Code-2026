@@ -30,6 +30,10 @@ public final class Constants {
   public static final double MAX_SPEED  = Units.feetToMeters(14.5);
   // Maximum speed of the robot in meters per second, used to limit acceleration.
 
+  // Robot dimensions (in meters, from PathPlanner settings)
+  public static final double robotLength = 0.812;
+  public static final double robotWidth = 0.812;
+
   public static final class DrivebaseConstants {
     // Hold time on motor brakes when disabled
     public static final double WHEEL_LOCK_TIME = 10; // seconds
