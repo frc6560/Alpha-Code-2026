@@ -157,29 +157,11 @@ public class SwerveSubsystem extends SubsystemBase {
 
     Pose2d pose = getPose();
 
-    double speed = Math.hypot(setpoint.vx, setpoint.vy);
-    double lookaheadDistance = MathUtil.clamp(
-        DrivebaseConstants.kPurePursuitMinLookahead
-            + speed * DrivebaseConstants.kPurePursuitLookaheadSpeedFactor,
-        DrivebaseConstants.kPurePursuitMinLookahead,
-        DrivebaseConstants.kPurePursuitMaxLookahead);
-
-    Translation2d pathDirection = new Translation2d(setpoint.vx, setpoint.vy);
-    if (pathDirection.getNorm() < 1e-3) {
-      pathDirection = new Translation2d(Math.cos(setpoint.heading), Math.sin(setpoint.heading));
-    } else {
-      pathDirection = pathDirection.div(pathDirection.getNorm());
-    }
-
-    Translation2d lookaheadTranslation = new Translation2d(setpoint.x, setpoint.y)
-        .plus(pathDirection.times(lookaheadDistance));
-    Pose2d lookaheadPose = new Pose2d(lookaheadTranslation, Rotation2d.fromRadians(setpoint.heading));
-    swerveDrive.field.getObject("LookaheadPose").setPose(lookaheadPose);
-
-    ChassisSpeeds targetSpeeds = new ChassisSpeeds(
-        setpoint.vx + m_pidControllerX.calculate(pose.getX(), lookaheadPose.getX()),
-        setpoint.vy + m_pidControllerY.calculate(pose.getY(), lookaheadPose.getY()),
-        setpoint.omega + m_pidControllerTheta.calculate(pose.getRotation().getRadians(), setpoint.heading));
+    ChassisSpeeds targetSpeeds = new ChassisSpeeds( 
+      setpoint.vx + m_pidControllerX.calculate(pose.getX(), setpoint.x), 
+      setpoint.vy + m_pidControllerY.calculate(pose.getY(), setpoint.y),
+      setpoint.omega + m_pidControllerTheta.calculate(pose.getRotation().getRadians(), setpoint.heading)
+    );
 
     swerveDrive.driveFieldOriented(targetSpeeds);
   }
