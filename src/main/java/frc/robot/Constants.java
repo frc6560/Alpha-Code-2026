@@ -37,9 +37,9 @@ public final class Constants {
   public static final class DrivebaseConstants {
     // Hold time on motor brakes when disabled
     public static final double WHEEL_LOCK_TIME = 10; // seconds
-    public static final double kS = 0.142; // TODO: tune with sysid at workshop
-    public static final double kV = 2.474;
-    public static final double kA = 0.230;
+    public static final double kS = 0.0994; // TODO: tune with sysid at workshop
+    public static final double kV = 2.4482;
+    public static final double kA = 0.1997;
 
     public static final double kP_translation = 4.0;
     public static final double kP_rotation = 4.0;
