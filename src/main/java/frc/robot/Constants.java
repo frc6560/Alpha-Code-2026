@@ -49,6 +49,11 @@ public final class Constants {
 
     public static final double kD_translation = 0.0;
     public static final double kD_rotation = 0.0;
+
+    // Pure pursuit tuning (meters, meters per second)
+    public static final double kPurePursuitMinLookahead = 0.3;
+    public static final double kPurePursuitMaxLookahead = 1.5;
+    public static final double kPurePursuitLookaheadSpeedFactor = 0.15;
   }
 
   public static final class FieldConstants{
