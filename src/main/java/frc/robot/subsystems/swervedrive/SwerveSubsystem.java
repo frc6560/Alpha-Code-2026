@@ -140,7 +140,7 @@ public class SwerveSubsystem extends SubsystemBase {
   public void periodic() {
   }
 
-  /** 
+  /**
    * Path following command using SwerveSample from Choreo
    * @param setpoint SwerveSample setpoint to follow, representing the robot state.
    */
@@ -157,9 +157,13 @@ public class SwerveSubsystem extends SubsystemBase {
 
     Pose2d pose = getPose();
 
-    ChassisSpeeds targetSpeeds = new ChassisSpeeds( 
-      setpoint.vx + m_pidControllerX.calculate(pose.getX(), setpoint.x), 
-      setpoint.vy + m_pidControllerY.calculate(pose.getY(), setpoint.y),
+    // Use acceleration feedforward from Choreo trajectory for better curve tracking
+    // kA converts acceleration to additional velocity command (units: seconds)
+    double kA_translation = DrivebaseConstants.kA / DrivebaseConstants.kV; // ~0.08s
+
+    ChassisSpeeds targetSpeeds = new ChassisSpeeds(
+      setpoint.vx + kA_translation * setpoint.ax + m_pidControllerX.calculate(pose.getX(), setpoint.x),
+      setpoint.vy + kA_translation * setpoint.ay + m_pidControllerY.calculate(pose.getY(), setpoint.y),
       setpoint.omega + m_pidControllerTheta.calculate(pose.getRotation().getRadians(), setpoint.heading)
     );
 
