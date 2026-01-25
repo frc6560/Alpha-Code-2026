@@ -40,7 +40,7 @@ public class ShotCalculator {
 
     private static final double TIME_PARAMETER = 0.03; // seconds into the future to project
 
-    // Low-pass filter coefficient (0-1, higher = more smoothing)
+    // low-pass filter coefficient (0-1, higher = more smoothing)
     private static final double VELOCITY_FILTER_ALPHA = 0.8;
 
     private static final InterpolatingDoubleTreeMap hoodAzimuthMap = new InterpolatingDoubleTreeMap();
@@ -49,7 +49,7 @@ public class ShotCalculator {
 
     public Translation2d virtualTargetPose; // for SOTM
 
-    // State for numerical differentiation
+    // state for numerical differentiation
     private double prevHoodAzimuth = 0;
     private double prevTurretAngle = 0;
     private double prevTimestamp = 0;
@@ -113,7 +113,7 @@ public class ShotCalculator {
                                             FieldConstants.BLUE_HUB_CENTER : 
                                             FieldConstants.RED_HUB_CENTER;
         
-        // Calculates projected position
+        // calculates projected position due to sensor lag
         Pose2d projectedPosition = currentRobotPose.exp(
             new Twist2d(
                 fieldVelocity.vxMetersPerSecond * TIME_PARAMETER,
@@ -183,12 +183,10 @@ public class ShotCalculator {
             hasInitialized = true;
         }
 
-        // Update previous state for next iteration
         prevHoodAzimuth = newHoodAzimuth;
         prevTurretAngle = newTurretAngle;
         prevTimestamp = currentTime;
 
-        // Update output values
         hoodAzimuth = newHoodAzimuth;
         turretAngle = newTurretAngle;
         hoodVelocity = filteredHoodVelocity;

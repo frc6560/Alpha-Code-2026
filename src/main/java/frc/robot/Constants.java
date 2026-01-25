@@ -36,18 +36,19 @@ public final class Constants {
 
   public static final class DrivebaseConstants {
     // Hold time on motor brakes when disabled
+    
     public static final double WHEEL_LOCK_TIME = 10; // seconds
     public static final double kS = 0.0994; 
     public static final double kV = 2.4482;
     public static final double kA = 0.1997;
 
-    public static final double kP_translation = 4.0;
+    public static final double kP_translation = 2.0;
     public static final double kP_rotation = 4.0;
 
     public static final double kI_translation = 0.0;
     public static final double kI_rotation = 0.0;
 
-    public static final double kD_translation = 0.0;
+    public static final double kD_translation = 0.2;
     public static final double kD_rotation = 0.0;
 
     // Pure pursuit tuning (meters, meters per second)
