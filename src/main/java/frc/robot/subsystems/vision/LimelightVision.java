@@ -35,9 +35,9 @@ public class LimelightVision{
             cameraPose.getTranslation().getX(),
             cameraPose.getTranslation().getY(),
             cameraPose.getTranslation().getZ(),
-            cameraPose.getRotation().getX(),
-            cameraPose.getRotation().getY(),
-            cameraPose.getRotation().getZ()
+            Units.radiansToDegrees(cameraPose.getRotation().getX()),
+            Units.radiansToDegrees(cameraPose.getRotation().getY()),
+            Units.radiansToDegrees(cameraPose.getRotation().getZ())
         );
     }
 
@@ -58,7 +58,7 @@ public class LimelightVision{
         SmartDashboard.putNumber(this.name + "/TagCount", poseEstimate.tagCount);
         SmartDashboard.putNumber(this.name + "/AvgTagDist", poseEstimate.avgTagDist);
         SmartDashboard.putNumber(this.name + "/Latency", latency);
-        SmartDashboard.putNumber(this.name + "/STDVX", kStdvXY);
+        SmartDashboard.putNumber(this.name + "/STDVX", kStdvXY * LimelightConstants.kStdvXYBase);
 
         if(!Double.isNaN(poseEstimate.pose.getX()) && poseEstimate.tagCount > 0){
             drivebase.getSwerveDrive().field.getObject(this.name + "/LimelightPose").setPose(robotPose2d);
