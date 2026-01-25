@@ -128,12 +128,16 @@ public class AutoCommands {
             .active()
                 .onTrue(
                     Commands.sequence(
-                        trenchToCenter.resetOdometry(),  // Only reset once at the start!
-                        trenchToCenter.cmd(), // add an intake command after (or during) this.
+                        trenchToCenter.resetOdometry(), 
+                        trenchToCenter.cmd() // add an intake command after (or during) this.
+                            .beforeStarting(trenchToCenter.resetOdometry()),
                         trenchToShoot.cmd()
+                            .beforeStarting(trenchToShoot.resetOdometry())
                             .andThen(shoot()), // to simulate shooting
-                        trenchToCenter.cmd(),
+                        trenchToCenter.cmd()
+                            .beforeStarting(trenchToCenter.resetOdometry()),
                         trenchToClimb.cmd()
+                            .beforeStarting(trenchToClimb.resetOdometry())
                             .andThen(shoot())
                     )
         );

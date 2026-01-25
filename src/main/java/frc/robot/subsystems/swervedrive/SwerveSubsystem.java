@@ -157,8 +157,6 @@ public class SwerveSubsystem extends SubsystemBase {
 
     Pose2d pose = getPose();
 
-    // Use acceleration feedforward from Choreo trajectory for better curve tracking
-    // kA converts acceleration to additional velocity command (units: seconds)
     double kA_translation = DrivebaseConstants.kA / DrivebaseConstants.kV; // ~0.08s
 
     ChassisSpeeds targetSpeeds = new ChassisSpeeds(
