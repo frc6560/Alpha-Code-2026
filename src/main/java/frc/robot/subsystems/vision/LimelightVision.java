@@ -58,7 +58,7 @@ public class LimelightVision{
         SmartDashboard.putNumber(this.name + "/TagCount", poseEstimate.tagCount);
         SmartDashboard.putNumber(this.name + "/AvgTagDist", poseEstimate.avgTagDist);
         SmartDashboard.putNumber(this.name + "/Latency", latency);
-        SmartDashboard.putNumber(this.name + "/STDVX", kStdvXY);
+        SmartDashboard.putNumber(this.name + "/STDVX", kStdvXY * LimelightConstants.kStdvXYBase);
 
         if(!Double.isNaN(poseEstimate.pose.getX()) && poseEstimate.tagCount > 0){
             drivebase.getSwerveDrive().field.getObject(this.name + "/LimelightPose").setPose(robotPose2d);

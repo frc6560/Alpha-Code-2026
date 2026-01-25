@@ -157,7 +157,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
     Pose2d pose = getPose();
 
-    double kA_translation = DrivebaseConstants.kA / DrivebaseConstants.kV; // ~0.08s
+    double kA_translation = DrivebaseConstants.kA / DrivebaseConstants.kV; // acceleration FF
 
     ChassisSpeeds targetSpeeds = new ChassisSpeeds(
       setpoint.vx + kA_translation * setpoint.ax + m_pidControllerX.calculate(pose.getX(), setpoint.x),
