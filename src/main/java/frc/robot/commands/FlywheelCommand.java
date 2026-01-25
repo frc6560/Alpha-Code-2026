@@ -22,131 +22,119 @@ public class FlywheelCommand extends Command{
 
 
     /**
-     * Checks if a line segment intersects with a rectangular region.
-     * Uses parametric line representation and checks intersection with all 4 edges.
+     * Checks if robot trajectory intersects with a rectangular trench region.
+     * Uses parametric motion: position(t) = robotPos + velocity * t
+     * For each boundary (constant x or y), solve for crossing time t and check:
+     *   1. Is 0 <= t <= HOOD_DEACTUATION_TIME?
+     *   2. Is the perpendicular coordinate within bounds at time t?
      *
-     * @param p0 Start point of segment
-     * @param p1 End point of segment
-     * @param xMin Left boundary of rectangle
-     * @param xMax Right boundary of rectangle
-     * @param yMin Bottom boundary of rectangle
-     * @param yMax Top boundary of rectangle
-     * @return true if segment intersects rectangle
+     * @param robotPos Current robot position
+     * @param velocity Robot velocity vector
+     * @param xMin Left boundary of trench
+     * @param xMax Right boundary of trench
+     * @param yMin Bottom boundary of trench
+     * @param yMax Top boundary of trench
+     * @return true if trajectory intersects trench
      */
-    private boolean lineSegmentIntersectsRectangle(Translation2d p0, Translation2d p1,
-                                                   double xMin, double xMax,
-                                                   double yMin, double yMax) {
-        // Check if either endpoint is inside the rectangle
-        if (isPointInRectangle(p0, xMin, xMax, yMin, yMax) ||
-            isPointInRectangle(p1, xMin, xMax, yMin, yMax)) {
+    private boolean trajectoryIntersectsTrench(Translation2d robotPos, Translation2d velocity,
+                                               double xMin, double xMax,
+                                               double yMin, double yMax) {
+        double x0 = robotPos.getX();
+        double y0 = robotPos.getY();
+        double vx = velocity.getX();
+        double vy = velocity.getY();
+
+        // Check if robot starts inside the trench
+        if (x0 >= xMin && x0 <= xMax && y0 >= yMin && y0 <= yMax) {
             return true;
         }
 
-        // Direction vector of our segment
-        double dx = p1.getX() - p0.getX();
-        double dy = p1.getY() - p0.getY();
-
-        // Check intersection with all 4 edges
-        // Top edge: from (xMin, yMax) to (xMax, yMax)
-        if (segmentIntersectsSegment(p0.getX(), p0.getY(), dx, dy,
-                                     xMin, yMax, xMax - xMin, 0)) {
-            return true;
+        // Check crossing LEFT boundary (x = xMin)
+        // Solve: x0 + vx * t = xMin  =>  t = (xMin - x0) / vx
+        if (Math.abs(vx) > 1e-10) {
+            double t = (xMin - x0) / vx;
+            if (t >= 0 && t <= HOOD_DEACTUATION_TIME) {
+                double y_at_crossing = y0 + vy * t;
+                if (y_at_crossing >= yMin && y_at_crossing <= yMax) {
+                    return true;
+                }
+            }
         }
 
-        // Bottom edge: from (xMin, yMin) to (xMax, yMin)
-        if (segmentIntersectsSegment(p0.getX(), p0.getY(), dx, dy,
-                                     xMin, yMin, xMax - xMin, 0)) {
-            return true;
+        // Check crossing RIGHT boundary (x = xMax)
+        // Solve: x0 + vx * t = xMax  =>  t = (xMax - x0) / vx
+        if (Math.abs(vx) > 1e-10) {
+            double t = (xMax - x0) / vx;
+            if (t >= 0 && t <= HOOD_DEACTUATION_TIME) {
+                double y_at_crossing = y0 + vy * t;
+                if (y_at_crossing >= yMin && y_at_crossing <= yMax) {
+                    return true;
+                }
+            }
         }
 
-        // Left edge: from (xMin, yMin) to (xMin, yMax)
-        if (segmentIntersectsSegment(p0.getX(), p0.getY(), dx, dy,
-                                     xMin, yMin, 0, yMax - yMin)) {
-            return true;
+        // Check crossing BOTTOM boundary (y = yMin)
+        // Solve: y0 + vy * t = yMin  =>  t = (yMin - y0) / vy
+        if (Math.abs(vy) > 1e-10) {
+            double t = (yMin - y0) / vy;
+            if (t >= 0 && t <= HOOD_DEACTUATION_TIME) {
+                double x_at_crossing = x0 + vx * t;
+                if (x_at_crossing >= xMin && x_at_crossing <= xMax) {
+                    return true;
+                }
+            }
         }
 
-        // Right edge: from (xMax, yMin) to (xMax, yMax)
-        if (segmentIntersectsSegment(p0.getX(), p0.getY(), dx, dy,
-                                     xMax, yMin, 0, yMax - yMin)) {
-            return true;
+        // Check crossing TOP boundary (y = yMax)
+        // Solve: y0 + vy * t = yMax  =>  t = (yMax - y0) / vy
+        if (Math.abs(vy) > 1e-10) {
+            double t = (yMax - y0) / vy;
+            if (t >= 0 && t <= HOOD_DEACTUATION_TIME) {
+                double x_at_crossing = x0 + vx * t;
+                if (x_at_crossing >= xMin && x_at_crossing <= xMax) {
+                    return true;
+                }
+            }
         }
 
         return false;
-    }
-
-    /**
-     * Checks if a point is inside a rectangle.
-     */
-    private boolean isPointInRectangle(Translation2d point, double xMin, double xMax,
-                                       double yMin, double yMax) {
-        return point.getX() >= xMin && point.getX() <= xMax &&
-               point.getY() >= yMin && point.getY() <= yMax;
-    }
-
-    /**
-     * Checks if two line segments intersect using parametric representation.
-     * Segment 1: P(t) = (p0x, p0y) + t * (dx, dy), t in [0, 1]
-     * Segment 2: Q(s) = (q0x, q0y) + s * (ex, ey), s in [0, 1]
-     *
-     * @return true if segments intersect
-     */
-    private boolean segmentIntersectsSegment(double p0x, double p0y, double dx, double dy,
-                                             double q0x, double q0y, double ex, double ey) {
-        // Calculate denominator (cross product of direction vectors)
-        double denominator = ex * dy - ey * dx;
-
-        // Parallel lines (or coincident) - no intersection for our purposes
-        if (Math.abs(denominator) < 1e-10) {
-            return false;
-        }
-
-        // Calculate t and s parameters
-        double t = ((q0x - p0x) * ey - (q0y - p0y) * ex) / denominator;
-        double s = ((q0x - p0x) * dy - (q0y - p0y) * dx) / denominator;
-
-        // Check if intersection is within both segments
-        return (t >= 0 && t <= 1 && s >= 0 && s <= 1);
     }
 
     /** State machine to determine robot's (future) position and how to act correspondingly */
     @Override
     public void execute() {
         // Get current position and velocity
-        Translation2d currentPosition = drivetrain.getPose().getTranslation();
+        Translation2d robotPos = drivetrain.getPose().getTranslation();
         Translation2d velocity = new Translation2d(
             drivetrain.getFieldVelocity().vxMetersPerSecond,
             drivetrain.getFieldVelocity().vyMetersPerSecond
         );
 
-        // Calculate trajectory line segment
-        Translation2d startPoint = currentPosition;
-        Translation2d endPoint = currentPosition.plus(velocity.times(HOOD_DEACTUATION_TIME));
-
-        // Define all 4 trench rectangular regions (based on FRC 2026 field specs)
+        // Check trajectory against all 4 trench regions (based on FRC 2026 field specs)
         // Blue Left Trench (zones 3-4)
-        boolean intersectsBlueLeft = lineSegmentIntersectsRectangle(
-            startPoint, endPoint,
+        boolean intersectsBlueLeft = trajectoryIntersectsTrench(
+            robotPos, velocity,
             1.067 - TRENCH_TOLERANCE, 3.369 + TRENCH_TOLERANCE,
             1.929 - TRENCH_TOLERANCE, 4.034 + TRENCH_TOLERANCE
         );
 
         // Blue Right Trench (zones 2-3, square)
-        boolean intersectsBlueRight = lineSegmentIntersectsRectangle(
-            startPoint, endPoint,
+        boolean intersectsBlueRight = trajectoryIntersectsTrench(
+            robotPos, velocity,
             4.626 - TRENCH_TOLERANCE, 7.291 + TRENCH_TOLERANCE,
             1.128 - TRENCH_TOLERANCE, 3.438 + TRENCH_TOLERANCE
         );
 
         // Red Left Trench (zones 2-3, square, diagonally opposite to blue right)
-        boolean intersectsRedLeft = lineSegmentIntersectsRectangle(
-            startPoint, endPoint,
+        boolean intersectsRedLeft = trajectoryIntersectsTrench(
+            robotPos, velocity,
             9.249 - TRENCH_TOLERANCE, 11.914 + TRENCH_TOLERANCE,
             4.631 - TRENCH_TOLERANCE, 6.941 + TRENCH_TOLERANCE
         );
 
         // Red Right Trench (zones 1-2)
-        boolean intersectsRedRight = lineSegmentIntersectsRectangle(
-            startPoint, endPoint,
+        boolean intersectsRedRight = trajectoryIntersectsTrench(
+            robotPos, velocity,
             13.171 - TRENCH_TOLERANCE, 15.473 + TRENCH_TOLERANCE,
             4.034 - TRENCH_TOLERANCE, 6.139 + TRENCH_TOLERANCE
         );
