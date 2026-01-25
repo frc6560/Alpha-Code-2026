@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
@@ -29,21 +30,31 @@ public final class Constants {
   public static final double MAX_SPEED  = Units.feetToMeters(14.5);
   // Maximum speed of the robot in meters per second, used to limit acceleration.
 
+  // Robot dimensions (in meters, from PathPlanner settings)
+  public static final double robotLength = 0.812;
+  public static final double robotWidth = 0.812;
+
   public static final class DrivebaseConstants {
     // Hold time on motor brakes when disabled
+    
     public static final double WHEEL_LOCK_TIME = 10; // seconds
-    public static final double kS = 0.142; // TODO: tune with sysid at workshop
-    public static final double kV = 2.474;
-    public static final double kA = 0.230;
+    public static final double kS = 0.0994; 
+    public static final double kV = 2.4482;
+    public static final double kA = 0.1997;
 
-    public static final double kP_translation = 4.0;
+    public static final double kP_translation = 2.0;
     public static final double kP_rotation = 4.0;
 
     public static final double kI_translation = 0.0;
     public static final double kI_rotation = 0.0;
 
-    public static final double kD_translation = 0.0;
+    public static final double kD_translation = 0.2;
     public static final double kD_rotation = 0.0;
+
+    // Pure pursuit tuning (meters, meters per second)
+    public static final double kPurePursuitMinLookahead = 0.3;
+    public static final double kPurePursuitMaxLookahead = 1.5;
+    public static final double kPurePursuitLookaheadSpeedFactor = 0.15;
   }
 
   public static final class FieldConstants{
@@ -54,6 +65,9 @@ public final class Constants {
     public static final Translation2d TRENCH_BLUE_LEFT = new Translation2d(4.68, 7.32);
     public static final Translation2d TRENCH_RED_RIGHT = new Translation2d(11.87, 7.32);
     public static final Translation2d TRENCH_RED_LEFT = new Translation2d(11.87, 0.68);
+
+    public static final Translation2d BLUE_HUB_CENTER = new Translation2d(4.68, 4.03);
+    public static final Translation2d RED_HUB_CENTER = new Translation2d(11.85, 4.03);
   }
 
   public static class OperatorConstants
@@ -81,7 +95,7 @@ public final class Constants {
             0.394,
             -0.0248,
             0.192,
-            new Rotation3d(0, Units.degreesToRadians(15), 0)
+            new Rotation3d(0, Units.degreesToRadians(17.12), 0)
           );
           break;
         default:
@@ -168,6 +182,11 @@ public final class Constants {
 
   public static final class FeederConstants{
     public static final double FEEDER_RPM = -1000;
+  }
+
+  public static final class TurretConstants{
+    public static final Transform3d ROBOT_RELATIVE_TURRET = new Transform3d(0, 0, 0, new Rotation3d()); // update when turret constants come out
+    // MAKE SURE THIS IS UP LEFT. NOT UP RIGHT.
   }
 
   public static final class ArmConstants
