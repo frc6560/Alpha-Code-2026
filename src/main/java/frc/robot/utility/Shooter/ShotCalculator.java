@@ -12,20 +12,36 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.TurretConstants;
 
-
-// consts needed:
-// all LUT values
-// shooter position on robot
-// time parameter
 public class ShotCalculator {
+
+    /** State container for turret position and velocity. */
+    public record TurretState(double positionRadians, double velocityRadiansPerSecond) {}
+
+    /** State container for hood position and velocity. */
+    public record HoodState(double positionRadians, double velocityRadiansPerSecond) {}
+
+    /** Combined state for the entire shooter system. */
+    public record ShooterState(
+        TurretState turret,
+        HoodState hood,
+        double flywheelRPM,
+        Translation2d virtualTargetPose
+    ) {}
+
     public double flywheelRPM;
     private double hoodAzimuth; // in radians
     private double turretAngle; // in radians
+    private double hoodVelocity; // rad/s
+    private double turretVelocity; // rad/s
 
     private static final double TIME_PARAMETER = 0.03; // seconds into the future to project
+
+    // Low-pass filter coefficient (0-1, higher = more smoothing)
+    private static final double VELOCITY_FILTER_ALPHA = 0.8;
 
     private static final InterpolatingDoubleTreeMap hoodAzimuthMap = new InterpolatingDoubleTreeMap();
     private static final InterpolatingDoubleTreeMap flywheelRPMMap = new InterpolatingDoubleTreeMap();
@@ -33,11 +49,21 @@ public class ShotCalculator {
 
     public Translation2d virtualTargetPose; // for SOTM
 
-    /** A util class for outputting shooter state values, even while the robot is moving!*/
+    // State for numerical differentiation
+    private double prevHoodAzimuth = 0;
+    private double prevTurretAngle = 0;
+    private double prevTimestamp = 0;
+    private double filteredHoodVelocity = 0;
+    private double filteredTurretVelocity = 0;
+    private boolean hasInitialized = false;
+
+    /** A util class for outputting shooter state values, even while the robot is moving! */
     public ShotCalculator() {
         this.flywheelRPM = 0;
         this.hoodAzimuth = 0;
         this.turretAngle = 0;
+        this.hoodVelocity = 0;
+        this.turretVelocity = 0;
         this.virtualTargetPose = new Translation2d();
     }
 
@@ -49,12 +75,30 @@ public class ShotCalculator {
         return turretAngle;
     }
 
+    public double getHoodVelocity() {
+        return hoodVelocity;
+    }
+
+    public double getTurretVelocity() {
+        return turretVelocity;
+    }
+
     public double getFlywheelRPM() {
         return flywheelRPM;
     }
 
     public Translation2d getVirtualTargetPose() {
         return virtualTargetPose;
+    }
+
+    /** Returns the complete shooter state including positions and velocities. */
+    public ShooterState getState() {
+        return new ShooterState(
+            new TurretState(turretAngle, turretVelocity),
+            new HoodState(hoodAzimuth, hoodVelocity),
+            flywheelRPM,
+            virtualTargetPose
+        );
     }
 
     /** Calculates the shot parameters based on current robot pose and field velocity. */
@@ -113,11 +157,48 @@ public class ShotCalculator {
         }
 
         // calculates hood angle and flywheel RPM from virtual target
-        hoodAzimuth = hoodAzimuthMap.get(distanceToTarget);
+        double newHoodAzimuth = hoodAzimuthMap.get(distanceToTarget);
         flywheelRPM = flywheelRPMMap.get(distanceToTarget);
-        turretAngle = MathUtil.angleModulus(Math.atan2(
+        double newTurretAngle = MathUtil.angleModulus(Math.atan2(
             virtualTargetPose.getY() - turretPose.getY(),
             virtualTargetPose.getX() - turretPose.getX()
         ) - projectedPosition.getRotation().getRadians());
+
+        // Calculate velocities using numerical differentiation with low-pass filtering
+        double currentTime = Timer.getFPGATimestamp();
+        if (hasInitialized) {
+            double dt = currentTime - prevTimestamp;
+            if (dt > 1e-6) { // Avoid division by zero
+                // Raw velocity from backward difference
+                double rawHoodVelocity = MathUtil.angleModulus(newHoodAzimuth - prevHoodAzimuth) / dt;
+                double rawTurretVelocity = MathUtil.angleModulus(newTurretAngle - prevTurretAngle) / dt;
+
+                // Exponential moving average filter: filtered = alpha * prev + (1 - alpha) * raw
+                filteredHoodVelocity = VELOCITY_FILTER_ALPHA * filteredHoodVelocity
+                                     + (1 - VELOCITY_FILTER_ALPHA) * rawHoodVelocity;
+                filteredTurretVelocity = VELOCITY_FILTER_ALPHA * filteredTurretVelocity
+                                       + (1 - VELOCITY_FILTER_ALPHA) * rawTurretVelocity;
+            }
+        } else {
+            hasInitialized = true;
+        }
+
+        // Update previous state for next iteration
+        prevHoodAzimuth = newHoodAzimuth;
+        prevTurretAngle = newTurretAngle;
+        prevTimestamp = currentTime;
+
+        // Update output values
+        hoodAzimuth = newHoodAzimuth;
+        turretAngle = newTurretAngle;
+        hoodVelocity = filteredHoodVelocity;
+        turretVelocity = filteredTurretVelocity;
+    }
+
+    /** Resets the velocity filter state. Call this when re-enabling or after long pauses. */
+    public void resetFilter() {
+        hasInitialized = false;
+        filteredHoodVelocity = 0;
+        filteredTurretVelocity = 0;
     }
 }
