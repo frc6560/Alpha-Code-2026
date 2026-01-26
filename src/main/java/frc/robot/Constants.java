@@ -105,17 +105,17 @@ public final class Constants {
     public static final double ROLLER_CURRENT_LIMIT = 30.0;
     
     // Motor Speeds (as percentage: -1.0 to 1.0)
-    public static final double EXTENSION_OUT_SPEED = 0.6;
-    public static final double EXTENSION_IN_SPEED = -0.6;
-    public static final double ROLLER_INTAKE_SPEED = 0.8;
+    public static final double EXTENSION_OUT_SPEED = 0.6;  // 60% is plenty for real robot
+    public static final double EXTENSION_IN_SPEED = -0.6;  // 60% is plenty for real robot
+    public static final double ROLLER_INTAKE_SPEED = 0.8;  // 80% for intake
     public static final double ROLLER_OUTTAKE_SPEED = -0.5;
     
     // Motor Inversions
     public static final boolean EXTENSION_MOTOR_INVERTED = false; // TODO: Test and adjust
     public static final boolean ROLLER_MOTOR_INVERTED = false;    // TODO: Test and adjust
     
-    // Extension Thresholds
-    public static final double EXTENSION_THRESHOLD = 0.5; // Motor output threshold to consider "fully extended"
+    // Springy Mode Thresholds
+    public static final double SPRINGY_CURRENT_THRESHOLD = 25.0; // Amps - triggers springy mode when exceeded
   }
 
 }
