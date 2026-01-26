@@ -3,6 +3,7 @@ package frc.robot.commands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
@@ -14,7 +15,13 @@ public class FlywheelCommand extends Command{
     private final SwerveSubsystem drivetrain;
 
     private final double HOOD_DEACTUATION_TIME = 0.8; // in seconds
-    private final double TRENCH_TOLERANCE = 0.5; // in meters, larger than trench boundary
+    private final double TRENCH_TOLERANCE = 0; // in meters, larger than trench boundary
+
+    private int executeCounter = 0; // Debug counter to verify execute() is being called
+
+    // Field2d for visualization
+    private final Field2d field = new Field2d();
+    private final Pose2d[] trajectoryPoses = new Pose2d[10]; // Pre-allocate for trajectory visualization
 
     public FlywheelCommand(Flywheel flywheel, SwerveSubsystem drivetrain) {
         this.flywheel = flywheel;
@@ -22,6 +29,18 @@ public class FlywheelCommand extends Command{
         addRequirements(flywheel);
     }
 
+    @Override
+    public void initialize() {
+        // Log that the command has started
+        executeCounter = 0; // Reset counter on initialize
+        SmartDashboard.putBoolean("FlywheelCommand/Running", true);
+        SmartDashboard.putString("FlywheelCommand/Status", "Initialized");
+        SmartDashboard.putNumber("FlywheelCommand/Initialize Time", System.currentTimeMillis() / 1000.0);
+        System.out.println("FlywheelCommand initialized at " + System.currentTimeMillis());
+
+        // Add field visualization to SmartDashboard
+        SmartDashboard.putData("Trajectory/Field", field);
+    }
 
     /**
      * Checks if robot trajectory intersects with a rectangular trench region.
@@ -105,6 +124,11 @@ public class FlywheelCommand extends Command{
     /** State machine to determine robot's (future) position and how to act correspondingly */
     @Override
     public void execute() {
+        // Debug: Increment counter and log to verify execute() is being called
+        executeCounter++;
+        SmartDashboard.putNumber("FlywheelCommand/Execute Counter", executeCounter);
+        SmartDashboard.putBoolean("FlywheelCommand/Execute Running", true);
+
         // Get current position and velocity
         Translation2d robotPos = drivetrain.getPose().getTranslation();
         Translation2d velocity = new Translation2d(
@@ -115,48 +139,78 @@ public class FlywheelCommand extends Command{
         // Calculate projected position at end of hood deactuation time
         Translation2d projectedPos = robotPos.plus(velocity.times(HOOD_DEACTUATION_TIME));
 
-        // Check trajectory against all 4 trench regions (based on FRC 2026 field specs)
-        // Blue Left Trench (zones 3-4)
+        // Check trajectory against all 4 trench regions (FRC 2026 field coordinates)
+        // Blue Left Trench (narrower x range)
         boolean intersectsBlueLeft = trajectoryIntersectsTrench(
             robotPos, velocity,
-            1.067 - TRENCH_TOLERANCE, 3.369 + TRENCH_TOLERANCE,
-            1.929 - TRENCH_TOLERANCE, 4.034 + TRENCH_TOLERANCE
+            4.10 , 5.25,
+            6.75, 9.42
         );
 
-        // Blue Right Trench (zones 2-3, square)
+        // Blue Right Trench
         boolean intersectsBlueRight = trajectoryIntersectsTrench(
             robotPos, velocity,
-            4.626 - TRENCH_TOLERANCE, 7.291 + TRENCH_TOLERANCE,
-            1.128 - TRENCH_TOLERANCE, 3.438 + TRENCH_TOLERANCE
+            4.10 - TRENCH_TOLERANCE, 5.25 + TRENCH_TOLERANCE,
+            -0.70 - TRENCH_TOLERANCE, 1.27 + TRENCH_TOLERANCE
         );
 
-        // Red Left Trench (zones 2-3, square, diagonally opposite to blue right)
+        // Red Left Trench
         boolean intersectsRedLeft = trajectoryIntersectsTrench(
             robotPos, velocity,
-            9.249 - TRENCH_TOLERANCE, 11.914 + TRENCH_TOLERANCE,
-            4.631 - TRENCH_TOLERANCE, 6.941 + TRENCH_TOLERANCE
+            11.29 - TRENCH_TOLERANCE, 12.44 + TRENCH_TOLERANCE,
+            -0.70 - TRENCH_TOLERANCE, 1.27 + TRENCH_TOLERANCE
         );
 
-        // Red Right Trench (zones 1-2)
+        // Red Right Trench
         boolean intersectsRedRight = trajectoryIntersectsTrench(
             robotPos, velocity,
-            13.171 - TRENCH_TOLERANCE, 15.473 + TRENCH_TOLERANCE,
-            4.034 - TRENCH_TOLERANCE, 6.139 + TRENCH_TOLERANCE
+            11.29 - TRENCH_TOLERANCE, 12.44 + TRENCH_TOLERANCE,
+            6.75 - TRENCH_TOLERANCE, 9.42 + TRENCH_TOLERANCE
         );
 
         // Stop flywheel if trajectory intersects ANY trench
         boolean intersectsAnyTrench = intersectsBlueLeft || intersectsBlueRight ||
                                        intersectsRedLeft || intersectsRedRight;
 
+        // Control flywheel based on trench intersection
+        // When conditions are met (not intersecting trench), set flywheel to 1000 RPM
+        final double FLYWHEEL_TARGET_RPM = 1000.0;
+
         if (intersectsAnyTrench) {
             flywheel.stop();
+            SmartDashboard.putString("FlywheelCommand/Status", "STOPPED - Trench Detected");
+            SmartDashboard.putNumber("FlywheelCommand/Target RPM", 0);
         } else {
-            flywheel.setRPM(1000);
+            flywheel.setRPM(FLYWHEEL_TARGET_RPM);
+            SmartDashboard.putString("FlywheelCommand/Status", "RUNNING - Clear Path");
+            SmartDashboard.putNumber("FlywheelCommand/Target RPM", FLYWHEEL_TARGET_RPM);
         }
+
+        // Log current flywheel state from command perspective
+        SmartDashboard.putNumber("FlywheelCommand/Actual RPM", flywheel.getVelocityRPM());
+        SmartDashboard.putBoolean("FlywheelCommand/At Setpoint", flywheel.atSetpoint());
 
         // ========== VISUALIZATION LOGGING FOR ADVANTAGESCOPE ==========
 
-        // Current and projected positions
+        // Get current robot pose with rotation
+        Pose2d currentPose = drivetrain.getPose();
+
+        // Create projected pose (position at end of trajectory with current rotation)
+        Pose2d projectedPose = new Pose2d(projectedPos, currentPose.getRotation());
+
+        // Update Field2d visualization
+        field.setRobotPose(currentPose); // Current robot position
+        field.getObject("Projected Pose").setPose(projectedPose); // Projected position
+
+        // Create trajectory line for visualization
+        for (int i = 0; i < trajectoryPoses.length; i++) {
+            double t = (HOOD_DEACTUATION_TIME / (trajectoryPoses.length - 1)) * i;
+            Translation2d point = robotPos.plus(velocity.times(t));
+            trajectoryPoses[i] = new Pose2d(point, currentPose.getRotation());
+        }
+        field.getObject("Trajectory Line").setPoses(trajectoryPoses);
+
+        // Current and projected positions (for numerical display)
         SmartDashboard.putNumber("Trajectory/current_x", robotPos.getX());
         SmartDashboard.putNumber("Trajectory/current_y", robotPos.getY());
         SmartDashboard.putNumber("Trajectory/projected_x", projectedPos.getX());
@@ -167,18 +221,8 @@ public class FlywheelCommand extends Command{
         SmartDashboard.putNumber("Trajectory/velocity_y", velocity.getY());
         SmartDashboard.putNumber("Trajectory/velocity_magnitude", velocity.getNorm());
 
-        // Trajectory as array of poses (for line visualization in AdvantageScope)
-        int numPoints = 10;
-        Pose2d[] trajectoryPoses = new Pose2d[numPoints];
-        for (int i = 0; i < numPoints; i++) {
-            double t = (HOOD_DEACTUATION_TIME / (numPoints - 1)) * i;
-            Translation2d point = robotPos.plus(velocity.times(t));
-            trajectoryPoses[i] = new Pose2d(point, new Rotation2d());
-        }
+        // Legacy string format for AdvantageScope (if needed)
         SmartDashboard.putString("Trajectory/trajectory_line", formatPoseArray(trajectoryPoses));
-
-        // Projected endpoint as a pose (for better visualization)
-        Pose2d projectedPose = new Pose2d(projectedPos, drivetrain.getPose().getRotation());
         SmartDashboard.putString("Trajectory/projected_pose",
             String.format("%.3f,%.3f,%.3f", projectedPos.getX(), projectedPos.getY(),
                          projectedPose.getRotation().getRadians()));
@@ -190,19 +234,57 @@ public class FlywheelCommand extends Command{
         SmartDashboard.putBoolean("Trajectory/intersects_red_left", intersectsRedLeft);
         SmartDashboard.putBoolean("Trajectory/intersects_red_right", intersectsRedRight);
 
-        // Trench boundaries for visualization (only need to log once, but doing every cycle is fine)
+        // Trench boundaries for visualization (numerical arrays)
         SmartDashboard.putNumberArray("Trajectory/trench_blue_left",
-            new double[]{1.067 - TRENCH_TOLERANCE, 1.929 - TRENCH_TOLERANCE,
-                        3.369 + TRENCH_TOLERANCE, 4.034 + TRENCH_TOLERANCE});
+            new double[]{4.10 - TRENCH_TOLERANCE, 6.75 - TRENCH_TOLERANCE,
+                        5.25 + TRENCH_TOLERANCE, 9.42 + TRENCH_TOLERANCE});
         SmartDashboard.putNumberArray("Trajectory/trench_blue_right",
-            new double[]{4.626 - TRENCH_TOLERANCE, 1.128 - TRENCH_TOLERANCE,
-                        7.291 + TRENCH_TOLERANCE, 3.438 + TRENCH_TOLERANCE});
+            new double[]{4.10 - TRENCH_TOLERANCE, -0.70 - TRENCH_TOLERANCE,
+                        5.25 + TRENCH_TOLERANCE, 1.27 + TRENCH_TOLERANCE});
         SmartDashboard.putNumberArray("Trajectory/trench_red_left",
-            new double[]{9.249 - TRENCH_TOLERANCE, 4.631 - TRENCH_TOLERANCE,
-                        11.914 + TRENCH_TOLERANCE, 6.941 + TRENCH_TOLERANCE});
+            new double[]{11.29 - TRENCH_TOLERANCE, -0.70 - TRENCH_TOLERANCE,
+                        12.44 + TRENCH_TOLERANCE, 1.27 + TRENCH_TOLERANCE});
         SmartDashboard.putNumberArray("Trajectory/trench_red_right",
-            new double[]{13.171 - TRENCH_TOLERANCE, 4.034 - TRENCH_TOLERANCE,
-                        15.473 + TRENCH_TOLERANCE, 6.139 + TRENCH_TOLERANCE});
+            new double[]{11.29 - TRENCH_TOLERANCE, 6.75 - TRENCH_TOLERANCE,
+                        12.44 + TRENCH_TOLERANCE, 9.42 + TRENCH_TOLERANCE});
+
+        // Visualize trench boundaries on field as rectangles (corner poses)
+        visualizeTrenchBoundary("Blue Left Trench",
+            4.10 - TRENCH_TOLERANCE, 6.75 - TRENCH_TOLERANCE,
+            5.25 + TRENCH_TOLERANCE, 9.42 + TRENCH_TOLERANCE,
+            intersectsBlueLeft);
+        visualizeTrenchBoundary("Blue Right Trench",
+            4.10 - TRENCH_TOLERANCE, -0.70 - TRENCH_TOLERANCE,
+            5.25 + TRENCH_TOLERANCE, 1.27 + TRENCH_TOLERANCE,
+            intersectsBlueRight);
+        visualizeTrenchBoundary("Red Left Trench",
+            11.29 - TRENCH_TOLERANCE, -0.70 - TRENCH_TOLERANCE,
+            12.44 + TRENCH_TOLERANCE, 1.27 + TRENCH_TOLERANCE,
+            intersectsRedLeft);
+        visualizeTrenchBoundary("Red Right Trench",
+            11.29 - TRENCH_TOLERANCE, 6.75 - TRENCH_TOLERANCE,
+            12.44 + TRENCH_TOLERANCE, 9.42 + TRENCH_TOLERANCE,
+            intersectsRedRight);
+    }
+
+    /**
+     * Helper method to visualize a trench boundary as a rectangle on the field
+     */
+    private void visualizeTrenchBoundary(String name, double xMin, double yMin, double xMax, double yMax, boolean isIntersecting) {
+        // Create 4 corner poses to draw a rectangle
+        Pose2d[] corners = new Pose2d[5]; // 5 points to close the rectangle
+        corners[0] = new Pose2d(xMin, yMin, new Rotation2d());
+        corners[1] = new Pose2d(xMax, yMin, new Rotation2d());
+        corners[2] = new Pose2d(xMax, yMax, new Rotation2d());
+        corners[3] = new Pose2d(xMin, yMax, new Rotation2d());
+        corners[4] = new Pose2d(xMin, yMin, new Rotation2d()); // Close the loop
+
+        field.getObject(name).setPoses(corners);
+
+        // Also show center point with a marker
+        double centerX = (xMin + xMax) / 2.0;
+        double centerY = (yMin + yMax) / 2.0;
+        field.getObject(name + " Center").setPose(new Pose2d(centerX, centerY, new Rotation2d()));
     }
 
     /**
@@ -225,10 +307,12 @@ public class FlywheelCommand extends Command{
         return false;
     }
 
-    /** But this should never run lol */
     @Override
     public void end(boolean interrupted) {
         flywheel.stop();
+        SmartDashboard.putBoolean("FlywheelCommand/Running", false);
+        SmartDashboard.putString("FlywheelCommand/Status", interrupted ? "INTERRUPTED" : "ENDED");
+        SmartDashboard.putNumber("FlywheelCommand/Target RPM", 0);
     }
 }
 

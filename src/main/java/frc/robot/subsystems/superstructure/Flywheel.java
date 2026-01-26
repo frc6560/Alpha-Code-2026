@@ -93,6 +93,9 @@ public class Flywheel extends SubsystemBase {
 
     @Override
     public void periodic() {
+        // Debug: Verify periodic is being called
+        SmartDashboard.putBoolean("Flywheel/Periodic Running", true);
+
         SmartDashboard.putNumber("Flywheel/Target RPM", targetRPM);
         SmartDashboard.putNumber("Flywheel/Actual RPM", getVelocityRPM());
         SmartDashboard.putNumber("Flywheel/Leader Output", leaderMotor.get());

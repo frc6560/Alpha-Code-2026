@@ -71,12 +71,25 @@ public class RobotContainer {
 
 
     public RobotContainer() {
+      // Subsystems are automatically registered when setDefaultCommand is called
       arm.setDefaultCommand(new ArmCommand(arm, controls));
-
       elevator.setDefaultCommand(new ElevatorCommand(elevator,controls));
       ballGrabber.setDefaultCommand(new BallGrabberCommand(ballGrabber, controls));
       subsystemManager.setDefaultCommand(new SubsystemManagerCommand(drivebase, elevator, arm, ballGrabber, controls, subsystemManager));
-      flywheel.setDefaultCommand(new FlywheelCommand(flywheel, drivebase));
+
+      // Set flywheel default command and log for debugging
+      FlywheelCommand flywheelCmd = new FlywheelCommand(flywheel, drivebase);
+      flywheel.setDefaultCommand(flywheelCmd);
+
+      // Debug logging to verify initialization
+      SmartDashboard.putBoolean("Debug/Flywheel Initialized", true);
+      SmartDashboard.putBoolean("Debug/FlywheelCommand Set", flywheel.getDefaultCommand() != null);
+      SmartDashboard.putString("Debug/FlywheelCommand Name", flywheel.getDefaultCommand() != null ? flywheel.getDefaultCommand().getName() : "NULL");
+      SmartDashboard.putString("Debug/Info", "Enable robot to start commands");
+
+      System.out.println("RobotContainer initialized - Flywheel default command: " + flywheel.getDefaultCommand());
+      System.out.println("NOTE: Default commands only schedule when robot is ENABLED");
+
       factory = new AutoCommands(drivebase,flywheel,feeder);
 
       autoChooser = new AutoModeChooser(factory);
@@ -108,5 +121,10 @@ public class RobotContainer {
 
     public Command getAutonomousCommand() {
       return autoChooser.getAutoChooser().selectedCommand();
+    }
+
+    // Getter for debug access
+    public Flywheel getFlywheel() {
+      return flywheel;
     }
 }
