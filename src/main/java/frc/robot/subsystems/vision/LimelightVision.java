@@ -65,7 +65,7 @@ public class LimelightVision{
         }
 
         // Rejects null measurements
-        if(robotPose2d == null || robotPose2d == nullPose){
+        if(robotPose2d == null || robotPose2d.equals(nullPose)){
             return;
         }
 
