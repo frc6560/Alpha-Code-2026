@@ -1,5 +1,7 @@
 package frc.robot.commands;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -110,6 +112,9 @@ public class FlywheelCommand extends Command{
             drivetrain.getFieldVelocity().vyMetersPerSecond
         );
 
+        // Calculate projected position at end of hood deactuation time
+        Translation2d projectedPos = robotPos.plus(velocity.times(HOOD_DEACTUATION_TIME));
+
         // Check trajectory against all 4 trench regions (based on FRC 2026 field specs)
         // Blue Left Trench (zones 3-4)
         boolean intersectsBlueLeft = trajectoryIntersectsTrench(
@@ -149,10 +154,70 @@ public class FlywheelCommand extends Command{
             flywheel.setRPM(1000);
         }
 
-        // Logging
-        SmartDashboard.putNumber("Shooter/v_x", velocity.getX());
-        SmartDashboard.putNumber("Shooter/v_y", velocity.getY());
-        SmartDashboard.putBoolean("Shooter/intersects_trench", intersectsAnyTrench);
+        // ========== VISUALIZATION LOGGING FOR ADVANTAGESCOPE ==========
+
+        // Current and projected positions
+        SmartDashboard.putNumber("Trajectory/current_x", robotPos.getX());
+        SmartDashboard.putNumber("Trajectory/current_y", robotPos.getY());
+        SmartDashboard.putNumber("Trajectory/projected_x", projectedPos.getX());
+        SmartDashboard.putNumber("Trajectory/projected_y", projectedPos.getY());
+
+        // Velocity
+        SmartDashboard.putNumber("Trajectory/velocity_x", velocity.getX());
+        SmartDashboard.putNumber("Trajectory/velocity_y", velocity.getY());
+        SmartDashboard.putNumber("Trajectory/velocity_magnitude", velocity.getNorm());
+
+        // Trajectory as array of poses (for line visualization in AdvantageScope)
+        int numPoints = 10;
+        Pose2d[] trajectoryPoses = new Pose2d[numPoints];
+        for (int i = 0; i < numPoints; i++) {
+            double t = (HOOD_DEACTUATION_TIME / (numPoints - 1)) * i;
+            Translation2d point = robotPos.plus(velocity.times(t));
+            trajectoryPoses[i] = new Pose2d(point, new Rotation2d());
+        }
+        SmartDashboard.putString("Trajectory/trajectory_line", formatPoseArray(trajectoryPoses));
+
+        // Projected endpoint as a pose (for better visualization)
+        Pose2d projectedPose = new Pose2d(projectedPos, drivetrain.getPose().getRotation());
+        SmartDashboard.putString("Trajectory/projected_pose",
+            String.format("%.3f,%.3f,%.3f", projectedPos.getX(), projectedPos.getY(),
+                         projectedPose.getRotation().getRadians()));
+
+        // Intersection status
+        SmartDashboard.putBoolean("Trajectory/intersects_trench", intersectsAnyTrench);
+        SmartDashboard.putBoolean("Trajectory/intersects_blue_left", intersectsBlueLeft);
+        SmartDashboard.putBoolean("Trajectory/intersects_blue_right", intersectsBlueRight);
+        SmartDashboard.putBoolean("Trajectory/intersects_red_left", intersectsRedLeft);
+        SmartDashboard.putBoolean("Trajectory/intersects_red_right", intersectsRedRight);
+
+        // Trench boundaries for visualization (only need to log once, but doing every cycle is fine)
+        SmartDashboard.putNumberArray("Trajectory/trench_blue_left",
+            new double[]{1.067 - TRENCH_TOLERANCE, 1.929 - TRENCH_TOLERANCE,
+                        3.369 + TRENCH_TOLERANCE, 4.034 + TRENCH_TOLERANCE});
+        SmartDashboard.putNumberArray("Trajectory/trench_blue_right",
+            new double[]{4.626 - TRENCH_TOLERANCE, 1.128 - TRENCH_TOLERANCE,
+                        7.291 + TRENCH_TOLERANCE, 3.438 + TRENCH_TOLERANCE});
+        SmartDashboard.putNumberArray("Trajectory/trench_red_left",
+            new double[]{9.249 - TRENCH_TOLERANCE, 4.631 - TRENCH_TOLERANCE,
+                        11.914 + TRENCH_TOLERANCE, 6.941 + TRENCH_TOLERANCE});
+        SmartDashboard.putNumberArray("Trajectory/trench_red_right",
+            new double[]{13.171 - TRENCH_TOLERANCE, 4.034 - TRENCH_TOLERANCE,
+                        15.473 + TRENCH_TOLERANCE, 6.139 + TRENCH_TOLERANCE});
+    }
+
+    /**
+     * Format array of poses for AdvantageScope visualization
+     */
+    private String formatPoseArray(Pose2d[] poses) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < poses.length; i++) {
+            if (i > 0) sb.append(";");
+            sb.append(String.format("%.3f,%.3f,%.3f",
+                poses[i].getX(),
+                poses[i].getY(),
+                poses[i].getRotation().getRadians()));
+        }
+        return sb.toString();
     }
 
     @Override

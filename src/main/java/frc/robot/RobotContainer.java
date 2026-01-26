@@ -17,6 +17,7 @@ import frc.robot.subsystems.superstructure.Arm;
 import frc.robot.commands.ArmCommand;
 import frc.robot.commands.ElevatorCommand;
 import frc.robot.commands.BallGrabberCommand;
+import frc.robot.commands.FlywheelCommand;
 import frc.robot.subsystems.vision.LimelightVision;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
@@ -75,7 +76,7 @@ public class RobotContainer {
       elevator.setDefaultCommand(new ElevatorCommand(elevator,controls));
       ballGrabber.setDefaultCommand(new BallGrabberCommand(ballGrabber, controls));
       subsystemManager.setDefaultCommand(new SubsystemManagerCommand(drivebase, elevator, arm, ballGrabber, controls, subsystemManager));
-      
+      flywheel.setDefaultCommand(new FlywheelCommand(flywheel, drivebase));
       factory = new AutoCommands(drivebase,flywheel,feeder);
 
       autoChooser = new AutoModeChooser(factory);
