@@ -9,6 +9,8 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.Constants.LimelightConstants;
+import frc.robot.utility.LimelightHelpers;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to each mode, as
@@ -90,6 +92,9 @@ public class Robot extends TimedRobot
       disabledTimer.stop();
       disabledTimer.reset();
     }
+    for(String limelightName : LimelightConstants.LIMELIGHT_NAMES){
+      LimelightHelpers.SetIMUMode(limelightName, 0);
+    }
   }
 
   /**
@@ -98,6 +103,10 @@ public class Robot extends TimedRobot
   @Override
   public void autonomousInit()
   {
+    for(String limelightName : LimelightConstants.LIMELIGHT_NAMES){
+      LimelightHelpers.SetIMUMode(limelightName, 4);
+    }
+
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
@@ -127,6 +136,10 @@ public class Robot extends TimedRobot
     } else
     {
       CommandScheduler.getInstance().cancelAll();
+    }
+
+    for(String limelightName : LimelightConstants.LIMELIGHT_NAMES){
+      LimelightHelpers.SetIMUMode(limelightName, 4);
     }
   }
 

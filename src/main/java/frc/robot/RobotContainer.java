@@ -73,7 +73,7 @@ public class RobotContainer {
     public RobotContainer() {
       arm.setDefaultCommand(new ArmCommand(arm, controls));
 
-      elevator.setDefaultCommand(new ElevatorCommand(elevator,controls));
+      elevator.setDefaultCommand(new ElevatorCommand(elevator));
       ballGrabber.setDefaultCommand(new BallGrabberCommand(ballGrabber, controls));
       subsystemManager.setDefaultCommand(new SubsystemManagerCommand(drivebase, elevator, arm, ballGrabber, controls, subsystemManager));
       
