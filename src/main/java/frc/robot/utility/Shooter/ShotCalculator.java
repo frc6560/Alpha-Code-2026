@@ -152,8 +152,20 @@ public class ShotCalculator {
         double timeOfFlight = 0;
         double distanceToTarget = turretPose.getTranslation().getDistance(targetPose);
 
+        // Convergence threshold for early exit (seconds)
+        final double EPSILON = 0.01;
+        double prevTimeOfFlight = 0;
+
         for(int i = 0; i < 20; i++){
             timeOfFlight = timeOfFlightMap.get(distanceToTarget);
+
+            // Early exit if time of flight has converged
+            if (i > 0 && Math.abs(timeOfFlight - prevTimeOfFlight) < EPSILON) {
+                break;
+            }
+
+            prevTimeOfFlight = timeOfFlight;
+
             virtualTargetPose = targetPose.minus(
                 new Translation2d(
                     turretVx * timeOfFlight,
