@@ -113,12 +113,19 @@ public class ShotCalculator {
                                             FieldConstants.BLUE_HUB_CENTER : 
                                             FieldConstants.RED_HUB_CENTER;
         
+        ChassisSpeeds robotVelocity = ChassisSpeeds.fromFieldRelativeSpeeds(
+            fieldVelocity.vxMetersPerSecond,
+            fieldVelocity.vyMetersPerSecond,
+            fieldVelocity.omegaRadiansPerSecond,
+            currentRobotPose.getRotation()
+        );
+        
         // calculates projected position due to sensor lag
         Pose2d projectedPosition = currentRobotPose.exp(
             new Twist2d(
-                fieldVelocity.vxMetersPerSecond * TIME_PARAMETER,
-                fieldVelocity.vyMetersPerSecond * TIME_PARAMETER,
-                fieldVelocity.omegaRadiansPerSecond * TIME_PARAMETER
+                robotVelocity.vxMetersPerSecond * TIME_PARAMETER,
+                robotVelocity.vyMetersPerSecond * TIME_PARAMETER,
+                robotVelocity.omegaRadiansPerSecond * TIME_PARAMETER
             )
         );
 
