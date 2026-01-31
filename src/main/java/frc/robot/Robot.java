@@ -9,6 +9,8 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.Constants.LimelightConstants;
+import frc.robot.utility.LimelightHelpers;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to each mode, as
@@ -70,15 +72,6 @@ public class Robot extends TimedRobot
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
-
-    // Debug: Monitor command scheduler status
-    if (m_robotContainer != null) {
-      Command currentFlywheelCommand = CommandScheduler.getInstance().requiring(m_robotContainer.getFlywheel());
-      edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putBoolean("Debug/Flywheel Command Running", currentFlywheelCommand != null);
-      edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putString("Debug/Current Flywheel Command",
-        currentFlywheelCommand != null ? currentFlywheelCommand.getName() : "NONE");
-      edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putBoolean("Debug/Robot Enabled", !DriverStation.isDisabled());
-    }
   }
 
   /**
@@ -99,6 +92,9 @@ public class Robot extends TimedRobot
       disabledTimer.stop();
       disabledTimer.reset();
     }
+    for(String limelightName : LimelightConstants.LIMELIGHT_NAMES){
+      LimelightHelpers.SetIMUMode(limelightName, 1);
+    }
   }
 
   /**
@@ -107,6 +103,10 @@ public class Robot extends TimedRobot
   @Override
   public void autonomousInit()
   {
+    for(String limelightName : LimelightConstants.LIMELIGHT_NAMES){
+      LimelightHelpers.SetIMUMode(limelightName, 4);
+    }
+
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
@@ -126,7 +126,6 @@ public class Robot extends TimedRobot
   @Override
   public void teleopInit()
   {
-    System.out.println("=== Entering Teleop Mode ===");
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
@@ -134,20 +133,13 @@ public class Robot extends TimedRobot
     if (m_autonomousCommand != null)
     {
       m_autonomousCommand.cancel();
-      System.out.println("Cancelled autonomous command");
     } else
     {
       CommandScheduler.getInstance().cancelAll();
-      System.out.println("Cancelled all commands (no auto was running)");
     }
 
-    // After cancelling, default commands should automatically reschedule
-    System.out.println("Default commands will now be scheduled automatically by CommandScheduler");
-
-    // Check flywheel command status after a brief moment
-    if (m_robotContainer != null) {
-      Command flywheelCmd = m_robotContainer.getFlywheel().getDefaultCommand();
-      System.out.println("Flywheel default command: " + (flywheelCmd != null ? flywheelCmd.getName() : "NULL"));
+    for(String limelightName : LimelightConstants.LIMELIGHT_NAMES){
+      LimelightHelpers.SetIMUMode(limelightName, 4);
     }
   }
 
