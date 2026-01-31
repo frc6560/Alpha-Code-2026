@@ -177,11 +177,11 @@ public class FlywheelCommand extends Command{
         final double FLYWHEEL_TARGET_RPM = 1000.0;
 
         if (intersectsAnyTrench) {
-            flywheel.stop();
+            flywheel.setRPM(FLYWHEEL_TARGET_RPM);
             SmartDashboard.putString("FlywheelCommand/Status", "STOPPED - Trench Detected");
             SmartDashboard.putNumber("FlywheelCommand/Target RPM", 0);
         } else {
-            flywheel.setRPM(FLYWHEEL_TARGET_RPM);
+            flywheel.stop();
             SmartDashboard.putString("FlywheelCommand/Status", "RUNNING - Clear Path");
             SmartDashboard.putNumber("FlywheelCommand/Target RPM", FLYWHEEL_TARGET_RPM);
         }
