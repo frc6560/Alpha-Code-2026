@@ -228,20 +228,22 @@ public class PathCalculator {
             waypoint,
             startControlPoint,
             getControlPoints(waypointPose)[0],
-            5.0, // tune
-            4.0, // tune
-            3.14,
-            6.28);
+            5.0, // maxVelocity - tune
+            4.0, // maxAt - tune
+            3.14, // maxOmega
+            6.28, // maxAlpha
+            3.0); // maxCentripetal - tune
 
         Path secondPath = new Path(
             waypoint,
             this.endPose,
             getControlPoints(waypointPose)[1],
             endControlPoint,
-            5.0,
-            4.0,
-            3.14,
-            6.28);
+            5.0, // maxVelocity - tune
+            4.0, // maxAt - tune
+            3.14, // maxOmega
+            6.28, // maxAlpha
+            3.0); // maxCentripetal - tune
 
         return new PathGroup(firstPath, secondPath, 5.0, 4.0, 3.14, 6.28);
     }
