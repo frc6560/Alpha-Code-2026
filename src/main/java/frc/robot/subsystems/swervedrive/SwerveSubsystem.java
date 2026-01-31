@@ -108,7 +108,7 @@ public class SwerveSubsystem extends SubsystemBase {
       throw new RuntimeException(e);
     }
     swerveDrive.setHeadingCorrection(false); 
-    swerveDrive.setCosineCompensator(false);
+    swerveDrive.setCosineCompensator(true);
     swerveDrive.setAngularVelocityCompensation(true,
                                                true,
                                                0.1);
