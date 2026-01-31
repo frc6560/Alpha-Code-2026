@@ -17,8 +17,6 @@ public class LimelightVision{
     private Pose2d robotPose2d = new Pose2d();
     private double latency = 0.0;
     private final String name;
-    private final Pose3d cameraPose;
-
     private double kStdvXY = Double.POSITIVE_INFINITY;
     private double kStdvTheta = Double.POSITIVE_INFINITY;
 
@@ -27,8 +25,6 @@ public class LimelightVision{
     public LimelightVision(SwerveSubsystem drivebase, String name, Pose3d cameraPose) {
         this.name = name;
         this.drivebase = drivebase;
-        this.cameraPose = cameraPose;
-
         // Sets the camera's position on the robot. The actual Pose3d this originates from comes from the camera.
         LimelightHelpers.setCameraPose_RobotSpace(
             name, 
