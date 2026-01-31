@@ -12,11 +12,13 @@ import frc.robot.subsystems.superstructure.Arm;
 import frc.robot.subsystems.superstructure.BallGrabber;
 import frc.robot.subsystems.superstructure.Elevator;
 import frc.robot.subsystems.superstructure.Flywheel;
+import frc.robot.subsystems.superstructure.Hood;
 import frc.robot.subsystems.superstructure.SubsystemManager;
 import frc.robot.commands.ArmCommand;
 import frc.robot.commands.ElevatorCommand;
 import frc.robot.commands.BallGrabberCommand;
 import frc.robot.commands.FlywheelCommand;
+import frc.robot.commands.HoodCommand;
 import frc.robot.subsystems.vision.LimelightVision;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
@@ -59,6 +61,7 @@ public class RobotContainer {
     private final BallGrabber ballGrabber = new BallGrabber();
     private final SubsystemManager subsystemManager = new SubsystemManager(drivebase, elevator, arm, ballGrabber, controls);
     private final Flywheel flywheel = new Flywheel(() -> drivebase.getPose()); 
+    private final Hood hood = new Hood(() -> drivebase.getPose());
 
     private final AutoFactory factory;
     private final SendableChooser<Auto> autoChooser;
@@ -79,7 +82,12 @@ public class RobotContainer {
       ballGrabber.setDefaultCommand(new BallGrabberCommand(ballGrabber, controls));
       subsystemManager.setDefaultCommand(new SubsystemManagerCommand(drivebase, elevator, arm, ballGrabber, controls, subsystemManager));
       flywheel.setDefaultCommand(new FlywheelCommand(flywheel, controls));
+      hood.setDefaultCommand(new HoodCommand(hood, controls)); 
       
+      // DON'T set HoodCommand as default - it interferes with manual control
+      // Instead, hood has no default command and holds its last position
+      // hood.setDefaultCommand(new HoodCommand(hood, controls));
+
       factory = new AutoFactory(
       null,
       drivebase
@@ -105,13 +113,16 @@ public class RobotContainer {
 
       vision = new VisionSubsystem(limelights);
       configureBindings();
+      
+   
 
-    SmartDashboard.putData("Auto Chooser", autoChooser);
+      SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
     private void configureBindings() {
         Command driveFieldOrientedAnglularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
         drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+        
         driverXbox.a().onTrue(
           Commands.defer(() -> {
             return Commands.runOnce(() -> vision.hardReset("limelight"), vision);
@@ -123,7 +134,29 @@ public class RobotContainer {
         driverXbox.start().onTrue((Commands.runOnce(drivebase::zeroNoAprilTagsGyro)));
         driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
         driverXbox.rightBumper().onTrue(Commands.none());
+
+        // Hood controls - Fine adjustment (using setGoal for trapezoidal profiling)
+        driverXbox.povUp().whileTrue(
+          Commands.runOnce(() -> hood.setGoal(hood.getCurrentAngle() + 1), hood).repeatedly()
+        );
+        driverXbox.povDown().whileTrue(
+          Commands.runOnce(() -> hood.setGoal(hood.getCurrentAngle() - 1), hood).repeatedly()
+        );
+        
+        // Hood controls - Larger adjustments
+        driverXbox.povLeft().whileTrue(
+          Commands.runOnce(() -> hood.setGoal(hood.getCurrentAngle() - 5), hood).repeatedly()
+        );
+        driverXbox.povRight().whileTrue(
+          Commands.runOnce(() -> hood.setGoal(hood.getCurrentAngle() + 5), hood).repeatedly()
+        );
     }
+
+    /**
+     * Adds hood test commands to SmartDashboard for easy testing
+     * Click these buttons in SmartDashboard/Shuffleboard to test hood movement
+     */
+    
 
     public Command getAutonomousCommand() {
       return autoChooser.getSelected().getCommand();

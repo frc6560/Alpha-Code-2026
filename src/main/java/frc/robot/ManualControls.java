@@ -103,6 +103,14 @@ public class ManualControls {
       return firstXbox.getRightBumperButton();
     }
 
+    //hood
+    public boolean adjustHoodUp(){
+      return firstXbox.getYButton();
+    }
+    public boolean adjustHoodDown(){
+      return firstXbox.getAButton();
+    }
+
 
 
     // tests 

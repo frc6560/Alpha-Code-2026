@@ -127,6 +127,51 @@ public final class Constants {
     public static final Slot0Configs FLYWHEEL_PID_CONFIG = null;
 
   }
+  public static final class HoodConstants {
+    public static final int HOOD_MOTOR_ID = 30; // TODO: set correct ID
+    public static final double HOOD_GEAR_RATIO = 18.0/360.0;
+    public static final double ABSOLUTE_HOOD_ENCODER_GEAR_RATIO = 18.0/360.0;
+
+    public static final double kP = 0.5; // TODO: tune
+    public static final double kI = 0.0; // TODO: tune
+    public static final double kD = 0.0; // TODO: tune
+    public static final double kV = 0.0; // TODO: tune
+    
+
+    public static final double[][] DISTANCE_ANGLE_TABLE = {
+      {0.0, 10.0},
+      {1.0, 10.0},
+      {2.0, 10.0},
+      {3.0, 10.0},
+      {4.0, 10.0},
+      {5.0, 10.0}
+    };
+
+    public static final double HOOD_kD = 0;
+
+    public static final double HOOD_kV = 0;
+
+    public static final double HOOD_kI = 0;
+
+    public static final double HOOD_kP = 0;
+
+    public static final double HOOD_kS = 0;
+
+
+
+
+
+
+    public static final double HOOD_CURRENT_LIMIT = 0;
+    public static final int HOOD_ABSOLUTE_ENCODER_ID = 0;
+    public static final double HOOD_kMaxV = 0;
+    public static final double HOOD_kMaxA = 0;
+    public static final double HOOD_kA = 0;
+    public static double kMaxV;
+    public static double kMaxA;
+
+
+  }
 
   public static final class ElevatorConstants {
     
