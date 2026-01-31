@@ -93,7 +93,7 @@ public class Robot extends TimedRobot
       disabledTimer.reset();
     }
     for(String limelightName : LimelightConstants.LIMELIGHT_NAMES){
-      LimelightHelpers.SetIMUMode(limelightName, 0);
+      LimelightHelpers.SetIMUMode(limelightName, 1);
     }
   }
 
