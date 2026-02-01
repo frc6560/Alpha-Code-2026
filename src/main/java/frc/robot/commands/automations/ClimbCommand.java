@@ -150,17 +150,31 @@ public class ClimbCommand extends SequentialCommandGroup {
     }
 
     /** Sets the target for the robot, including target pose, elevator height, and arm angle */
-    public void setTargets(){
-        DriverStation.Alliance alliance;
-        if(!DriverStation.getAlliance().isPresent()){
-            alliance = DriverStation.Alliance.Blue;
-        }
-        else alliance = DriverStation.getAlliance().get();
-
-
-
-        targetPose = (alliance.equals(DriverStation.Alliance.Blue)) ? new Pose2d(): new Pose2d(); 
+   public void setTargets() {
+    DriverStation.Alliance alliance;
+    if (!DriverStation.getAlliance().isPresent()) {
+        alliance = DriverStation.Alliance.Blue;
+    } else {
+        alliance = DriverStation.getAlliance().get();
     }
+
+    double currentY = drivetrain.getPose().getY(); // Replace with your actual method to get robot pose
+    double yThreshold = 3.75;
+
+    if (alliance.equals(DriverStation.Alliance.Blue)) {
+        if (currentY > yThreshold) {
+            targetPose = new Pose2d(1.5753228664398193, 4.183515548706055, new Rotation2d(0));
+        } else {
+            targetPose = new Pose2d(1.5753228664398193, 3.330711841583252, new Rotation2d(0));
+        }
+    } else { // Red Alliance
+        if (currentY > yThreshold) {
+            targetPose = new Pose2d(14.976325035095215, 4.754785537719727, new Rotation2d(3.14159265));
+        } else {
+            targetPose = new Pose2d(14.977962493896484, 3.8988282680511475, new Rotation2d(3.14159265));
+        }
+    }
+}
 
     /** Transforms red alliance poses to blue by reflecting around the center point of the field*/
     public Pose2d applyAllianceTransform(Pose2d pose){

@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 
@@ -54,6 +55,10 @@ public class ManualControls {
       return secondXbox.getRightY() < -0.7;
         // return secondXbox.getRightStickButton(); 
     }
+
+    public void setDriverRumble(double intensity) {
+    firstXbox.setRumble(GenericHID.RumbleType.kBothRumble, intensity);
+}
 
     // elevator
 

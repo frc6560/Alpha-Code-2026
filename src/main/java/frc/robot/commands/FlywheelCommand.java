@@ -9,10 +9,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.subsystems.superstructure.Flywheel;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
+import frc.robot.ManualControls;
 
 public class FlywheelCommand extends Command{
     private final Flywheel flywheel;
     private final SwerveSubsystem drivetrain;
+    private final ManualControls controls;
 
     private final double HOOD_DEACTUATION_TIME = 0.8; // in seconds
     private final double TRENCH_TOLERANCE = 0; // in meters, larger than trench boundary
@@ -23,9 +25,10 @@ public class FlywheelCommand extends Command{
     private final Field2d field = new Field2d();
     private final Pose2d[] trajectoryPoses = new Pose2d[10]; // Pre-allocate for trajectory visualization
 
-    public FlywheelCommand(Flywheel flywheel, SwerveSubsystem drivetrain) {
+    public FlywheelCommand(Flywheel flywheel, SwerveSubsystem drivetrain, ManualControls controls) {
         this.flywheel = flywheel;
         this.drivetrain = drivetrain;
+        this.controls = controls;
         addRequirements(flywheel);
     }
 
@@ -177,11 +180,11 @@ public class FlywheelCommand extends Command{
         final double FLYWHEEL_TARGET_RPM = 1000.0;
 
         if (intersectsAnyTrench) {
-            flywheel.setRPM(FLYWHEEL_TARGET_RPM);
+            controls.setDriverRumble(1.0); // Full rumble
             SmartDashboard.putString("FlywheelCommand/Status", "STOPPED - Trench Detected");
             SmartDashboard.putNumber("FlywheelCommand/Target RPM", 0);
         } else {
-            flywheel.stop();
+             controls.setDriverRumble(0); // Full rumble
             SmartDashboard.putString("FlywheelCommand/Status", "RUNNING - Clear Path");
             SmartDashboard.putNumber("FlywheelCommand/Target RPM", FLYWHEEL_TARGET_RPM);
         }
