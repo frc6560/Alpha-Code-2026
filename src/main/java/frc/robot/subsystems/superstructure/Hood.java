@@ -13,6 +13,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
@@ -71,7 +72,7 @@ private MechanismLigament2d hoodArm;
 
     // Initialize hardware
     hoodMotor = new TalonFX(HoodConstants.HOOD_MOTOR_ID, "rio");
-    absoluteEncoder = new CANcoder(HoodConstants.HOOD_MOTOR_ID + 1, "rio");
+    absoluteEncoder = new CANcoder(HoodConstants.HOOD_ABSOLUTE_ENCODER_ID, "rio");
 
     // Position control request
     positionControl = new PositionVoltage(0.0).withSlot(0);
@@ -131,6 +132,8 @@ private MechanismLigament2d hoodArm;
     
     // Apply offset to align zero position
     config.MagnetSensor.MagnetOffset = 0.0; // Will be set during calibration
+
+    
     
     absoluteEncoder.getConfigurator().apply(config);
   }
@@ -149,6 +152,7 @@ private MechanismLigament2d hoodArm;
     slot0.kP = HoodConstants.HOOD_kP;
     slot0.kI = HoodConstants.HOOD_kI;
     slot0.kD = HoodConstants.HOOD_kD;
+    
 
     // Set neutral mode to brake
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -156,6 +160,16 @@ private MechanismLigament2d hoodArm;
     // Current limits
     config.CurrentLimits.SupplyCurrentLimit = HoodConstants.HOOD_CURRENT_LIMIT;
     config.CurrentLimits.SupplyCurrentLimitEnable = HoodConstants.HOOD_CURRENT_LIMIT > 0;
+    
+    config.Feedback.SensorToMechanismRatio = 2 * (HoodConstants.ABSOLUTE_HOOD_ENCODER_GEAR_RATIO);
+    config.Feedback.RotorToSensorRatio = (44.0/9.0); 
+
+    //soft limits
+    config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 37.0 / 360.0 * HoodConstants.HOOD_GEAR_RATIO; //37 degrees
+    config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true; 
+    config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0.0 / 360.0; //0 degrees
+
 
     // Apply configuration
     hoodMotor.getConfigurator().apply(config.withSlot0(slot0));
@@ -167,7 +181,6 @@ private MechanismLigament2d hoodArm;
   private double getDistanceToTarget() {
     Pose2d robotPose = poseSupplier.getPose();
     Translation2d hubPose = getHubPose();
-
     return robotPose.getTranslation().getDistance(hubPose);
   }
 
@@ -197,12 +210,31 @@ private MechanismLigament2d hoodArm;
    * @param goalDeg Target angle in degrees
    */
   public void setGoal(double goalDeg) {
-    // Normalize angle to 0-360
-    goalDeg = ((goalDeg % 360) + 360) % 360;
-    targetAngle = goalDeg;
+
+    double clampedGoal = MathUtil.clamp(
+        goalDeg, 
+        HoodConstants.HOOD_MIN_ANGLE, 
+        HoodConstants.HOOD_MAX_ANGLE
+    );
+    targetAngle = clampedGoal;
     
     // Convert degrees to rotations for the profile
-    hoodGoalState = new TrapezoidProfile.State(goalDeg / 360.0, 0);
+    hoodGoalState = new TrapezoidProfile.State(clampedGoal / 360.0, 0);
+  }
+
+  public void manualUp() {
+    // 0.5 degrees per 20ms = 25 degrees per second
+    double nextAngle = getGoalValue() + 0.5;
+    setGoal(nextAngle);
+  }
+
+  /**
+   * Manually decreases the hood angle setpoint.
+   */
+  public void manualDown() {
+    // 0.5 degrees per 20ms = 25 degrees per second
+    double nextAngle = getGoalValue() - 0.5;
+    setGoal(nextAngle);
   }
 
   /**
@@ -305,12 +337,12 @@ private MechanismLigament2d hoodArm;
       hoodGoalState
     );
 
+    //update setpoint state
+    setSetpoint(targetState);
+
     // Convert profile state (in rotations) to motor rotations accounting for gear ratio
     double targetRotations = targetState.position * HoodConstants.HOOD_GEAR_RATIO;
     double targetVelocity = targetState.velocity * HoodConstants.HOOD_GEAR_RATIO;
-
-    // Update setpoint
-    setSetpoint(targetState);
 
     // Apply position control with velocity feedforward
     positionControl.Position = targetRotations;
@@ -320,14 +352,10 @@ private MechanismLigament2d hoodArm;
 
   @Override
   public void periodic() {
-    // Read manual angle
-  // double manualAngle = 20.0; 
-  //     SmartDashboard.getNumber("Hood/Manual Angle", targetAngle);
-  // manualAngle = Math.max(0.0, Math.min(70.0, manualAngle));
-  // setGoal(manualAngle);
 
   double manualAngle = SmartDashboard.getNumber(
     "Hood/Manual Angle", targetAngle
+
 );
   // Existing logic
   setControl();
@@ -338,9 +366,8 @@ private MechanismLigament2d hoodArm;
   SmartDashboard.putNumber("Hood/Current Angle (Motor)", currentAngle);
   SmartDashboard.putNumber("Hood/Current Angle (Absolute)", absoluteAngle);
 
-  // Update Mechanism2d
-  // hoodArm.setAngle(getCurrentAngle());
-  hoodArm.setAngle(30);
+  // Update Mechanism2d 
+  hoodArm.setAngle(45);
 
 
     // Update SmartDashboard

@@ -104,9 +104,11 @@ public final class Constants {
     public static final double kP = 0.0; // TODO: tune
     public static final double kI = 0.0; // TODO: tune
     public static final double kD = 0.0; // TODO: tune
+    public static final double kF = 0.0; // TODO: tune
 
-    public static final double MAX_RPM = 2000.0; // Example value for Falcon 500
-    public static final double FLYWHEEL_GEAR_RATIO = 2 / 1; // TODO: set correct gear ratio
+    public static final double MAX_RPM = 5000; // Example value for Falcon 500
+    public static final double TARGET_RPM_HARDSET = 2000.0; 
+    public static final double FLYWHEEL_GEAR_RATIO = 1.25; // TODO: set correct gear ratio
     public static final double FLYWHEEL_IDLE_RPM = 600.0; //kraken x60 
     public static final double FLYWHEEL_RPM_TOLERANCE = 100.0;
     public static final double[][] DISTANCE_RPM_TABLE = {
@@ -129,13 +131,14 @@ public final class Constants {
   }
   public static final class HoodConstants {
     public static final int HOOD_MOTOR_ID = 30; // TODO: set correct ID
-    public static final double HOOD_GEAR_RATIO = 18.0/360.0;
-    public static final double ABSOLUTE_HOOD_ENCODER_GEAR_RATIO = 18.0/360.0;
+    public static final double HOOD_GEAR_RATIO = 40.0;
+    public static final double ABSOLUTE_HOOD_ENCODER_GEAR_RATIO = 44/18.0;
 
     public static final double kP = 0.5; // TODO: tune
     public static final double kI = 0.0; // TODO: tune
     public static final double kD = 0.0; // TODO: tune
     public static final double kV = 0.0; // TODO: tune
+    public static final double kF = 0.0; // TODO: tune
     
 
     public static final double[][] DISTANCE_ANGLE_TABLE = {
@@ -163,10 +166,12 @@ public final class Constants {
 
 
     public static final double HOOD_CURRENT_LIMIT = 0;
-    public static final int HOOD_ABSOLUTE_ENCODER_ID = 0;
+    public static final int HOOD_ABSOLUTE_ENCODER_ID = 30;
     public static final double HOOD_kMaxV = 0;
     public static final double HOOD_kMaxA = 0;
     public static final double HOOD_kA = 0;
+    public static final double HOOD_MIN_ANGLE = 0;
+    public static final double HOOD_MAX_ANGLE = 0;
     public static double kMaxV;
     public static double kMaxA;
 

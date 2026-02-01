@@ -12,30 +12,46 @@ import frc.robot.ManualControls;
 public class HoodCommand extends Command {
   private final Hood Hood;
   private final ManualControls controls;
+  private final double targetAngle;
   /** Creates a new HoodCommand. */
-  public HoodCommand(Hood hood, ManualControls controls) {
+  public HoodCommand(Hood hood, ManualControls controls, double targetAngle) {
     this.Hood = hood;
     this.controls = controls;
+    this.targetAngle = targetAngle;
     addRequirements(hood);
+    
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    Hood.setGoal(45);
+    Hood.setGoal(targetAngle);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    //Hood.runWithPose();; 
-    //Hood.setGoal(45); 
+    if (controls.shootWithLimelight()) {
+      Hood.runWithPose(); 
+    }
+    else if (controls.hoodManualUp()) {
+      Hood.manualUp();
+    }
+    else if (controls.hoodManualDown()) {
+      Hood.manualDown();
+    }
+    else {
+      
+    }
+    
   }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    Hood.stop();
+  }
 
   // Returns true when the command should end.
   @Override

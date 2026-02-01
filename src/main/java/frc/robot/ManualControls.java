@@ -104,10 +104,10 @@ public class ManualControls {
     }
 
     //hood
-    public boolean adjustHoodUp(){
+    public boolean hoodManualUp(){
       return firstXbox.getYButton();
     }
-    public boolean adjustHoodDown(){
+    public boolean hoodManualDown(){
       return firstXbox.getAButton();
     }
 
