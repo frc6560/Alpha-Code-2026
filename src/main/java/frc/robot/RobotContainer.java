@@ -78,7 +78,7 @@ public class RobotContainer {
       subsystemManager.setDefaultCommand(new SubsystemManagerCommand(drivebase, elevator, arm, ballGrabber, controls, subsystemManager));
 
       // Set flywheel default command and log for debugging
-      FlywheelCommand flywheelCmd = new FlywheelCommand(flywheel, drivebase);
+      FlywheelCommand flywheelCmd = new FlywheelCommand(flywheel, drivebase,controls);
       flywheel.setDefaultCommand(flywheelCmd);
 
       // Debug logging to verify initialization
