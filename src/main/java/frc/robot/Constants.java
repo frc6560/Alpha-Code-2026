@@ -42,7 +42,7 @@ public final class Constants {
     public static final double kV = 2.4482;
     public static final double kA = 0.1997;
 
-    public static final double kP_translation = 2.0;
+    public static final double kP_translation = 4.0;
     public static final double kP_rotation = 4.0;
 
     public static final double kI_translation = 0.0;
@@ -51,10 +51,32 @@ public final class Constants {
     public static final double kD_translation = 0.2;
     public static final double kD_rotation = 0.0;
 
+    public static final double kP_translation_pose = 0.3;  
+    public static final double kI_translation_pose = 0; 
+    public static final double kD_translation_pose = 0.05; 
+
+    public static final double kP_rotation_pose = 2;
+    public static final double kI_rotation_pose = 0.02;
+    public static final double kD_rotation_pose = 0.2;
+
+    public static final double kP_translation_intake = 0.85;
+    public static final double kI_translation_intake = 0.028;
+    public static final double kD_translation_intake = 0.0;
+
     // Pure pursuit tuning (meters, meters per second)
     public static final double kPurePursuitMinLookahead = 0.3;
     public static final double kPurePursuitMaxLookahead = 1.5;
     public static final double kPurePursuitLookaheadSpeedFactor = 0.15;
+
+    public static final double kMaxAutoVelocity = 3; 
+    public static final double kMaxAutoAcceleration = 3; 
+
+    // Max velocities and accelerations for teleop alignment
+    public static final double kHandoffVelocity = 0.5;   // formerly 2.1
+    public static final double kMaxOmega = Math.toRadians(270);
+    public static final double kMaxAlpha = Math.toRadians(360);
+    public static final double kMaxAlignmentAcceleration = 1.3; // formerly 1.8
+    public static final double kMaxAlignmentVelocity = 2.1;  
   }
 
   public static final class FieldConstants{
