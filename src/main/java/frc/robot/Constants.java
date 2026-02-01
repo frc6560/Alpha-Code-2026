@@ -42,7 +42,7 @@ public final class Constants {
     public static final double kV = 2.4482;
     public static final double kA = 0.1997;
 
-    public static final double kP_translation = 2.0;
+    public static final double kP_translation = 4.0;
     public static final double kP_rotation = 4.0;
 
     public static final double kI_translation = 0.0;
