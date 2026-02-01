@@ -46,7 +46,6 @@ import frc.robot.Constants.DrivebaseConstants;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.utility.LimelightHelpers;
 import frc.robot.utility.LimelightHelpers.PoseEstimate;
-import frc.robot.utility.Setpoint;
 
 import java.io.File;
 import java.io.IOException;
@@ -85,17 +84,6 @@ public class SwerveSubsystem extends SubsystemBase {
   PIDController m_pidControllerTheta = new PIDController(DrivebaseConstants.kP_rotation,
                                                           DrivebaseConstants.kI_rotation,
                                                           DrivebaseConstants.kD_rotation); // tune values
-                                            
-  PIDController m_pidControllerX_pose = new PIDController(DrivebaseConstants.kP_translation_pose, 
-                                                            DrivebaseConstants.kI_translation_pose, 
-                                                            DrivebaseConstants.kD_translation_pose);
-  PIDController m_pidControllerY_pose = new PIDController(DrivebaseConstants.kP_translation_pose,
-                                                            DrivebaseConstants.kI_translation_pose, 
-                                                            DrivebaseConstants.kD_translation_pose);
-  PIDController m_pidControllerTheta_pose = new PIDController(DrivebaseConstants.kP_rotation_pose, 
-                                                                DrivebaseConstants.kI_rotation_pose, 
-                                                                DrivebaseConstants.kD_rotation_pose);
-                                                       
 
   /**
    * Initialize {@link SwerveDrive} with the directory provided.
@@ -120,7 +108,7 @@ public class SwerveSubsystem extends SubsystemBase {
       throw new RuntimeException(e);
     }
     swerveDrive.setHeadingCorrection(false); 
-    swerveDrive.setCosineCompensator(false);
+    swerveDrive.setCosineCompensator(true);
     swerveDrive.setAngularVelocityCompensation(true,
                                                true,
                                                0.1);
@@ -169,40 +157,15 @@ public class SwerveSubsystem extends SubsystemBase {
 
     Pose2d pose = getPose();
 
-    double kA_translation = DrivebaseConstants.kA / DrivebaseConstants.kV; // acceleration FF
-    // double kA_translation = 0.0; // tuning this term seems to make things worse???
-
     ChassisSpeeds targetSpeeds = new ChassisSpeeds(
-      setpoint.vx + kA_translation * setpoint.ax + m_pidControllerX.calculate(pose.getX(), setpoint.x),
-      setpoint.vy + kA_translation * setpoint.ay + m_pidControllerY.calculate(pose.getY(), setpoint.y),
+      setpoint.vx + m_pidControllerX.calculate(pose.getX(), setpoint.x),
+      setpoint.vy + m_pidControllerY.calculate(pose.getY(), setpoint.y),
       setpoint.omega + m_pidControllerTheta.calculate(pose.getRotation().getRadians(), setpoint.heading)
     );
 
     swerveDrive.driveFieldOriented(targetSpeeds);
   }
 
-  public void followSegment2(Setpoint setpoint, Pose2d targetPose) {
-    m_pidControllerTheta_pose.enableContinuousInput(-Math.PI, Math.PI);
-    Pose2d pose = getPose();
-    swerveDrive.field.getObject("TargetPose").setPose(targetPose);
-
-      m_pidControllerX_pose.setPID(DrivebaseConstants.kP_translation_intake, 
-                            DrivebaseConstants.kI_translation_intake, 
-                            DrivebaseConstants.kD_translation_intake);
-      m_pidControllerY_pose.setPID(DrivebaseConstants.kP_translation_intake, 
-                            DrivebaseConstants.kI_translation_intake, 
-                            DrivebaseConstants.kD_translation_intake);
-    m_pidControllerTheta_pose.setIZone(0.08);
-    m_pidControllerX_pose.setIZone(0.5);
-    m_pidControllerY_pose.setIZone(0.5);
-
-    ChassisSpeeds targetSpeeds = new ChassisSpeeds( 
-      setpoint.vx + m_pidControllerX_pose.calculate(pose.getX(), setpoint.x), 
-      setpoint.vy + m_pidControllerY_pose.calculate(pose.getY(), setpoint.y),
-      (-1) * (setpoint.omega + m_pidControllerTheta_pose.calculate(pose.getRotation().getRadians(), setpoint.theta))
-    );
-    swerveDrive.driveFieldOriented(targetSpeeds);
-  }
 
   /** Rotates to a specified angle while inheriting the chassis's original translational velocity */
   public void rotateToAngle(double targetInRadians){
