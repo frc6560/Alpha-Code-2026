@@ -301,10 +301,16 @@ public class groundIntake extends SubsystemBase {
             updateSpringyMode();
         }
 
-        // When fully retracted (stowed), stop both motors
+        // When fully retracted (stowed), stop both motors and reset encoder
         if (!isExtended && isRetractLimitTriggered()) {
             extensionMotor.set(0);
             rollerMotor.stopMotor();
+            
+            // Reset encoder position to 0 when limit switch is triggered
+            // This ensures accurate position tracking for the real robot
+            if (!RobotBase.isSimulation()) {
+                extensionMotor.setPosition(0.0);
+            }
         }
 
         /* ===== Mechanism2d - Linear Extension ===== */
@@ -352,5 +358,21 @@ public class groundIntake extends SubsystemBase {
         SmartDashboard.putNumber("Intake Extension Length (m)", extensionLength);
         SmartDashboard.putNumber("Intake Extension Motor %", extensionMotor.get() * 100);
         SmartDashboard.putNumber("Intake Roller Motor %", rollerMotor.get() * 100);
+        
+        // Show actual encoder position on real robot
+        if (!RobotBase.isSimulation()) {
+            SmartDashboard.putNumber("Intake Extension Position (rotations)", 
+                extensionMotor.getPosition().getValueAsDouble());
+        }
+    }
+
+    /* ======================== Getters ======================== */
+
+    public double getExtensionPosition() {
+        if (RobotBase.isSimulation()) {
+            return simExtensionPosition;
+        }
+        return extensionMotor.getPosition().getValueAsDouble();
     }
 }
+
