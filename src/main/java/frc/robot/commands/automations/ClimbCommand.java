@@ -25,6 +25,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.robot.commands.automations.ClimbCommand;
 
 /**
  * A command that automatically aligns the robot to a target pose, actuates the elevator and wrist, scores, and retracts.

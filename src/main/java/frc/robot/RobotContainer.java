@@ -20,6 +20,8 @@ import frc.robot.commands.BallGrabberCommand;
 import frc.robot.commands.FlywheelCommand;
 import frc.robot.subsystems.vision.LimelightVision;
 import frc.robot.subsystems.vision.VisionSubsystem;
+import frc.robot.commands.automations.ClimbCommand;
+import frc.robot.subsystems.LEDs.LED;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -60,6 +62,7 @@ public class RobotContainer {
     private final Feeder feeder = new Feeder();
     private final AutoCommands factory;
     private final AutoModeChooser autoChooser;
+    private final LED led;
 
     SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
       () -> driverXbox.getLeftY() * -1,
@@ -94,7 +97,7 @@ public class RobotContainer {
 
       autoChooser = new AutoModeChooser(factory);
       SmartDashboard.putData("Auto Chooser", autoChooser.getAutoChooser());
-
+      led = new LED();
       List<LimelightVision> limelights = new ArrayList<LimelightVision>();
       for(String name : LimelightConstants.LIMELIGHT_NAMES) {
         Pose3d cameraPose = LimelightConstants.getLimelightPose(name);
@@ -106,18 +109,25 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        Command driveFieldOrientedAnglularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
-        drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
-        driverXbox.a().onTrue(
-          Commands.defer(() -> {
+    Command driveFieldOrientedAnglularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
+    drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+
+    driverXbox.a().onTrue(
+        Commands.defer(() -> {
             return Commands.runOnce(() -> vision.hardReset("limelight"), vision);
-          }, Set.of(vision))
-        );
-        driverXbox.y().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().cancelAll()));
-        driverXbox.x().onTrue(Commands.defer(() -> drivebase.alignToTrenchCommand(), Set.of(drivebase)));
-        driverXbox.start().onTrue((Commands.runOnce(drivebase::zeroNoAprilTagsGyro)));
-        driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
-    }
+        }, Set.of(vision))
+    );
+
+    driverXbox.y().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().cancelAll()));
+
+    driverXbox.x().onTrue(Commands.runOnce(() -> led.setGreen(), led));
+
+    driverXbox.start().onTrue(Commands.runOnce(drivebase::zeroNoAprilTagsGyro));
+
+    driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
+
+    driverXbox.b().onTrue(Commands.defer(() -> new ClimbCommand(drivebase), Set.of(drivebase)));
+}
 
     public Command getAutonomousCommand() {
       return autoChooser.getAutoChooser().selectedCommand();
