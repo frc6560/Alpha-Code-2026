@@ -21,8 +21,12 @@ import java.util.Set;
 import swervelib.SwerveInputStream;
 import frc.robot.commands.ShooterCommand;
 import frc.robot.commands.SubsystemManagerCommand;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.Constants.LimelightConstants;
+import frc.robot.utility.Shooter.ShotCalculator;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.autonomous.AutoModeChooser;
 import frc.robot.autonomous.AutoCommands;
@@ -48,9 +52,14 @@ public class RobotContainer {
     private final Shooter shooter = new Shooter();
     private final Feeder feeder = new Feeder();
 
+    // Shot calculator for snap-to-target heading
+    private final ShotCalculator shotCalculator = new ShotCalculator();
+    private boolean wasSnapModeActive = false;
+
     private final AutoCommands factory;
     private final AutoModeChooser autoChooser;
 
+    // Normal drive mode - angular velocity control
     SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
       () -> driverXbox.getLeftY() * -1,
       () -> driverXbox.getLeftX() * -1)
@@ -58,6 +67,9 @@ public class RobotContainer {
       .deadband(OperatorConstants.DEADBAND)
       .scaleTranslation(0.8)
       .allianceRelativeControl(true);
+
+    // Threshold for left trigger to activate snap-to-target mode
+    private static final double SNAP_MODE_TRIGGER_THRESHOLD = 0.5;
 
 
     public RobotContainer() {
@@ -79,8 +91,47 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        Command driveFieldOrientedAnglularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
-        drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+        // Dual-mode drive command: normal or snap-to-target based on left trigger
+        Command dualModeDrive = drivebase.run(() -> {
+            boolean snapModeActive = driverXbox.getLeftTriggerAxis() > SNAP_MODE_TRIGGER_THRESHOLD;
+
+            // Reset heading profile on transition into snap mode
+            if (snapModeActive && !wasSnapModeActive) {
+                drivebase.resetHeadingProfile();
+            }
+            wasSnapModeActive = snapModeActive;
+
+            // Get translation inputs (scaled and deadbanded from SwerveInputStream)
+            ChassisSpeeds baseSpeeds = driveAngularVelocity.get();
+            double vx = baseSpeeds.vxMetersPerSecond;
+            double vy = baseSpeeds.vyMetersPerSecond;
+
+            double omega;
+            if (snapModeActive) {
+                // Snap-to-target mode: calculate heading to face the shot target
+                Pose2d robotPose = drivebase.getPose();
+                ChassisSpeeds fieldVelocity = drivebase.getFieldVelocity();
+
+                // Update shot calculator with current pose and velocity
+                shotCalculator.calculate(robotPose, fieldVelocity);
+
+                // Convert robot-relative turret angle to field-relative heading
+                double turretAngle = shotCalculator.getTurretAngle();
+                double targetHeading = MathUtil.angleModulus(
+                    robotPose.getRotation().getRadians() + turretAngle
+                );
+
+                // Get profiled omega for smooth heading control
+                omega = drivebase.calculateSnapToTargetOmega(targetHeading);
+            } else {
+                // Normal mode: use angular velocity from right stick
+                omega = baseSpeeds.omegaRadiansPerSecond;
+            }
+
+            drivebase.driveFieldOriented(new ChassisSpeeds(vx, vy, omega));
+        });
+
+        drivebase.setDefaultCommand(dualModeDrive);
         driverXbox.a().onTrue(
           Commands.defer(() -> {
             return Commands.runOnce(() -> vision.hardReset("limelight"), vision);
