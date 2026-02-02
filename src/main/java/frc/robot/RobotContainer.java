@@ -10,13 +10,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.superstructure.Feeder;
 import frc.robot.subsystems.superstructure.Shooter;
-import frc.robot.subsystems.superstructure.deprecated.Arm;
-import frc.robot.subsystems.superstructure.deprecated.BallGrabber;
-import frc.robot.subsystems.superstructure.deprecated.Elevator;
-import frc.robot.subsystems.superstructure.deprecated.SubsystemManager;
-import frc.robot.commands.ArmCommand;
-import frc.robot.commands.ElevatorCommand;
-import frc.robot.commands.BallGrabberCommand;
 import frc.robot.subsystems.vision.LimelightVision;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
@@ -26,6 +19,7 @@ import java.util.List;
 import java.util.Set;
 
 import swervelib.SwerveInputStream;
+import frc.robot.commands.ShooterCommand;
 import frc.robot.commands.SubsystemManagerCommand;
 import edu.wpi.first.math.geometry.Pose3d;
 import frc.robot.Constants.LimelightConstants;
@@ -51,12 +45,8 @@ public class RobotContainer {
     private final VisionSubsystem vision;
 
     // Subsystems
-    private final Elevator elevator = new Elevator();
     private final Shooter shooter = new Shooter();
     private final Feeder feeder = new Feeder();
-    private final Arm arm = new Arm();
-    private final BallGrabber ballGrabber = new BallGrabber();
-    private final SubsystemManager subsystemManager = new SubsystemManager(drivebase, elevator, arm, ballGrabber, controls);
 
     private final AutoCommands factory;
     private final AutoModeChooser autoChooser;
@@ -71,11 +61,7 @@ public class RobotContainer {
 
 
     public RobotContainer() {
-      arm.setDefaultCommand(new ArmCommand(arm, controls));
-
-      elevator.setDefaultCommand(new ElevatorCommand(elevator));
-      ballGrabber.setDefaultCommand(new BallGrabberCommand(ballGrabber, controls));
-      subsystemManager.setDefaultCommand(new SubsystemManagerCommand(drivebase, elevator, arm, ballGrabber, controls, subsystemManager));
+      shooter.setDefaultCommand(new ShooterCommand(shooter, drivebase));
       
       factory = new AutoCommands(drivebase, shooter, feeder);
 
