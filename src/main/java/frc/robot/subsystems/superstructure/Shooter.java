@@ -79,7 +79,6 @@ public class Shooter extends SubsystemBase {
     public void stop() {
         targetRPM = 0;
         leaderMotor.stopMotor();
-        followerMotor.setControl(new Follower(leaderMotor.getDeviceID(), MotorAlignmentValue.Aligned));
     }
 
     public double getVelocityRPM() {
