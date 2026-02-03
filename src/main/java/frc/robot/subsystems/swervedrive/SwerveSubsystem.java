@@ -182,6 +182,14 @@ public class SwerveSubsystem extends SubsystemBase {
     m_pidControllerTheta_pose.enableContinuousInput(-Math.PI, Math.PI);
     Pose2d pose = getPose();
     swerveDrive.field.getObject("TargetPose").setPose(targetPose);
+
+    swerveDrive.field.getObject("TargetSetpoint").setPose(setpoint.getSetpointPose());
+    // SmartDashboard.getEntry("X Error").setDouble(m_pidControllerX.getError());
+    // SmartDashboard.getEntry("Y Error").setDouble(m_pidControllerY.getError());
+    // SmartDashboard.getEntry("Theta Error").setDouble(m_pidControllerTheta.getError());
+    // SmartDashboard.getEntry("VX Error").setDouble(Math.abs(setpoint.vx - swerveDrive.getRobotVelocity().vxMetersPerSecond));
+    // SmartDashboard.getEntry("VY Error").setDouble(Math.abs(setpoint.vy - swerveDrive.getRobotVelocity().vyMetersPerSecond));
+
     
     m_pidControllerX_pose.setPID(DrivebaseConstants.kP_translation_intake, 
                           DrivebaseConstants.kI_translation_intake, 
@@ -197,7 +205,15 @@ public class SwerveSubsystem extends SubsystemBase {
     ChassisSpeeds targetSpeeds = new ChassisSpeeds( 
       setpoint.vx + m_pidControllerX_pose.calculate(pose.getX(), setpoint.x), 
       setpoint.vy + m_pidControllerY_pose.calculate(pose.getY(), setpoint.y),
-      (-1) * (setpoint.omega + m_pidControllerTheta_pose.calculate(pose.getRotation().getRadians(), setpoint.theta))
+      setpoint.omega + m_pidControllerTheta_pose.calculate(pose.getRotation().getRadians(), setpoint.theta)
+    );
+
+    swerveDrive.field.getObject("desiredPose").setPose(
+      new Pose2d(
+        pose.getX() + targetSpeeds.vxMetersPerSecond,
+        pose.getY() + targetSpeeds.vyMetersPerSecond,
+        Rotation2d.fromRadians(pose.getRotation().getRadians() + targetSpeeds.omegaRadiansPerSecond)
+      )
     );
     swerveDrive.driveFieldOriented(targetSpeeds);
   }

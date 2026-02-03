@@ -144,8 +144,8 @@ public class ClimbCommand extends SequentialCommandGroup {
     //todo convert m to foot
     public Pose2d getPrescore(Pose2d targetPose){
         return new Pose2d(
-            targetPose.getX() + Units.metersToFeet(1) * Math.cos(targetPose.getRotation().getRadians()), 
-            targetPose.getY() + Units.metersToFeet(1) * Math.sin(targetPose.getRotation().getRadians()), 
+            targetPose.getX() + Units.feetToMeters(1) * Math.cos(targetPose.getRotation().getRadians()), 
+            targetPose.getY() + Units.feetToMeters(1) * Math.sin(targetPose.getRotation().getRadians()), 
             targetPose.getRotation()
         );
     }
@@ -168,8 +168,13 @@ public class ClimbCommand extends SequentialCommandGroup {
         } else {
             targetPose = new Pose2d(1.5753228664398193, 3.330711841583252, new Rotation2d(0));
         }
+        
     } else { // Red Alliance
-        if (currentY > yThreshold) {
+        if (currentY > yThreshold) {if (currentY > yThreshold) {
+            targetPose = new Pose2d(1.5753228664398193, 4.183515548706055, new Rotation2d(0));
+        } else {
+            targetPose = new Pose2d(1.5753228664398193, 3.330711841583252, new Rotation2d(0));
+        }
             targetPose = new Pose2d(14.976325035095215, 4.754785537719727, new Rotation2d(3.14159265));
         } else {
             targetPose = new Pose2d(14.977962493896484, 3.8988282680511475, new Rotation2d(3.14159265));
