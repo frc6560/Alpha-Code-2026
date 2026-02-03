@@ -13,6 +13,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.TurretConstants;
 
@@ -129,7 +130,7 @@ public class ShotCalculator {
             )
         );
 
-        // gets the turret's robot relative transform
+       // gets the turret's robot relative transform
         Transform2d turretTransform = new Transform2d(
             TurretConstants.ROBOT_RELATIVE_TURRET.getX(), 
             TurretConstants.ROBOT_RELATIVE_TURRET.getY(),
@@ -147,17 +148,30 @@ public class ShotCalculator {
         double turretVy = fieldVelocity.vyMetersPerSecond
                         + (r * fieldVelocity.omegaRadiansPerSecond * Math.cos(projectedPosition.getRotation().getRadians() + angleOffset));
         
+        // Log input velocities
+        SmartDashboard.putNumber("SOTM/FieldVel/vX", fieldVelocity.vxMetersPerSecond);
+        SmartDashboard.putNumber("SOTM/FieldVel/vY", fieldVelocity.vyMetersPerSecond);
+        SmartDashboard.putNumber("SOTM/FieldVel/omega", fieldVelocity.omegaRadiansPerSecond);
+
+        // Log turret field-relative velocity
+        SmartDashboard.putNumber("SOTM/TurretVel/vX", turretVx);
+        SmartDashboard.putNumber("SOTM/TurretVel/vY", turretVy);
+        SmartDashboard.putNumber("SOTM/TurretVel/magnitude", Math.hypot(turretVx, turretVy));
+
         // calculates a virtual target iteratively based upon our parameters.
-        virtualTargetPose = targetPose;
+        virtualTargetPose = targetPose; 
         double timeOfFlight = 0;
         double distanceToTarget = turretPose.getTranslation().getDistance(targetPose);
+        double staticDistance = distanceToTarget; // save for logging
 
         // Convergence threshold for early exit (seconds)
         final double EPSILON = 0.01;
         double prevTimeOfFlight = 0;
+        int iterationsUsed = 0;
 
         for(int i = 0; i < 20; i++){
             timeOfFlight = timeOfFlightMap.get(distanceToTarget);
+            iterationsUsed = i + 1;
 
             // Early exit if time of flight has converged
             if (i > 0 && Math.abs(timeOfFlight - prevTimeOfFlight) < EPSILON) {
@@ -174,6 +188,16 @@ public class ShotCalculator {
             );
             distanceToTarget = turretPose.getTranslation().getDistance(virtualTargetPose);
         }
+
+        SmartDashboard.putNumber("SOTM/Iterations", iterationsUsed);
+        SmartDashboard.putNumber("SOTM/TimeOfFlight", timeOfFlight);
+        SmartDashboard.putNumber("SOTM/Distance/Static", staticDistance);
+        SmartDashboard.putNumber("SOTM/Distance/Virtual", distanceToTarget);
+
+        Translation2d targetOffset = virtualTargetPose.minus(targetPose);
+        SmartDashboard.putNumber("SOTM/VirtualOffset/X", targetOffset.getX());
+        SmartDashboard.putNumber("SOTM/VirtualOffset/Y", targetOffset.getY());
+        SmartDashboard.putNumber("SOTM/VirtualOffset/magnitude", targetOffset.getNorm());
 
         // calculates hood angle and flywheel RPM from virtual target
         double newHoodAzimuth = hoodAzimuthMap.get(distanceToTarget);
@@ -210,6 +234,13 @@ public class ShotCalculator {
         turretAngle = newTurretAngle;
         hoodVelocity = filteredHoodVelocity;
         turretVelocity = filteredTurretVelocity;
+
+        // Log final output values
+        SmartDashboard.putNumber("SOTM/Output/TurretAngleDeg", Math.toDegrees(turretAngle));
+        SmartDashboard.putNumber("SOTM/Output/TurretVelDegPerSec", Math.toDegrees(turretVelocity));
+        SmartDashboard.putNumber("SOTM/Output/HoodAngleDeg", Math.toDegrees(hoodAzimuth));
+        SmartDashboard.putNumber("SOTM/Output/HoodVelDegPerSec", Math.toDegrees(hoodVelocity));
+        SmartDashboard.putNumber("SOTM/Output/FlywheelRPM", flywheelRPM);
     }
 
     /** Resets the velocity filter state. Call this when re-enabling or after long pauses. */

@@ -73,7 +73,7 @@ public class RobotContainer {
 
 
     public RobotContainer() {
-      shooter.setDefaultCommand(new ShooterCommand(shooter, drivebase));
+      // shooter.setDefaultCommand(new ShooterCommand(shooter, drivebase));
       
       factory = new AutoCommands(drivebase, shooter, feeder);
 
