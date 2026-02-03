@@ -27,6 +27,7 @@ import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -45,6 +46,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import frc.robot.Constants;
 import frc.robot.Constants.DrivebaseConstants;
 import frc.robot.Constants.FieldConstants;
+import frc.robot.Constants.TurretConstants;
 import frc.robot.utility.LimelightHelpers;
 import frc.robot.utility.LimelightHelpers.PoseEstimate;
 
@@ -146,6 +148,16 @@ public class SwerveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+    // Update distance to hub on SmartDashboard for debugging
+    Transform2d turretTransform = new Transform2d(
+            TurretConstants.ROBOT_RELATIVE_TURRET.getX(), 
+            TurretConstants.ROBOT_RELATIVE_TURRET.getY(),
+            new Rotation2d()
+        );
+    Pose2d robotRelativeTurret = getPose().transformBy( turretTransform );
+    swerveDrive.field.getObject("TurretPose").setPose(robotRelativeTurret);
+    SmartDashboard.getEntry("DistToBlueHub").setDouble(
+      robotRelativeTurret.getTranslation().getDistance(FieldConstants.BLUE_HUB_CENTER));
   }
 
   /**
