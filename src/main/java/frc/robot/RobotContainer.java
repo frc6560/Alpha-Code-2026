@@ -80,6 +80,9 @@ public class RobotContainer {
       autoChooser = new AutoModeChooser(factory);
       SmartDashboard.putData("Auto Chooser", autoChooser.getAutoChooser());
 
+      // Shooter test RPM entry - editable in Shuffleboard
+      SmartDashboard.putNumber("Shooter Test RPM", -1500);
+
       List<LimelightVision> limelights = new ArrayList<LimelightVision>();
       for(String name : LimelightConstants.LIMELIGHT_NAMES) {
         Pose3d cameraPose = LimelightConstants.getLimelightPose(name);
@@ -141,10 +144,13 @@ public class RobotContainer {
         driverXbox.x().onTrue(Commands.defer(() -> drivebase.alignToTrenchCommand(), Set.of(drivebase)));
         driverXbox.b().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().schedule(drivebase.sysIdDriveMotorCommand()), drivebase));
         driverXbox.start().onTrue((Commands.runOnce(drivebase::zeroNoAprilTagsGyro)));
-        driverXbox.leftBumper().onTrue(Commands.runOnce(() -> shooter.setRPM(-1750), shooter));
+        driverXbox.leftBumper().onTrue(Commands.runOnce(() -> {
+            double targetRPM = SmartDashboard.getNumber("Shooter Test RPM", -1500);
+            shooter.setRPM(targetRPM);
+        }, shooter).withTimeout(5.0));
         
         // B button: Start feeder at constant RPM
-        driverXbox.rightBumper().onTrue(Commands.runOnce(() -> feeder.setRPM(-1000), feeder));
+        driverXbox.rightBumper().onTrue(Commands.runOnce(() -> feeder.setRPM(-1500), feeder).withTimeout(5.0));
     }
 
     public Command getAutonomousCommand() {
