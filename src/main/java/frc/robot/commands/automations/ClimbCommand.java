@@ -94,7 +94,7 @@ public class ClimbCommand extends SequentialCommandGroup {
                 // Move.
                 Setpoint newSetpoint = getNextSetpoint(path);
                 drivetrain.followSegment2(newSetpoint, targetPose);
-                if(drivetrain.getPose().getTranslation().getDistance(targetPose.getTranslation()) < 0.02
+                if(drivetrain.getPose().getTranslation().getDistance(targetPose.getTranslation()) < 0.05
                     && Math.abs(drivetrain.getPose().getRotation().getRadians() - targetPose.getRotation().getRadians()) < 0.017
                 ){
                     // Stop.

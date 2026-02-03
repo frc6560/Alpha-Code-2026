@@ -24,7 +24,7 @@ import frc.robot.utility.LimelightHelpers;
  * described in the TimedRobot documentation. If you change the name of this class or the package after creating this
  * project, you must also update the build.gradle file in the project.
  */
-public class Robot extends LoggedRobot
+public class Robot extends TimedRobot
 {
 
   private static Robot   instance;
@@ -36,18 +36,6 @@ public class Robot extends LoggedRobot
 
   public Robot()
   {
-    Logger.recordMetadata("Robot", "2026 Alpha");
-    if (isReal()) {
-      Logger.addDataReceiver(new WPILOGWriter());
-      Logger.addDataReceiver(new NT4Publisher());
-    } else {
-      setUseTiming(false); // Run as fast as possible
-      String logPath = LogFileUtil.findReplayLog(); 
-      Logger.setReplaySource(new WPILOGReader(logPath)); 
-      Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim"))); 
-    }
-
-    Logger.start(); 
     instance = this;
   }
 

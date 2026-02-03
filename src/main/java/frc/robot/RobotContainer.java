@@ -31,6 +31,7 @@ import java.util.Set;
 import swervelib.SwerveInputStream;
 import frc.robot.commands.SubsystemManagerCommand;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import frc.robot.Constants.LimelightConstants;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.autonomous.AutoModeChooser;
@@ -114,7 +115,8 @@ public class RobotContainer {
 
     driverXbox.a().onTrue(
         Commands.defer(() -> {
-            return Commands.runOnce(() -> vision.hardReset("limelight"), vision);
+            return Commands.runOnce(() -> vision.hardReset("limelight"), vision)
+            .andThen(Commands.runOnce(() -> drivebase.getSwerveDrive().setGyro(new Rotation3d(0, 0, drivebase.getPose().getRotation().getRadians()))));
         }, Set.of(vision))
     );
 
