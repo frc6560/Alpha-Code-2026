@@ -106,7 +106,7 @@ public class RobotContainer {
 
             double omega;
             if (snapModeActive) {
-              // // Snap-to-target mode: calculate heading to face the shot target
+               // // Snap-to-target mode: calculate heading to face the shot target
               //   Pose2d robotPose = drivebase.getPose();
               //   ChassisSpeeds fieldVelocity = drivebase.getFieldVelocity();
 
@@ -121,20 +121,24 @@ public class RobotContainer {
 
               //   // Get profiled omega for smooth heading control
               //   omega = drivebase.calculateSnapToTargetOmega(targetHeading);
-                // Snap-to-target mode: point directly at the blue hub (for LUT testing)
+
                 Pose2d robotPose = drivebase.getPose();
+                ChassisSpeeds fieldVelocity = drivebase.getFieldVelocity();
 
                 double dx = Constants.FieldConstants.BLUE_HUB_CENTER.getX() - robotPose.getX();
                 double dy = Constants.FieldConstants.BLUE_HUB_CENTER.getY() - robotPose.getY();
                 double targetHeading = Math.atan2(dy, dx);
-                if(Math.abs(MathUtil.angleModulus(targetHeading - robotPose.getRotation().getRadians())) < Math.toRadians(1.0)) {
-                    omega = 0.0;
-                }
-                else{
-                    omega = drivebase.getRotationalOutput(targetHeading).omegaRadiansPerSecond;
+
+                double distSq = dx * dx + dy * dy;
+                double omegaFF = (dx * fieldVelocity.vyMetersPerSecond - dy * fieldVelocity.vxMetersPerSecond) / distSq;
+
+                double headingError = MathUtil.angleModulus(targetHeading - robotPose.getRotation().getRadians());
+                if (Math.abs(headingError) < Math.toRadians(1.0)) {
+                    omega = omegaFF;
+                } else {
+                    omega = drivebase.getRotationalOutput(targetHeading).omegaRadiansPerSecond + omegaFF;
                 }
             } else {
-                // Normal mode: use angular velocity from right stick
                 omega = baseSpeeds.omegaRadiansPerSecond;
             }
 
