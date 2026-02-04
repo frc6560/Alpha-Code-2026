@@ -88,12 +88,6 @@ public class SwerveSubsystem extends SubsystemBase {
                                                           DrivebaseConstants.kI_rotation,
                                                           DrivebaseConstants.kD_rotation); // tune values
 
-  // Trapezoidal profile for smooth heading control (snap-to-target mode)
-  private static final double MAX_ANGULAR_VELOCITY = Math.PI * 2; // rad/s
-  private static final double MAX_ANGULAR_ACCELERATION = Math.PI * 4; // rad/s^2
-  private final TrapezoidProfile.Constraints headingConstraints =
-      new TrapezoidProfile.Constraints(MAX_ANGULAR_VELOCITY, MAX_ANGULAR_ACCELERATION);
-  private TrapezoidProfile.State headingState = new TrapezoidProfile.State(0, 0);
 
   /**
    * Initialize {@link SwerveDrive} with the directory provided.
@@ -189,6 +183,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
   /** Rotates to a specified angle while inheriting the chassis's original translational velocity */
   public void rotateToAngle(double targetInRadians){
+    m_pidControllerTheta.enableContinuousInput(-Math.PI, Math.PI);
+
     SmartDashboard.getEntry("Yaw error").setDouble(m_pidControllerTheta.getError());
     SmartDashboard.getEntry("Pose in radians").setDouble(getPose().getRotation().getRadians());
 
@@ -201,45 +197,19 @@ public class SwerveSubsystem extends SubsystemBase {
     swerveDrive.driveFieldOriented(targetSpeeds);
   }
 
-  /**
-   * Calculates omega for snap-to-target heading using a trapezoidal profile for smooth control.
-   * Uses the profile to generate velocity setpoints and PID for position correction.
-   *
-   * @param targetHeadingRadians The target field-relative heading in radians
-   * @return The omega (angular velocity) to command in rad/s
-   */
-  public double calculateSnapToTargetOmega(double targetHeadingRadians) {
+  public ChassisSpeeds getRotationalOutput(double targetInRadians){
     m_pidControllerTheta.enableContinuousInput(-Math.PI, Math.PI);
+    
+    SmartDashboard.getEntry("Yaw error").setDouble(m_pidControllerTheta.getError());
+    SmartDashboard.getEntry("Pose in radians").setDouble(getPose().getRotation().getRadians());
 
-    double currentHeading = getPose().getRotation().getRadians();
-    double currentOmega = getFieldVelocity().omegaRadiansPerSecond;
+    ChassisSpeeds targetSpeeds = new ChassisSpeeds(
+      0,
+      0,
+      m_pidControllerTheta.calculate(getPose().getRotation().getRadians(), targetInRadians)
+    );
 
-    // Handle angle wrapping for the target
-    double headingError = MathUtil.angleModulus(targetHeadingRadians - currentHeading);
-    double adjustedTarget = currentHeading + headingError;
-
-    // Update heading state with current position and velocity
-    headingState = new TrapezoidProfile.State(currentHeading, currentOmega);
-    TrapezoidProfile.State goalState = new TrapezoidProfile.State(adjustedTarget, 0);
-
-    // Calculate next state from trapezoidal profile
-    TrapezoidProfile profile = new TrapezoidProfile(headingConstraints);
-    TrapezoidProfile.State nextState = profile.calculate(0.02, headingState, goalState); // 20ms loop
-
-    // Combine feedforward velocity from profile with PID correction
-    double pidOutput = m_pidControllerTheta.calculate(currentHeading, nextState.position);
-    double omega = nextState.velocity + pidOutput;
-
-    SmartDashboard.putNumber("Snap Target Heading", Math.toDegrees(targetHeadingRadians));
-    SmartDashboard.putNumber("Snap Heading Error", Math.toDegrees(headingError));
-
-    return omega;
-  }
-
-  /** Resets the heading profile state. Call when transitioning to snap-to-target mode. */
-  public void resetHeadingProfile() {
-    headingState = new TrapezoidProfile.State(getPose().getRotation().getRadians(),
-                                               getFieldVelocity().omegaRadiansPerSecond);
+    return targetSpeeds;
   }
 
   double tx;

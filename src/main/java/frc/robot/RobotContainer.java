@@ -97,11 +97,6 @@ public class RobotContainer {
         // Dual-mode drive command: normal or snap-to-target based on left trigger
         Command dualModeDrive = drivebase.run(() -> {
             boolean snapModeActive = driverXbox.getLeftTriggerAxis() > SNAP_MODE_TRIGGER_THRESHOLD;
-
-            // Reset heading profile on transition into snap mode
-            if (snapModeActive && !wasSnapModeActive) {
-                drivebase.resetHeadingProfile();
-            }
             wasSnapModeActive = snapModeActive;
 
             // Get translation inputs (scaled and deadbanded from SwerveInputStream)
@@ -111,21 +106,33 @@ public class RobotContainer {
 
             double omega;
             if (snapModeActive) {
-                // Snap-to-target mode: calculate heading to face the shot target
+              // // Snap-to-target mode: calculate heading to face the shot target
+              //   Pose2d robotPose = drivebase.getPose();
+              //   ChassisSpeeds fieldVelocity = drivebase.getFieldVelocity();
+
+              //   // Update shot calculator with current pose and velocity
+              //   shotCalculator.calculate(robotPose, fieldVelocity);
+
+              //   // Convert robot-relative turret angle to field-relative heading
+              //   double turretAngle = shotCalculator.getTurretAngle();
+              //   double targetHeading = MathUtil.angleModulus(
+              //       robotPose.getRotation().getRadians() + turretAngle
+              //   );
+
+              //   // Get profiled omega for smooth heading control
+              //   omega = drivebase.calculateSnapToTargetOmega(targetHeading);
+                // Snap-to-target mode: point directly at the blue hub (for LUT testing)
                 Pose2d robotPose = drivebase.getPose();
-                ChassisSpeeds fieldVelocity = drivebase.getFieldVelocity();
 
-                // Update shot calculator with current pose and velocity
-                shotCalculator.calculate(robotPose, fieldVelocity);
-
-                // Convert robot-relative turret angle to field-relative heading
-                double turretAngle = shotCalculator.getTurretAngle();
-                double targetHeading = MathUtil.angleModulus(
-                    robotPose.getRotation().getRadians() + turretAngle
-                );
-
-                // Get profiled omega for smooth heading control
-                omega = drivebase.calculateSnapToTargetOmega(targetHeading);
+                double dx = Constants.FieldConstants.BLUE_HUB_CENTER.getX() - robotPose.getX();
+                double dy = Constants.FieldConstants.BLUE_HUB_CENTER.getY() - robotPose.getY();
+                double targetHeading = Math.atan2(dy, dx);
+                if(Math.abs(MathUtil.angleModulus(targetHeading - robotPose.getRotation().getRadians())) < Math.toRadians(1.0)) {
+                    omega = 0.0;
+                }
+                else{
+                    omega = drivebase.getRotationalOutput(targetHeading).omegaRadiansPerSecond;
+                }
             } else {
                 // Normal mode: use angular velocity from right stick
                 omega = baseSpeeds.omegaRadiansPerSecond;
@@ -144,13 +151,13 @@ public class RobotContainer {
         driverXbox.x().onTrue(Commands.defer(() -> drivebase.alignToTrenchCommand(), Set.of(drivebase)));
         driverXbox.b().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().schedule(drivebase.sysIdDriveMotorCommand()), drivebase));
         driverXbox.start().onTrue((Commands.runOnce(drivebase::zeroNoAprilTagsGyro)));
-        driverXbox.leftBumper().onTrue(Commands.runOnce(() -> {
+        driverXbox.leftBumper().onTrue(Commands.run(() -> {
             double targetRPM = SmartDashboard.getNumber("Shooter Test RPM", -1500);
             shooter.setRPM(targetRPM);
-        }, shooter).withTimeout(5.0));
+        }, shooter).withTimeout(5.0).finallyDo((interrupted) -> shooter.setRPM(0)));
         
         // B button: Start feeder at constant RPM
-        driverXbox.rightBumper().onTrue(Commands.runOnce(() -> feeder.setRPM(-1500), feeder).withTimeout(5.0));
+        driverXbox.rightBumper().onTrue(Commands.run(() -> feeder.setRPM(-1800), feeder).withTimeout(5.0).finallyDo((interrupted) -> feeder.setRPM(0)));
     }
 
     public Command getAutonomousCommand() {

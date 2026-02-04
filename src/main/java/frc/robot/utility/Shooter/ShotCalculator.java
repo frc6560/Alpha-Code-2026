@@ -66,6 +66,19 @@ public class ShotCalculator {
         this.hoodVelocity = 0;
         this.turretVelocity = 0;
         this.virtualTargetPose = new Translation2d();
+        populateLUTs();
+    }
+
+    public void populateLUTs(){
+        // shooter RPM
+        flywheelRPMMap.put(3.77, -1990.0);
+        flywheelRPMMap.put(4.29, -2070.0);
+        flywheelRPMMap.put(4.82, -2160.0); // TODO: finish tuning.
+        flywheelRPMMap.put(5.49, -2285.0);
+
+        // hood azimuth (finish on main bot)
+
+        // time of flight (finish on main bot)
     }
 
     public double getHoodAzimuth() {
