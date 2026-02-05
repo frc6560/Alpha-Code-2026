@@ -156,7 +156,7 @@ public class RobotContainer {
         driverXbox.b().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().schedule(drivebase.sysIdDriveMotorCommand()), drivebase));
         driverXbox.start().onTrue((Commands.runOnce(drivebase::zeroNoAprilTagsGyro)));
         driverXbox.leftBumper().onTrue(Commands.run(() -> {
-            double targetRPM = SmartDashboard.getNumber("Shooter Test RPM", -1500);
+            double targetRPM = shotCalculator.getStationaryRPM(drivebase.getPose());
             shooter.setRPM(targetRPM);
         }, shooter).withTimeout(5.0).finallyDo((interrupted) -> shooter.setRPM(0)));
         

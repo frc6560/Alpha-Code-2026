@@ -73,8 +73,8 @@ public class ShotCalculator {
         // shooter RPM
         flywheelRPMMap.put(3.77, -1990.0);
         flywheelRPMMap.put(4.29, -2070.0);
-        flywheelRPMMap.put(4.82, -2160.0); // TODO: finish tuning.
-        flywheelRPMMap.put(5.49, -2285.0);
+        flywheelRPMMap.put(4.82, -2175.0); // TODO: finish tuning.
+        flywheelRPMMap.put(5.47, -2285.0);
 
         // hood azimuth (finish on main bot)
 
@@ -83,6 +83,19 @@ public class ShotCalculator {
 
     public double getHoodAzimuth() {
         return hoodAzimuth;
+    }
+
+    /** Hack method for the alpha bot. DNU on main bot. */
+    public double getStationaryRPM(Pose2d currentRobotPose){
+        Transform2d turretTransform = new Transform2d(
+            TurretConstants.ROBOT_RELATIVE_TURRET.getX(), 
+            TurretConstants.ROBOT_RELATIVE_TURRET.getY(),
+            new Rotation2d()
+        );
+        Pose2d turretPose = currentRobotPose.transformBy(turretTransform);
+
+        double distanceToTarget = turretPose.getTranslation().getDistance(FieldConstants.BLUE_HUB_CENTER);
+        return flywheelRPMMap.get(distanceToTarget);
     }
 
     public double getTurretAngle() {
