@@ -85,7 +85,7 @@ public class ShotCalculator {
         return hoodAzimuth;
     }
 
-    /** Hack method for the alpha bot. DNU on main bot. */
+    /** Hack method for alpha bot testing. DNU on main bot.*/
     public double getStationaryRPM(Pose2d currentRobotPose){
         Transform2d turretTransform = new Transform2d(
             TurretConstants.ROBOT_RELATIVE_TURRET.getX(), 
