@@ -142,13 +142,38 @@ public class ClimbCommand extends SequentialCommandGroup {
 
     /** Gets the prescore for a specific Pose2d */
     //todo convert m to foot
+
     public Pose2d getPrescore(Pose2d targetPose){
-        return new Pose2d(
-            targetPose.getX() + Units.feetToMeters(1) * Math.cos(targetPose.getRotation().getRadians()), 
-            targetPose.getY() + Units.feetToMeters(1) * Math.sin(targetPose.getRotation().getRadians()), 
-            targetPose.getRotation()
-        );
-    }
+        DriverStation.Alliance alliance;
+        if (!DriverStation.getAlliance().isPresent()) {
+            alliance = DriverStation.Alliance.Blue;
+        } else {
+            alliance = DriverStation.getAlliance().get();
+        }
+
+        double currentY = drivetrain.getPose().getY();
+        double yThreshold = 3.75;
+
+        Pose2d climbPose;
+
+        if (alliance.equals(DriverStation.Alliance.Blue)) {
+            if (currentY > yThreshold) {
+                climbPose = new Pose2d(2.5753228664398193, 0.0, new Rotation2d(0)); // Placeholder - upper climb
+            } else {
+                climbPose = new Pose2d(2.5753228664398193, 3.330711841583252, new Rotation2d(0)); // Placeholder - lower climb
+            }
+        
+        } else { // Red Alliance
+            if (currentY > yThreshold) {
+                climbPose = new Pose2d(13.976325035095215, 4.754785537719727, new Rotation2d(3.14159265)); // Placeholder - upper climb
+            } else {
+                climbPose = new Pose2d(13.976325035095215, 3.8988282680511475, new Rotation2d(3.14159265)); // Placeholder - lower climb
+            }
+        }
+
+    // Return prescore position (1 foot back from climb pose)
+    return climbPose;
+}
 
     /** Sets the target for the robot, including target pose, elevator height, and arm angle */
    public void setTargets() {
@@ -170,16 +195,12 @@ public class ClimbCommand extends SequentialCommandGroup {
         }
         
     } else { // Red Alliance
-        if (currentY > yThreshold) {if (currentY > yThreshold) {
-            targetPose = new Pose2d(1.5753228664398193, 4.183515548706055, new Rotation2d(0));
-        } else {
-            targetPose = new Pose2d(1.5753228664398193, 3.330711841583252, new Rotation2d(0));
-        }
-            targetPose = new Pose2d(14.976325035095215, 4.754785537719727, new Rotation2d(3.14159265));
-        } else {
-            targetPose = new Pose2d(14.977962493896484, 3.8988282680511475, new Rotation2d(3.14159265));
-        }
+    if (currentY > yThreshold) {
+        targetPose = new Pose2d(14.976325035095215, 4.754785537719727, new Rotation2d(3.14159265));
+    } else {
+        targetPose = new Pose2d(14.977962493896484, 3.8988282680511475, new Rotation2d(3.14159265));
     }
+}
 }
 
     /** Transforms red alliance poses to blue by reflecting around the center point of the field*/
