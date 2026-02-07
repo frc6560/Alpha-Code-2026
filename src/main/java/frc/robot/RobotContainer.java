@@ -132,18 +132,8 @@ public class RobotContainer {
 }
 
     public Command getAutonomousCommand() {
-      //return autoChooser.getAutoChooser().selectedCommand();
-      return getClimbAuto();
-    }
+      return autoChooser.getAutoChooser().selectedCommand();
 
-    public Command getClimbAuto() {
-        return Commands.sequence(
-            Commands.defer(() -> {
-                return Commands.runOnce(() -> vision.hardReset("limelight"), vision)
-                    .andThen(Commands.runOnce(() -> drivebase.getSwerveDrive().setGyro(new Rotation3d(0, 0, drivebase.getPose().getRotation().getRadians()))));
-            }, Set.of(vision)),
-            Commands.defer(() -> new ClimbCommand(drivebase), Set.of(drivebase))
-        );
     }
 
 
