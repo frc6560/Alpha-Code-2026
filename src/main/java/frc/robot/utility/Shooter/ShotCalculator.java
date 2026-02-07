@@ -191,7 +191,7 @@ public class ShotCalculator {
         double staticDistance = distanceToTarget; // save for logging
 
         // Convergence threshold for early exit (seconds)
-        final double EPSILON = 0.01;
+        final double EPSILON = 0.05;
         double prevTimeOfFlight = 0;
         int iterationsUsed = 0;
 
