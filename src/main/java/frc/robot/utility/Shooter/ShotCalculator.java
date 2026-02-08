@@ -35,11 +35,11 @@ public class ShotCalculator {
 
     public double flywheelRPM;
     private double hoodAzimuth; // in radians
-    private double turretAngle; // in radians
-    private double hoodVelocity; // rad/s
-    private double turretVelocity; // rad/s
+    private double turretAngle; 
+    private double hoodVelocity; 
+    private double turretVelocity; 
 
-    private static final double TIME_PARAMETER = 0.03; // seconds into the future to project
+    private static final double TIME_PARAMETER = 0.058; 
 
     // low-pass filter coefficient (0-1, higher = more smoothing)
     private static final double VELOCITY_FILTER_ALPHA = 0.8;
@@ -48,7 +48,7 @@ public class ShotCalculator {
     private static final InterpolatingDoubleTreeMap flywheelRPMMap = new InterpolatingDoubleTreeMap();
     private static final InterpolatingDoubleTreeMap timeOfFlightMap = new InterpolatingDoubleTreeMap();
 
-    public Translation2d virtualTargetPose; // for SOTM
+    public Translation2d virtualTargetPose; 
 
     // state for numerical differentiation
     private double prevHoodAzimuth = 0;
