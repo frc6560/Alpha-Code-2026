@@ -63,7 +63,7 @@ public class ClimbCommand extends SequentialCommandGroup {
 
         setTargets();
 
-        super.addCommands(//new ParallelCommandGroup(getDriveToPrescore()),
+        super.addCommands(new ParallelCommandGroup(getDriveToPrescore()),
                                 new ParallelCommandGroup(getDriveInCommand()));
         super.addRequirements(drivetrain);
     }
@@ -159,16 +159,16 @@ public class ClimbCommand extends SequentialCommandGroup {
 
         if (alliance.equals(DriverStation.Alliance.Blue)) {
             if (initialY > yThreshold) { // Use initialY instead of current
-                climbPose = new Pose2d(2.5753228664398193, 0.0, new Rotation2d(0)); // Placeholder - upper climb
+                climbPose = new Pose2d(2.5753228664398193, 4.183515548706055, new Rotation2d(0)); // Placeholder - upper climb
             } else {
                 climbPose = new Pose2d(2.5753228664398193, 3.330711841583252, new Rotation2d(0)); // Placeholder - lower climb
             }
         
         } else { // Red Alliance
             if (initialY > yThreshold) { // Use initialY instead of current
-                climbPose = new Pose2d(13.976325035095215, 4.754785537719727, new Rotation2d(3.14159265)); // Placeholder - upper climb
+                climbPose = new Pose2d(13.976325035095215, 4.183515548706055, new Rotation2d(3.14159265)); // Placeholder - upper climb
             } else {
-                climbPose = new Pose2d(13.976325035095215, 3.8988282680511475, new Rotation2d(3.14159265)); // Placeholder - lower climb
+                climbPose = new Pose2d(13.976325035095215, 3.330711841583252, new Rotation2d(3.14159265)); // Placeholder - lower climb
             }
         }
 
@@ -196,9 +196,9 @@ public class ClimbCommand extends SequentialCommandGroup {
         
     } else { // Red Alliance
         if (initialY > yThreshold) { // Use initialY instead of current
-            targetPose = new Pose2d(14.976325035095215, 4.754785537719727, new Rotation2d(3.14159265));
+            targetPose = new Pose2d(14.976325035095215, 4.183515548706055, new Rotation2d(3.14159265));
         } else {
-            targetPose = new Pose2d(14.977962493896484, 3.8988282680511475, new Rotation2d(3.14159265));
+            targetPose = new Pose2d(14.977962493896484, 3.330711841583252, new Rotation2d(3.14159265));
         }
     }
 }
