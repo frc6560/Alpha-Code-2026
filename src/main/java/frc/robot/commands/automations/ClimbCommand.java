@@ -153,27 +153,15 @@ public class ClimbCommand extends SequentialCommandGroup {
             alliance = DriverStation.getAlliance().get();
         }
 
-        double yThreshold = 3.75;
-
-        Pose2d climbPose;
-
+        // Calculate prescore position 1 meter back from target
+        double prescoreX;
         if (alliance.equals(DriverStation.Alliance.Blue)) {
-            if (initialY > yThreshold) { // Use initialY instead of current
-                climbPose = new Pose2d(2.5753228664398193, 4.183515548706055, new Rotation2d(0)); // Placeholder - upper climb
-            } else {
-                climbPose = new Pose2d(2.5753228664398193, 3.330711841583252, new Rotation2d(0)); // Placeholder - lower climb
-            }
-        
-        } else { // Red Alliance
-            if (initialY > yThreshold) { // Use initialY instead of current
-                climbPose = new Pose2d(13.976325035095215, 4.183515548706055, new Rotation2d(3.14159265)); // Placeholder - upper climb
-            } else {
-                climbPose = new Pose2d(13.976325035095215, 3.330711841583252, new Rotation2d(3.14159265)); // Placeholder - lower climb
-            }
+            prescoreX = targetPose.getX() + 1.0; // Move back toward center (positive X)
+        } else {
+            prescoreX = targetPose.getX() - 1.0; // Move back toward center (negative X)
         }
 
-    // Return prescore position (1 foot back from climb pose)
-    return climbPose;
+        return new Pose2d(prescoreX, targetPose.getY(), targetPose.getRotation());
 }
 
     /** Sets the target for the robot, including target pose, elevator height, and arm angle */
