@@ -160,7 +160,7 @@ public class SwerveSubsystem extends SubsystemBase {
     m_pidControllerTheta.enableContinuousInput(-Math.PI, Math.PI);
 
     // Log some basic data to see if path following is accurate.
-    swerveDrive.field.getObject("TargetPose").setPose(setpoint.getPose());
+    //swerveDrive.field.getObject("TargetPose").setPose(setpoint.getPose());
     // SmartDashboard.getEntry("X Error").setDouble(m_pidControllerX.getError());
     // SmartDashboard.getEntry("Y Error").setDouble(m_pidControllerY.getError());
     // SmartDashboard.getEntry("Theta Error").setDouble(m_pidControllerTheta.getError());
