@@ -88,6 +88,12 @@ public class intake extends SubsystemBase {
 	}
 
 	public void setExtendPercent(double percent) {
+		if (!IntakeConstants.EXTENSION_ENABLED) {
+			lastExtendCommand = 0.0;
+			extendMotor.set(0.0);
+			return;
+		}
+
 		if (percent < 0 && isRetracted()) {
 			lastExtendCommand = 0.0;
 			extendMotor.set(0.0);
@@ -116,12 +122,27 @@ public class intake extends SubsystemBase {
 	}
 
 	public boolean isRetracted() {
+		if (!IntakeConstants.EXTENSION_ENABLED) {
+			return true;
+		}
+
 		boolean raw = retractLimitSwitch.get();
 		return IntakeConstants.RETRACT_LIMIT_SWITCH_INVERTED ? !raw : raw;
 	}
 
 	@Override
 	public void periodic() {
+		if (!IntakeConstants.EXTENSION_ENABLED) {
+			if (mode == Mode.EXTENSION || mode == Mode.SPRINGY) {
+				stopExtend();
+				setSpinPercent(IntakeConstants.SPIN_SPEED);
+			} else {
+				stopExtend();
+				stopSpin();
+			}
+			return;
+		}
+
 		if (isRetracted()) {
 			extendMotor.setPosition(0.0);
 		}
