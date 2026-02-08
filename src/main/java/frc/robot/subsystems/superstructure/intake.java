@@ -122,6 +122,10 @@ public class intake extends SubsystemBase {
 
 	@Override
 	public void periodic() {
+		if (isRetracted()) {
+			extendMotor.setPosition(0.0);
+		}
+
 		if (lastExtendCommand < 0 && isRetracted()) {
 			lastExtendCommand = 0.0;
 			extendMotor.set(0.0);
