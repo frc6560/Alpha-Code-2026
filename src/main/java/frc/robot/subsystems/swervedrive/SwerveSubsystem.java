@@ -161,11 +161,11 @@ public class SwerveSubsystem extends SubsystemBase {
 
     // Log some basic data to see if path following is accurate.
     swerveDrive.field.getObject("TargetPose").setPose(setpoint.getPose());
-    SmartDashboard.getEntry("X Error").setDouble(m_pidControllerX.getError());
-    SmartDashboard.getEntry("Y Error").setDouble(m_pidControllerY.getError());
-    SmartDashboard.getEntry("Theta Error").setDouble(m_pidControllerTheta.getError());
-    SmartDashboard.getEntry("VX Error").setDouble(Math.abs(setpoint.vx - swerveDrive.getRobotVelocity().vxMetersPerSecond));
-    SmartDashboard.getEntry("VY Error").setDouble(Math.abs(setpoint.vy - swerveDrive.getRobotVelocity().vyMetersPerSecond));
+    // SmartDashboard.getEntry("X Error").setDouble(m_pidControllerX.getError());
+    // SmartDashboard.getEntry("Y Error").setDouble(m_pidControllerY.getError());
+    // SmartDashboard.getEntry("Theta Error").setDouble(m_pidControllerTheta.getError());
+    // SmartDashboard.getEntry("VX Error").setDouble(Math.abs(setpoint.vx - swerveDrive.getRobotVelocity().vxMetersPerSecond));
+    // SmartDashboard.getEntry("VY Error").setDouble(Math.abs(setpoint.vy - swerveDrive.getRobotVelocity().vyMetersPerSecond));
 
     Pose2d pose = getPose();
 
@@ -184,9 +184,9 @@ public class SwerveSubsystem extends SubsystemBase {
     swerveDrive.field.getObject("TargetPose").setPose(targetPose);
 
     swerveDrive.field.getObject("TargetSetpoint").setPose(setpoint.getSetpointPose());
-    // SmartDashboard.getEntry("X Error").setDouble(m_pidControllerX.getError());
-    // SmartDashboard.getEntry("Y Error").setDouble(m_pidControllerY.getError());
-    // SmartDashboard.getEntry("Theta Error").setDouble(m_pidControllerTheta.getError());
+    SmartDashboard.getEntry("X Error").setDouble(m_pidControllerX.getError());
+    SmartDashboard.getEntry("Y Error").setDouble(m_pidControllerY.getError());
+    SmartDashboard.getEntry("Theta Error").setDouble(m_pidControllerTheta.getError());
     // SmartDashboard.getEntry("VX Error").setDouble(Math.abs(setpoint.vx - swerveDrive.getRobotVelocity().vxMetersPerSecond));
     // SmartDashboard.getEntry("VY Error").setDouble(Math.abs(setpoint.vy - swerveDrive.getRobotVelocity().vyMetersPerSecond));
 
