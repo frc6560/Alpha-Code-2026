@@ -73,8 +73,7 @@ public class RobotContainer {
 
 
     public RobotContainer() {
-      // shooter.setDefaultCommand(new ShooterCommand(shooter, drivebase));
-      
+      shooter.setDefaultCommand(new ShooterCommand(shooter, drivebase));
       factory = new AutoCommands(drivebase, shooter, feeder);
 
       autoChooser = new AutoModeChooser(factory);
@@ -106,27 +105,13 @@ public class RobotContainer {
 
             double omega;
             if (snapModeActive) {
-               // // Snap-to-target mode: calculate heading to face the shot target
-              //   Pose2d robotPose = drivebase.getPose();
-              //   ChassisSpeeds fieldVelocity = drivebase.getFieldVelocity();
-
-              //   // Update shot calculator with current pose and velocity
-              //   shotCalculator.calculate(robotPose, fieldVelocity);
-
-              //   // Convert robot-relative turret angle to field-relative heading
-              //   double turretAngle = shotCalculator.getTurretAngle();
-              //   double targetHeading = MathUtil.angleModulus(
-              //       robotPose.getRotation().getRadians() + turretAngle
-              //   );
-
-              //   // Get profiled omega for smooth heading control
-              //   omega = drivebase.calculateSnapToTargetOmega(targetHeading);
-
                 Pose2d robotPose = drivebase.getPose();
                 ChassisSpeeds fieldVelocity = drivebase.getFieldVelocity();
 
-                double dx = Constants.FieldConstants.BLUE_HUB_CENTER.getX() - robotPose.getX();
-                double dy = Constants.FieldConstants.BLUE_HUB_CENTER.getY() - robotPose.getY();
+                shotCalculator.calculate(robotPose, fieldVelocity);
+
+                double dx = shotCalculator.virtualTargetPose.getX() - robotPose.getX();
+                double dy = shotCalculator.virtualTargetPose.getY() - robotPose.getY();
                 double targetHeading = Math.atan2(dy, dx);
 
                 double distSq = dx * dx + dy * dy;

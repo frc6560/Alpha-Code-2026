@@ -33,7 +33,7 @@ public class ShotCalculator {
         Translation2d virtualTargetPose
     ) {}
 
-    public double flywheelRPM;
+    private double flywheelRPM;
     private double hoodAzimuth; // in radians
     private double turretAngle; 
     private double hoodVelocity; 
