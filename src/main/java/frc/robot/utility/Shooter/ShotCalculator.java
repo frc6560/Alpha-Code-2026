@@ -203,26 +203,28 @@ public class ShotCalculator {
         double prevTimeOfFlight = 0;
         int iterationsUsed = 0;
 
-        for(int i = 0; i < 20; i++){
-            timeOfFlight = timeOfFlightMap.get(distanceToTarget);
-            iterationsUsed = i + 1;
+        if(Math.hypot(turretVx, turretVy) > 0.1){
+            for(int i = 0; i < 20; i++){
+                timeOfFlight = timeOfFlightMap.get(distanceToTarget);
+                iterationsUsed = i + 1;
 
-            // Early exit if time of flight has converged
-            if (i > 0 && Math.abs(timeOfFlight - prevTimeOfFlight) < EPSILON) {
-                break;
+                // Early exit if time of flight has converged
+                if (i > 0 && Math.abs(timeOfFlight - prevTimeOfFlight) < EPSILON) {
+                    break;
+                }
+
+                prevTimeOfFlight = timeOfFlight;
+
+                virtualTargetPose = targetPose.minus(
+                    new Translation2d(
+                        turretVx * timeOfFlight,
+                        turretVy * timeOfFlight
+                    )
+                );
+                distanceToTarget = turretPose.getTranslation().getDistance(virtualTargetPose);
             }
-
-            prevTimeOfFlight = timeOfFlight;
-
-            virtualTargetPose = targetPose.minus(
-                new Translation2d(
-                    turretVx * timeOfFlight,
-                    turretVy * timeOfFlight
-                )
-            );
-            distanceToTarget = turretPose.getTranslation().getDistance(virtualTargetPose);
         }
-
+        
         SmartDashboard.putNumber("SOTM/Iterations", iterationsUsed);
         SmartDashboard.putNumber("SOTM/TimeOfFlight", timeOfFlight);
         SmartDashboard.putNumber("SOTM/Distance/Static", staticDistance);
