@@ -59,9 +59,9 @@ public final class Constants {
     public static final double kI_rotation_pose = 0.02;
     public static final double kD_rotation_pose = 0.2;
 
-    public static final double kP_translation_intake = 0.85;
-    public static final double kI_translation_intake = 0.028;
-    public static final double kD_translation_intake = 0.0;
+    public static final double kP_translation_intake = 0.4;
+    public static final double kI_translation_intake = 0.01;
+    public static final double kD_translation_intake = 0.04;
 
     // Pure pursuit tuning (meters, meters per second)
     public static final double kPurePursuitMinLookahead = 0.3;
