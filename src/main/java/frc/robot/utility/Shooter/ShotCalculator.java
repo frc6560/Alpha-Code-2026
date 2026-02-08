@@ -76,9 +76,17 @@ public class ShotCalculator {
         flywheelRPMMap.put(4.82, -2175.0); 
         flywheelRPMMap.put(5.47, -2285.0);
 
-        // hood azimuth (finish on main bot)
+        // hood azimuth (finish on main bot. these are completely BS values).
+        hoodAzimuthMap.put(3.77, Math.toRadians(20));
+        hoodAzimuthMap.put(4.29, Math.toRadians(25));
+        hoodAzimuthMap.put(4.82, Math.toRadians(30));
+        hoodAzimuthMap.put(5.47, Math.toRadians(35));
 
         // time of flight (finish on main bot)
+        timeOfFlightMap.put(3.93, 0.77);
+        timeOfFlightMap.put(4.30, 0.81);
+        timeOfFlightMap.put(4.83, 0.90);
+        timeOfFlightMap.put(5.47, 1.008);
     }
 
     public double getHoodAzimuth() {
