@@ -36,7 +36,7 @@ public class ManualControls {
         this.firstXbox = firstXbox;
         
     }
-
+/* 
     // slow down
 
     // public boolean slowDown() {
@@ -111,4 +111,5 @@ public class ManualControls {
     // public boolean resetWrist(){
     //   return secondXbox.getRightBumperButton();
     // }
+    */
 }

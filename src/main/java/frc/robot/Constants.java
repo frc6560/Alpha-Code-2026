@@ -160,6 +160,36 @@ public final class Constants {
     
   }
 
+  public static final class IntakeConstants {
+    public static final int EXTEND_MOTOR_ID = 50; // TODO: set correct ID
+    public static final int SPIN_MOTOR_ID = 51; // TODO: set correct ID
+    public static final String CAN_BUS = "Canivore";
+
+    public static final int RETRACT_LIMIT_SWITCH_ID = 5; // TODO: set correct DIO port
+    public static final boolean RETRACT_LIMIT_SWITCH_INVERTED = false;
+
+    public static final boolean EXTEND_MOTOR_INVERTED = false;
+    public static final boolean SPIN_MOTOR_INVERTED = false;
+
+    public static final double EXTEND_SPEED = 0.65;
+  public static final double RETRACT_SPEED = -0.5;
+    public static final double SPIN_SPEED = 0.7;
+    public static final double SPRINGY_EXTEND_SPEED = 0.12;
+    public static final double SPRINGY_SPIN_SPEED = 0.7;
+
+  public static final double MAX_EXTENSION_ROTATIONS = 60.0; // TODO: tune
+  public static final double SPRINGY_TRIGGER_ROTATIONS = 55.0; // TODO: tune
+
+    public static final double EXTEND_SUPPLY_CURRENT_LIMIT = 35;
+    public static final double EXTEND_STATOR_CURRENT_LIMIT = 60;
+
+    public static final double EXTEND_SPRINGY_SUPPLY_CURRENT_LIMIT = 12;
+    public static final double EXTEND_SPRINGY_STATOR_CURRENT_LIMIT = 20;
+
+    public static final double SPIN_SUPPLY_CURRENT_LIMIT = 30;
+    public static final double SPIN_STATOR_CURRENT_LIMIT = 50;
+  }
+
   public static final class ArmConstants
   {
     /** CAN IDs */
