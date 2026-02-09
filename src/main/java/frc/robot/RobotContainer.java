@@ -140,10 +140,6 @@ public class RobotContainer {
         driverXbox.x().onTrue(Commands.defer(() -> drivebase.alignToTrenchCommand(), Set.of(drivebase)));
         driverXbox.b().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().schedule(drivebase.sysIdDriveMotorCommand()), drivebase));
         driverXbox.start().onTrue((Commands.runOnce(drivebase::zeroNoAprilTagsGyro)));
-        driverXbox.leftBumper().onTrue(Commands.run(() -> {
-            double targetRPM = shotCalculator.getStationaryRPM(drivebase.getPose());
-            shooter.setRPM(targetRPM);
-        }, shooter).withTimeout(5.0).finallyDo((interrupted) -> shooter.setRPM(0)));
         
         // B button: Start feeder at constant RPM
         driverXbox.rightBumper().onTrue(Commands.run(() -> feeder.setRPM(-1800), feeder).withTimeout(5.0).finallyDo((interrupted) -> feeder.setRPM(0)));
