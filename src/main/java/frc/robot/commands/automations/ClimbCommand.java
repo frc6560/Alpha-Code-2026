@@ -96,15 +96,21 @@ public class ClimbCommand extends SequentialCommandGroup {
                 // Move.
                 Setpoint newSetpoint = getNextSetpoint(path);
                 drivetrain.followSegment2(newSetpoint, targetPose);
-                if(drivetrain.getPose().getTranslation().getDistance(targetPose.getTranslation()) < 0.05
-                    && Math.abs(drivetrain.getPose().getRotation().getRadians() - targetPose.getRotation().getRadians()) < 0.017
-                ){
+
+                double translationDistance = drivetrain.getPose().getTranslation().getDistance(targetPose.getTranslation());
+                double rotationError = Math.abs(drivetrain.getPose().getRotation().getRadians() - targetPose.getRotation().getRadians());
+
+                edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Climb Translation Distance", translationDistance);
+                edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Climb Rotation Error", rotationError);
+                edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putBoolean("Climb Within translational Threshold", translationDistance < 0.1);
+
+                if(translationDistance < 0.1){ //if(translationDistance < 0.1 && rotationError < 0.017){ put this in later
                     // Stop.
                     drivetrain.drive(new ChassisSpeeds(0, 0, 0));
                 }
             },
             (interrupted) -> {},
-            () -> drivetrain.getPose().getTranslation().getDistance(targetPose.getTranslation()) < 0.02
+            () -> drivetrain.getPose().getTranslation().getDistance(targetPose.getTranslation()) < 0.1
             && Math.abs(drivetrain.getPose().getRotation().getRadians() - targetPose.getRotation().getRadians()) < 0.017
         );
         return followPath;
