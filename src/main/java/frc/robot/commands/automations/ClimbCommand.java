@@ -127,7 +127,17 @@ public class ClimbCommand extends SequentialCommandGroup {
             DrivebaseConstants.kMaxOmega,
             DrivebaseConstants.kMaxAlpha);
         final Command driveToPrescore = getFollowPath(path, 2.1).until(
-            () -> drivetrain.getPose().getTranslation().getDistance(getPrescore(targetPose).getTranslation()) < 0.2
+            () -> {
+                Pose2d prescorePose = getPrescore(targetPose);
+                double prescoreTranslationDistance = drivetrain.getPose().getTranslation().getDistance(prescorePose.getTranslation());
+                double prescoreRotationError = Math.abs(drivetrain.getPose().getRotation().getRadians() - prescorePose.getRotation().getRadians());
+
+                edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Prescore Translation Distance", prescoreTranslationDistance);
+                edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Prescore Rotation Error", prescoreRotationError);
+                edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putBoolean("Prescore Within Threshold", prescoreTranslationDistance < 0.2);
+
+                return prescoreTranslationDistance < 0.2;
+            }
         );
         return driveToPrescore;
     }
