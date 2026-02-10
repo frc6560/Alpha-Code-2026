@@ -184,9 +184,20 @@ public class SwerveSubsystem extends SubsystemBase {
     swerveDrive.field.getObject("TargetPose").setPose(targetPose);
 
     swerveDrive.field.getObject("TargetSetpoint").setPose(setpoint.getSetpointPose());
-    SmartDashboard.getEntry("X Error").setDouble(m_pidControllerX_pose.getError());
-    SmartDashboard.getEntry("Y Error").setDouble(m_pidControllerY_pose.getError());
-    SmartDashboard.getEntry("Theta Error").setDouble(m_pidControllerTheta_pose.getError());
+
+    // Debug: Show actual values
+    SmartDashboard.putNumber("Current X", pose.getX());
+    SmartDashboard.putNumber("Current Y", pose.getY());
+    SmartDashboard.putNumber("Setpoint X", setpoint.x);
+    SmartDashboard.putNumber("Setpoint Y", setpoint.y);
+    SmartDashboard.putNumber("Setpoint VX", setpoint.vx);
+    SmartDashboard.putNumber("Setpoint VY", setpoint.vy);
+    SmartDashboard.putNumber("Target X", targetPose.getX());
+    SmartDashboard.putNumber("Target Y", targetPose.getY());
+
+    SmartDashboard.putNumber("X Error", m_pidControllerX_pose.getPositionError());
+    SmartDashboard.putNumber("Y Error", m_pidControllerY_pose.getPositionError());
+    SmartDashboard.putNumber("Theta Error", m_pidControllerTheta_pose.getPositionError());
     // SmartDashboard.getEntry("VX Error").setDouble(Math.abs(setpoint.vx - swerveDrive.getRobotVelocity().vxMetersPerSecond));
     // SmartDashboard.getEntry("VY Error").setDouble(Math.abs(setpoint.vy - swerveDrive.getRobotVelocity().vyMetersPerSecond));
 
@@ -202,10 +213,17 @@ public class SwerveSubsystem extends SubsystemBase {
     m_pidControllerX_pose.setIZone(0.5);
     m_pidControllerY_pose.setIZone(0.5);
 
-    ChassisSpeeds targetSpeeds = new ChassisSpeeds( 
-      setpoint.vx + m_pidControllerX_pose.calculate(pose.getX(), setpoint.x), 
-      setpoint.vy + m_pidControllerY_pose.calculate(pose.getY(), setpoint.y),
-      setpoint.omega + m_pidControllerTheta_pose.calculate(pose.getRotation().getRadians(), setpoint.theta)
+    double xPidOutput = m_pidControllerX_pose.calculate(pose.getX(), setpoint.x);
+    double yPidOutput = m_pidControllerY_pose.calculate(pose.getY(), setpoint.y);
+    double thetaPidOutput = m_pidControllerTheta_pose.calculate(pose.getRotation().getRadians(), setpoint.theta);
+
+    SmartDashboard.putNumber("X PID Output", xPidOutput);
+    SmartDashboard.putNumber("Y PID Output", yPidOutput);
+
+    ChassisSpeeds targetSpeeds = new ChassisSpeeds(
+      setpoint.vx + xPidOutput,
+      setpoint.vy + yPidOutput,
+      setpoint.omega + thetaPidOutput
     );
 
     swerveDrive.field.getObject("desiredPose").setPose(
@@ -844,3 +862,4 @@ public class SwerveSubsystem extends SubsystemBase {
     return swerveDrive;
   }
 }
+
