@@ -184,9 +184,9 @@ public class SwerveSubsystem extends SubsystemBase {
     swerveDrive.field.getObject("TargetPose").setPose(targetPose);
 
     swerveDrive.field.getObject("TargetSetpoint").setPose(setpoint.getSetpointPose());
-    SmartDashboard.getEntry("X Error").setDouble(m_pidControllerX.getError());
-    SmartDashboard.getEntry("Y Error").setDouble(m_pidControllerY.getError());
-    SmartDashboard.getEntry("Theta Error").setDouble(m_pidControllerTheta.getError());
+    SmartDashboard.getEntry("X Error").setDouble(m_pidControllerX_pose.getError());
+    SmartDashboard.getEntry("Y Error").setDouble(m_pidControllerY_pose.getError());
+    SmartDashboard.getEntry("Theta Error").setDouble(m_pidControllerTheta_pose.getError());
     // SmartDashboard.getEntry("VX Error").setDouble(Math.abs(setpoint.vx - swerveDrive.getRobotVelocity().vxMetersPerSecond));
     // SmartDashboard.getEntry("VY Error").setDouble(Math.abs(setpoint.vy - swerveDrive.getRobotVelocity().vyMetersPerSecond));
 
