@@ -12,6 +12,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 
 /**
  * A command that automatically aligns the robot to a target pose for climbing.
@@ -34,9 +35,12 @@ public class ClimbCommand extends SequentialCommandGroup {
     private static final double MAX_ACCEL = 9.0; // m/s^2
     private static final double SKID_ACCEL = 7.0; // m/s^2 (lateral acceleration limit)
     private static final double DT = 0.02; // 20ms loop time
+    private static final double DISTANCE_THRESHOLD = 0.05; // meters
+    private static final double TIMEOUT = 5.0; // seconds
 
     // Pilot Drive State
     private double currentVelocity = 0.0;
+    private Timer pilotDriveTimer;
 
     // Subsystems
     private SwerveSubsystem drivetrain;
@@ -53,6 +57,9 @@ public class ClimbCommand extends SequentialCommandGroup {
         this.rotationController = new PIDController(3.0, 0, 0);
         this.rotationController.enableContinuousInput(-Math.PI, Math.PI);
 
+        // Initialize timer
+        this.pilotDriveTimer = new Timer();
+
         setTargets();
 
         super.addCommands(
@@ -67,6 +74,7 @@ public class ClimbCommand extends SequentialCommandGroup {
     public Command getDriveToPrescore() {
         return Commands.runOnce(() -> {
             currentVelocity = 0.0; // Reset velocity at start
+            pilotDriveTimer.restart(); // Start timer
         }).andThen(Commands.run(() -> {
             prescorePose = getPrescore(targetPose);
             Pose2d currentPose = drivetrain.getPose();
@@ -97,19 +105,37 @@ public class ClimbCommand extends SequentialCommandGroup {
             // Calculate velocity direction: AF direction + modified alpha
             double velocityAngle = angleAF + alphaModified;
 
-            // Calculate velocity magnitude using autodrive logic
+            // Calculate velocity magnitude using autodrive logic with kinematic equations
             double dx = A.getDistance(E); // Distance to final target
 
-            // Limit 1: Stopping distance
+            // Limit 1: Stopping distance (using kinematic equation: vf² = vi² + 2*a*dx)
+            // For stopping: 0² = v² - 2*a*dx → v = sqrt(2*a*dx)
             double maxVelStoppingDistance = Math.sqrt(2 * MAX_ACCEL * dx);
 
-            // Limit 2: Forward acceleration (ramp up)
+            // Limit 2: Forward acceleration (check if we can reach target velocity)
+            // Using kinematic equation: v = v₀ + a*t
             double maxVelForwardAccel = currentVelocity + MAX_ACCEL * DT;
+
+            // Check if we have enough distance to accelerate to maxVelForwardAccel and then stop
+            // Distance needed to accelerate: d_accel = (v_target² - v_current²) / (2*a)
+            // Distance needed to stop: d_stop = v_target² / (2*a)
+            // Total distance needed: d_total = d_accel + d_stop
+            if (maxVelForwardAccel > currentVelocity) {
+                double distanceToAccelerate = (maxVelForwardAccel * maxVelForwardAccel - currentVelocity * currentVelocity) / (2 * MAX_ACCEL);
+                double distanceToStop = (maxVelForwardAccel * maxVelForwardAccel) / (2 * MAX_ACCEL);
+                double totalDistanceNeeded = distanceToAccelerate + distanceToStop;
+
+                // If we don't have enough distance, cap the acceleration
+                if (totalDistanceNeeded > dx) {
+                    maxVelForwardAccel = currentVelocity; // Don't accelerate
+                }
+            }
 
             // Limit 3: Skid/lateral acceleration (turn radius)
             double turnRadius = calculateTurnRadius(A, F, E);
             double maxVelSkid = Double.MAX_VALUE;
             if (turnRadius > 0.01) { // Avoid division by zero
+                // Centripetal acceleration: a = v² / r → v = sqrt(a * r)
                 maxVelSkid = Math.sqrt(SKID_ACCEL * turnRadius);
             }
 
@@ -139,9 +165,17 @@ public class ClimbCommand extends SequentialCommandGroup {
             edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Pilot Drive Velocity", commandedVelocity);
             edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Pilot Drive Turn Radius", turnRadius);
             edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Pilot Drive Alpha", Math.toDegrees(alpha));
+            edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Pilot Drive Timer", pilotDriveTimer.get());
         }, drivetrain).until(() -> {
             double distance = drivetrain.getPose().getTranslation().getDistance(prescorePose.getTranslation());
-            return distance < 0.05;
+            boolean atTarget = distance < DISTANCE_THRESHOLD;
+            boolean timedOut = pilotDriveTimer.hasElapsed(TIMEOUT);
+
+            if (timedOut) {
+                System.out.println("Pilot drive timed out after " + TIMEOUT + " seconds");
+            }
+
+            return atTarget || timedOut;
         }));
     }
 
