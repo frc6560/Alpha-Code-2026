@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Shooter extends SubsystemBase {
 
     private final TalonFX leaderMotor;
-    private final TalonFX followerMotor;
+    // private final TalonFX followerMotor;
     private final VelocityVoltage velocityControl = new VelocityVoltage(0).withSlot(0);
 
     // Gear ratio: 24:18 (motor:flywheel)
@@ -30,15 +30,15 @@ public class Shooter extends SubsystemBase {
     private double targetRPM = 0;
 
     public Shooter() {
-        leaderMotor = new TalonFX(20, "rio");
-        followerMotor = new TalonFX(21, "rio");
+        leaderMotor = new TalonFX(21, "rio");
+        // followerMotor = new TalonFX(21, "rio");
         configureMotors();
     }
 
     private void configureMotors() {
         TalonFXConfiguration config = new TalonFXConfiguration();
 
-        config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+        config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
         config.CurrentLimits.StatorCurrentLimitEnable = true;
@@ -61,9 +61,9 @@ public class Shooter extends SubsystemBase {
         followerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         followerConfig.CurrentLimits.SupplyCurrentLimit = 40;
 
-        followerMotor.getConfigurator().apply(followerConfig);
+        // followerMotor.getConfigurator().apply(followerConfig);
 
-        followerMotor.setControl(new Follower(leaderMotor.getDeviceID(), MotorAlignmentValue.Opposed));
+        // followerMotor.setControl(new Follower(leaderMotor.getDeviceID(), MotorAlignmentValue.Opposed));
     }
 
     public void setRPM(double rpm) {
@@ -95,7 +95,7 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("Flywheel/Target RPM", targetRPM);
         SmartDashboard.putNumber("Flywheel/Actual RPM", getVelocityRPM());
         SmartDashboard.putNumber("Flywheel/Leader Output", leaderMotor.get());
-        SmartDashboard.putNumber("Flywheel/Follower Output", followerMotor.get());
+        // SmartDashboard.putNumber("Flywheel/Follower Output", followerMotor.get());
         SmartDashboard.putBoolean("Flywheel/At Setpoint", atSetpoint());
     }
 }
