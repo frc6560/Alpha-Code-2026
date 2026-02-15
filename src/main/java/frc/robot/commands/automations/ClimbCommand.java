@@ -2,166 +2,109 @@ package frc.robot.commands.automations;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import java.util.HashMap;
 
-import frc.robot.Constants.DrivebaseConstants;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
-import frc.robot.utility.AutoAlignPath;
-import frc.robot.utility.Setpoint;
 
-import frc.robot.utility.Enums.*;
-
-import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import frc.robot.commands.automations.ClimbCommand;
 
 /**
- * A command that automatically aligns the robot to a target pose, actuates the elevator and wrist, scores, and retracts.
- * This command is used for scoring at the reef on any level, from L1-L4.
+ * A command that automatically aligns the robot to a target pose for climbing.
+ * Uses simple PID control for X, Y, and rotation.
  */
 public class ClimbCommand extends SequentialCommandGroup {
 
     // Poses
     private Pose2d targetPose;
-    private double initialY; // Store initial Y position
+    private Pose2d prescorePose;
+    private double initialY;
 
-    // Paths
-    private AutoAlignPath path;
-
-    // Profiles
-    private TrapezoidProfile.State translationalState = new TrapezoidProfile.State(0, 0);
-    private TrapezoidProfile.State rotationalState = new TrapezoidProfile.State(0, 0);
-    private TrapezoidProfile.State targetTranslationalState = new TrapezoidProfile.State(0, 0); // The position is actually the error.
-    private TrapezoidProfile.State targetRotationalState = new TrapezoidProfile.State(0, 0);
-
-    private TrapezoidProfile.Constraints translationConstraints;
-    private TrapezoidProfile.Constraints rotationConstraint;
-    private TrapezoidProfile translationProfile;
-    private TrapezoidProfile rotationProfile;
+    // PID Controllers
+    private PIDController xController;
+    private PIDController yController;
+    private PIDController rotationController;
 
     // Subsystems
     private SwerveSubsystem drivetrain;
 
 
-    /** Constructor for our scoring command */
+    /** Constructor for our climb command */
     public ClimbCommand(SwerveSubsystem drivetrain) {
-
         this.drivetrain = drivetrain;
-        this.initialY = drivetrain.getPose().getY(); // Store initial position
+        this.initialY = drivetrain.getPose().getY();
+
+        // Initialize PID controllers (tune these values as needed)
+        this.xController = new PIDController(2.0, 0, 0);
+        this.yController = new PIDController(2.0, 0, 0);
+        this.rotationController = new PIDController(3.0, 0, 0);
+        this.rotationController.enableContinuousInput(-Math.PI, Math.PI);
 
         setTargets();
 
-        super.addCommands(new ParallelCommandGroup(getDriveToPrescore()),
-                                new ParallelCommandGroup(getDriveInCommand()));
+        super.addCommands(
+            getDriveToPrescore(),
+            getDriveInCommand()
+        );
         super.addRequirements(drivetrain);
     }
 
 
-    /** Helper method for following a straight trajectory with a trapezoidal profile */
-    public Command getFollowPath(AutoAlignPath path, double finalVelocity){
-        final Command followPath = new FunctionalCommand(
-            () -> {
-            // Resets profiles and states
-            translationConstraints = new Constraints(path.maxVelocity, path.maxAcceleration);
-            rotationConstraint = new Constraints(path.maxAngularVelocity, path.maxAngularAcceleration);
+    /** Drives to prescore position using braindead PID */
+    public Command getDriveToPrescore() {
+        return Commands.run(() -> {
+            prescorePose = getPrescore(targetPose);
+            Pose2d currentPose = drivetrain.getPose();
 
-            translationProfile = new TrapezoidProfile(translationConstraints);
-            rotationProfile = new TrapezoidProfile(rotationConstraint);
+            double xVel = xController.calculate(currentPose.getX(), prescorePose.getX());
+            double yVel = yController.calculate(currentPose.getY(), prescorePose.getY());
+            double rotVel = rotationController.calculate(
+                currentPose.getRotation().getRadians(),
+                prescorePose.getRotation().getRadians()
+            );
 
-            translationalState.position = path.getDisplacement().getNorm();
-            translationalState.velocity = MathUtil.clamp(((-1) * (drivetrain.getFieldVelocity().vxMetersPerSecond * path.getDisplacement().getX() 
-                                                                + drivetrain.getFieldVelocity().vyMetersPerSecond * path.getDisplacement().getY())/ translationalState.position),
-                                                                -path.maxVelocity,
-                                                                0);
+            drivetrain.drive(ChassisSpeeds.fromFieldRelativeSpeeds(xVel, yVel, rotVel, currentPose.getRotation()));
 
-            targetTranslationalState.velocity = finalVelocity;
-
-            targetRotationalState.position = path.endPose.getRotation().getRadians();
-            rotationalState.position = drivetrain.getSwerveDrive().getPose().getRotation().getRadians();
-            rotationalState.velocity = drivetrain.getSwerveDrive().getRobotVelocity().omegaRadiansPerSecond;
-        },
-            () -> {
-                // Move.
-                Setpoint newSetpoint = getNextSetpoint(path);
-                drivetrain.followSegment2(newSetpoint, targetPose);
-
-                double translationDistance = drivetrain.getPose().getTranslation().getDistance(targetPose.getTranslation());
-                double rotationError = Math.abs(drivetrain.getPose().getRotation().getRadians() - targetPose.getRotation().getRadians());
-
-                edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Climb Translation Distance", translationDistance);
-                edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Climb Rotation Error", rotationError);
-                edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putBoolean("Climb Within translational Threshold", translationDistance < 0.1);
-
-                if(translationDistance < 0.1){ //if(translationDistance < 0.1 && rotationError < 0.017){ put this in later
-                    // Stop.
-                    drivetrain.drive(new ChassisSpeeds(0, 0, 0));
-                }
-            },
-            (interrupted) -> {},
-            () -> drivetrain.getPose().getTranslation().getDistance(targetPose.getTranslation()) < 0.1
-            && Math.abs(drivetrain.getPose().getRotation().getRadians() - targetPose.getRotation().getRadians()) < 0.017
-        );
-        return followPath;
-
+            double distance = currentPose.getTranslation().getDistance(prescorePose.getTranslation());
+            edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Prescore Translation Distance", distance);
+        }, drivetrain).until(() -> {
+            double distance = drivetrain.getPose().getTranslation().getDistance(prescorePose.getTranslation());
+            return distance < 0.05;
+        });
     }
 
-    /** Drives close to our target pose during auto */
-    public Command getDriveToPrescore(){
-        path = new AutoAlignPath(
-            drivetrain.getPose(),
-            getPrescore(targetPose),
-            DrivebaseConstants.kMaxAutoVelocity,
-            DrivebaseConstants.kMaxAutoAcceleration,
-            DrivebaseConstants.kMaxOmega,
-            DrivebaseConstants.kMaxAlpha);
-        final Command driveToPrescore = getFollowPath(path, 2.1).until(
-            () -> {
-                Pose2d prescorePose = getPrescore(targetPose);
-                double prescoreTranslationDistance = drivetrain.getPose().getTranslation().getDistance(prescorePose.getTranslation());
-                double prescoreRotationError = Math.abs(drivetrain.getPose().getRotation().getRadians() - prescorePose.getRotation().getRadians());
+    /** Drives to final climb position using braindead PID */
+    public Command getDriveInCommand() {
+        return Commands.run(() -> {
+            Pose2d currentPose = drivetrain.getPose();
 
-                edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Prescore Translation Distance", prescoreTranslationDistance);
-                edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Prescore Rotation Error", prescoreRotationError);
-                edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putBoolean("Prescore Within Threshold", prescoreTranslationDistance < 0.2);
+            double xVel = xController.calculate(currentPose.getX(), targetPose.getX());
+            double yVel = yController.calculate(currentPose.getY(), targetPose.getY());
+            double rotVel = rotationController.calculate(
+                currentPose.getRotation().getRadians(),
+                targetPose.getRotation().getRadians()
+            );
 
-                return prescoreTranslationDistance < 0.2;
-            }
-        );
-        return driveToPrescore;
+            drivetrain.drive(ChassisSpeeds.fromFieldRelativeSpeeds(xVel, yVel, rotVel, currentPose.getRotation()));
+
+            double distance = currentPose.getTranslation().getDistance(targetPose.getTranslation());
+            double rotError = Math.abs(currentPose.getRotation().getRadians() - targetPose.getRotation().getRadians());
+            edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Climb Translation Distance", distance);
+            edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Climb Rotation Error", rotError);
+        }, drivetrain).until(() -> {
+            Pose2d currentPose = drivetrain.getPose();
+            double distance = currentPose.getTranslation().getDistance(targetPose.getTranslation());
+            double rotError = Math.abs(currentPose.getRotation().getRadians() - targetPose.getRotation().getRadians());
+            return distance < 0.02 && rotError < 0.017;
+        });
     }
 
-    /** Snaps to the reef pose */
-    public Command getDriveInCommand(){
-        path = new AutoAlignPath(
-            drivetrain.getPose(),
-            targetPose, //originally just target pose
-            DrivebaseConstants.kMaxAlignmentVelocity,
-            DrivebaseConstants.kMaxAlignmentAcceleration,
-            DrivebaseConstants.kMaxOmega,
-            DrivebaseConstants.kMaxAlpha);
-        final Command driveIn = getFollowPath(path, 0);
-        return driveIn;
-    }
 
-    /** Actuates superstructure to our desired level */
-
-
-    /** Gets the prescore for a specific Pose2d */
-    //todo convert m to foot
-
-    public Pose2d getPrescore(Pose2d targetPose){
+    /** Gets the prescore position 1 meter back from target */
+    public Pose2d getPrescore(Pose2d targetPose) {
         DriverStation.Alliance alliance;
         if (!DriverStation.getAlliance().isPresent()) {
             alliance = DriverStation.Alliance.Blue;
@@ -180,77 +123,29 @@ public class ClimbCommand extends SequentialCommandGroup {
         return new Pose2d(prescoreX, targetPose.getY(), targetPose.getRotation());
 }
 
-    /** Sets the target for the robot, including target pose, elevator height, and arm angle */
-   public void setTargets() {
-    DriverStation.Alliance alliance;
-    if (!DriverStation.getAlliance().isPresent()) {
-        alliance = DriverStation.Alliance.Blue;
-    } else {
-        alliance = DriverStation.getAlliance().get();
-    }
-
-    double yThreshold = 3.75;
-
-    if (alliance.equals(DriverStation.Alliance.Blue)) {
-        if (initialY > yThreshold) { // Use initialY instead of current
-            targetPose = new Pose2d(1.5753228664398193, 4.183515548706055, new Rotation2d(0));
+    /** Sets the target pose based on alliance and starting Y position */
+    public void setTargets() {
+        DriverStation.Alliance alliance;
+        if (!DriverStation.getAlliance().isPresent()) {
+            alliance = DriverStation.Alliance.Blue;
         } else {
-            targetPose = new Pose2d(1.5753228664398193, 3.330711841583252, new Rotation2d(0));
+            alliance = DriverStation.getAlliance().get();
         }
-        
-    } else { // Red Alliance
-        if (initialY > yThreshold) { // Use initialY instead of current
-            targetPose = new Pose2d(14.976325035095215, 4.183515548706055, new Rotation2d(3.14159265));
+
+        double yThreshold = 3.75;
+
+        if (alliance.equals(DriverStation.Alliance.Blue)) {
+            if (initialY > yThreshold) {
+                targetPose = new Pose2d(1.5753228664398193, 4.183515548706055, new Rotation2d(0));
+            } else {
+                targetPose = new Pose2d(1.5753228664398193, 3.330711841583252, new Rotation2d(0));
+            }
         } else {
-            targetPose = new Pose2d(14.977962493896484, 3.330711841583252, new Rotation2d(3.14159265));
+            if (initialY > yThreshold) {
+                targetPose = new Pose2d(14.976325035095215, 4.183515548706055, new Rotation2d(Math.PI));
+            } else {
+                targetPose = new Pose2d(14.977962493896484, 3.330711841583252, new Rotation2d(Math.PI));
+            }
         }
-    }
-}
-
-    /** Transforms red alliance poses to blue by reflecting around the center point of the field*/
-    public Pose2d applyAllianceTransform(Pose2d pose){
-        return new Pose2d(
-            pose.getX() - 2 * (pose.getX() - 8.75),
-            pose.getY() - 2 * (pose.getY() - 4.0),
-            pose.getRotation().rotateBy(Rotation2d.fromDegrees(180))
-        );
-    }
-
-    /** Gets a setpoint for the robot PID to follow.
-     * @return A Setpoint object representing the next target robot state on a certain auto align path.
-     */
-    public Setpoint getNextSetpoint(AutoAlignPath path){
-        // trans
-        State translationSetpoint = translationProfile.calculate(0.02, translationalState, targetTranslationalState);
-        translationalState.position = translationSetpoint.position;
-        translationalState.velocity = translationSetpoint.velocity;
-
-        // rot wraparound calculations
-        double rotationalPose = drivetrain.getSwerveDrive().getPose().getRotation().getRadians();
-        double goalRotation = targetRotationalState.position;
-        double angularError = MathUtil.angleModulus(goalRotation - rotationalPose);
-
-        targetRotationalState.position = rotationalPose + angularError;
-        double setpointError = MathUtil.angleModulus(rotationalState.position - rotationalPose);
-        rotationalState.position = rotationalPose + setpointError;
-        // rot
-        State rotationalSetpoint = rotationProfile.calculate(0.02, rotationalState, targetRotationalState);
-        rotationalState.position = rotationalSetpoint.position;
-        rotationalState.velocity = rotationalSetpoint.velocity;
-
-        // arc length parametrization for a line
-        Translation2d interpolatedTranslation = path.endPose
-            .getTranslation()
-            .interpolate(path.startPose.getTranslation(), 
-            translationSetpoint.position / path.getDisplacement().getNorm());
-
-        return new Setpoint(
-            interpolatedTranslation.getX(),
-            interpolatedTranslation.getY(),
-            rotationalState.position,
-            path.getNormalizedDisplacement().getX() * -translationSetpoint.velocity, 
-            path.getNormalizedDisplacement().getY() * -translationSetpoint.velocity,
-            rotationalState.velocity
-        );
     }
 }
