@@ -161,11 +161,19 @@ public class ClimbCommand extends SequentialCommandGroup {
 
             // Telemetry
             double distance = A.getDistance(F);
+            double xError = F.getX() - A.getX();
+            double yError = F.getY() - A.getY();
+            double rotError = Math.abs(velocityAngle - currentPose.getRotation().getRadians());
+
             edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Prescore Translation Distance", distance);
+            edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Pilot Drive X Error", xError);
+            edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Pilot Drive Y Error", yError);
+            edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Pilot Drive Rotation Error", Math.toDegrees(rotError));
             edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Pilot Drive Velocity", commandedVelocity);
             edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Pilot Drive Turn Radius", turnRadius);
             edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Pilot Drive Alpha", Math.toDegrees(alpha));
             edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Pilot Drive Timer", pilotDriveTimer.get());
+            edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Pilot Drive Distance to Final", dx);
         }, drivetrain).until(() -> {
             double distance = drivetrain.getPose().getTranslation().getDistance(prescorePose.getTranslation());
             boolean atTarget = distance < DISTANCE_THRESHOLD;
