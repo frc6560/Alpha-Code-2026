@@ -62,6 +62,17 @@ public class ClimbCommand extends SequentialCommandGroup {
 
         setTargets();
 
+        // Calculate prescore position once
+        prescorePose = getPrescore(targetPose);
+
+        // Log initial setup
+        System.out.println("=== ClimbCommand Initialized ===");
+        System.out.println("Starting pose: " + drivetrain.getPose());
+        System.out.println("Initial Y: " + initialY);
+        System.out.println("Target pose: " + targetPose);
+        System.out.println("Prescore pose: " + prescorePose);
+        System.out.println("==============================");
+
         super.addCommands(
             getDriveToPrescore(),
             getDriveInCommand()
@@ -75,8 +86,14 @@ public class ClimbCommand extends SequentialCommandGroup {
         return Commands.runOnce(() -> {
             currentVelocity = 0.0; // Reset velocity at start
             pilotDriveTimer.restart(); // Start timer
+
+            // Visualize targets on field
+            drivetrain.getSwerveDrive().field.getObject("Climb Target").setPose(targetPose);
+            drivetrain.getSwerveDrive().field.getObject("Climb Prescore").setPose(prescorePose);
+
+            System.out.println("=== Phase 1: Driving to Prescore ===");
         }).andThen(Commands.run(() -> {
-            prescorePose = getPrescore(targetPose);
+            // Note: prescorePose is now calculated once in constructor
             Pose2d currentPose = drivetrain.getPose();
 
             // Get positions
@@ -106,7 +123,8 @@ public class ClimbCommand extends SequentialCommandGroup {
             double velocityAngle = angleAF + alphaModified;
 
             // Calculate velocity magnitude using autodrive logic with kinematic equations
-            double dx = A.getDistance(E); // Distance to final target
+            // CRITICAL FIX: Use distance to PRESCORE (F), not final target (E)
+            double dx = A.getDistance(F); // Distance to prescore target
 
             // Limit 1: Stopping distance (using kinematic equation: vf² = vi² + 2*a*dx)
             // For stopping: 0² = v² - 2*a*dx → v = sqrt(2*a*dx)
@@ -144,6 +162,17 @@ public class ClimbCommand extends SequentialCommandGroup {
                 Math.min(maxVelStoppingDistance,
                     Math.min(maxVelForwardAccel, maxVelSkid)));
 
+            // Determine which limit is active (for debugging)
+            String limitingFactor = "MAX_VEL";
+            if (commandedVelocity == maxVelStoppingDistance) {
+                limitingFactor = "STOPPING";
+            } else if (commandedVelocity == maxVelForwardAccel) {
+                limitingFactor = "ACCEL";
+            } else if (commandedVelocity == maxVelSkid) {
+                limitingFactor = "SKID";
+            }
+            edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putString("Pilot Drive Limiting Factor", limitingFactor);
+
             // Update current velocity
             currentVelocity = commandedVelocity;
 
@@ -173,17 +202,26 @@ public class ClimbCommand extends SequentialCommandGroup {
             edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Pilot Drive Turn Radius", turnRadius);
             edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Pilot Drive Alpha", Math.toDegrees(alpha));
             edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Pilot Drive Timer", pilotDriveTimer.get());
-            edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Pilot Drive Distance to Final", dx);
+            edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Pilot Drive Distance to Prescore", dx);
+            edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Pilot Drive Max Vel Stop", maxVelStoppingDistance);
+            edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Pilot Drive Max Vel Accel", maxVelForwardAccel);
+            edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Pilot Drive Max Vel Skid", maxVelSkid);
         }, drivetrain).until(() -> {
             double distance = drivetrain.getPose().getTranslation().getDistance(prescorePose.getTranslation());
             boolean atTarget = distance < DISTANCE_THRESHOLD;
             boolean timedOut = pilotDriveTimer.hasElapsed(TIMEOUT);
 
             if (timedOut) {
-                System.out.println("Pilot drive timed out after " + TIMEOUT + " seconds");
+                System.out.println("WARNING: Pilot drive timed out after " + TIMEOUT + " seconds");
             }
 
             return atTarget || timedOut;
+        })).andThen(Commands.runOnce(() -> {
+            System.out.println("=== Phase 1 Complete ===");
+            System.out.println("Final position: " + drivetrain.getPose());
+            System.out.println("Distance from prescore: " +
+                drivetrain.getPose().getTranslation().getDistance(prescorePose.getTranslation()) + "m");
+            System.out.println("========================");
         }));
     }
 
@@ -211,7 +249,13 @@ public class ClimbCommand extends SequentialCommandGroup {
 
     /** Drives to final climb position using braindead PID */
     public Command getDriveInCommand() {
-        return Commands.run(() -> {
+        return Commands.runOnce(() -> {
+            // Reset PID controllers to prevent integral windup from phase 1
+            xController.reset();
+            yController.reset();
+            rotationController.reset();
+            System.out.println("=== Phase 2: Final Climb Approach ===");
+        }).andThen(Commands.run(() -> {
             Pose2d currentPose = drivetrain.getPose();
 
             double xVel = xController.calculate(currentPose.getX(), targetPose.getX());
@@ -232,7 +276,13 @@ public class ClimbCommand extends SequentialCommandGroup {
             double distance = currentPose.getTranslation().getDistance(targetPose.getTranslation());
             double rotError = Math.abs(currentPose.getRotation().getRadians() - targetPose.getRotation().getRadians());
             return distance < 0.02 && rotError < 0.017;
-        });
+        })).andThen(Commands.runOnce(() -> {
+            System.out.println("=== Phase 2 Complete - Climb Finished ===");
+            System.out.println("Final position: " + drivetrain.getPose());
+            System.out.println("Distance from target: " +
+                drivetrain.getPose().getTranslation().getDistance(targetPose.getTranslation()) + "m");
+            System.out.println("=========================================");
+        }));
     }
 
 
