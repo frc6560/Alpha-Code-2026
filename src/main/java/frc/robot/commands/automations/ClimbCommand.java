@@ -51,10 +51,11 @@ public class ClimbCommand extends SequentialCommandGroup {
         this.drivetrain = drivetrain;
         this.initialY = drivetrain.getPose().getY();
 
-        // Initialize PID controllers (tune these values as needed)
-        this.xController = new PIDController(2.0, 0, 0);
-        this.yController = new PIDController(2.0, 0, 0);
-        this.rotationController = new PIDController(3.0, 0, 0);
+        // Initialize PID controllers with derivative terms for damping
+        // Reduced P gains + D term to prevent oscillation
+        this.xController = new PIDController(1.2, 0, 0.15);
+        this.yController = new PIDController(1.2, 0, 0.15);
+        this.rotationController = new PIDController(2.5, 0, 0.2);
         this.rotationController.enableContinuousInput(-Math.PI, Math.PI);
 
         // Initialize timer
