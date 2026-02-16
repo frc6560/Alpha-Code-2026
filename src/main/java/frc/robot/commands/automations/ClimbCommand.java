@@ -38,9 +38,10 @@ public class ClimbCommand extends SequentialCommandGroup {
         this.initialY = drivetrain.getPose().getY();
 
         // Initialize PID controllers (tune these values as needed)
-        this.xController = new PIDController(2.0, 0, 0);
-        this.yController = new PIDController(2.0, 0, 0);
-        this.rotationController = new PIDController(3.0, 0, 0);
+        // Increased kP for faster response, added kD for damping to prevent overshoot
+        this.xController = new PIDController(4.5, 0, 0.4);  // kP: 2.0→4.5, kD: 0→0.4
+        this.yController = new PIDController(4.5, 0, 0.4);  // kP: 2.0→4.5, kD: 0→0.4
+        this.rotationController = new PIDController(5.0, 0, 0.5);  // kP: 3.0→5.0, kD: 0→0.5
         this.rotationController.enableContinuousInput(-Math.PI, Math.PI);
 
         setTargets();
