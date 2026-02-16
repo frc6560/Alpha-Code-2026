@@ -68,6 +68,10 @@ public class ClimbCommand extends SequentialCommandGroup {
         return Commands.runOnce(() -> {
             SmartDashboard.putBoolean("Climb/Phase 1 Active", true);
             SmartDashboard.putBoolean("Climb/Phase 2 Active", false);
+
+            // Visualize target poses on Field2d
+            drivetrain.getSwerveDrive().field.getObject("Climb Prescore Target").setPose(prescorePose);
+            drivetrain.getSwerveDrive().field.getObject("Climb Final Target").setPose(targetPose);
         }).andThen(
             AutoBuilder.pathfindToPose(
                 prescorePose,
@@ -95,6 +99,9 @@ public class ClimbCommand extends SequentialCommandGroup {
         return Commands.runOnce(() -> {
             SmartDashboard.putBoolean("Climb/Phase 1 Active", false);
             SmartDashboard.putBoolean("Climb/Phase 2 Active", true);
+
+            // Update field visualization for phase 2
+            drivetrain.getSwerveDrive().field.getObject("Climb Current Phase").setPose(targetPose);
         }).andThen(
             AutoBuilder.pathfindToPose(
                 targetPose,
