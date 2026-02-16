@@ -16,7 +16,7 @@ public class FlywheelCommand extends Command{
     private final SwerveSubsystem drivetrain;
     private final ManualControls controls;
 
-    private final double HOOD_DEACTUATION_TIME = 0.8; // in seconds
+    private final double HOOD_DEACTUATION_TIME = 1.0; // in seconds
     private final double TRENCH_TOLERANCE = 0; // in meters, larger than trench boundary
 
     private int executeCounter = 0; // Debug counter to verify execute() is being called
