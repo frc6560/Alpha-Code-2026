@@ -23,7 +23,7 @@ public class ClimbCommand extends SequentialCommandGroup {
     private Pose2d prescorePose;
 
     // Path constraints - match your robot's capabilities
-    private static final double MAX_VELOCITY = 4.3; // m/s
+    private static final double MAX_VELOCITY = 2.3; // m/s
     private static final double MAX_ACCEL = 9.0; // m/s^2
     private static final double MAX_ANGULAR_VELOCITY = Units.degreesToRadians(540); // rad/s
     private static final double MAX_ANGULAR_ACCEL = Units.degreesToRadians(720); // rad/s^2
@@ -136,15 +136,15 @@ public class ClimbCommand extends SequentialCommandGroup {
 
         if (alliance.equals(DriverStation.Alliance.Blue)) {
             if (initialY > yThreshold) {
-                targetPose = new Pose2d(1.5753228664398193, 4.183515548706055, new Rotation2d(0));
+                targetPose = new Pose2d(1.5753228664398193, 4.183515548706055, new Rotation2d(Math.PI));
             } else {
-                targetPose = new Pose2d(1.5753228664398193, 3.330711841583252, new Rotation2d(0));
+                targetPose = new Pose2d(1.5753228664398193, 3.330711841583252, new Rotation2d(Math.PI));
             }
         } else {
             if (initialY > yThreshold) {
-                targetPose = new Pose2d(14.976325035095215, 4.183515548706055, new Rotation2d(Math.PI));
+                targetPose = new Pose2d(14.976325035095215, 4.183515548706055, new Rotation2d(0));
             } else {
-                targetPose = new Pose2d(14.977962493896484, 3.330711841583252, new Rotation2d(Math.PI));
+                targetPose = new Pose2d(14.977962493896484, 3.330711841583252, new Rotation2d(0));
             }
         }
 
